@@ -6,6 +6,7 @@ use App\Filament\Resources\ServiceResource\Pages;
 use App\Filament\Resources\ServiceResource\RelationManagers;
 use App\Models\Service;
 use Filament\Forms;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -18,15 +19,17 @@ class ServiceResource extends Resource
 {
     protected static ?string $model = Service::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-swatch';
     protected static ?string $navigationGroup = 'Services Setting';
-
+    protected static ?string $navigationLabel = 'تنوع خدمات';
+    protected static ?string $pluralModelLabel = "خدمات";
+    protected static ?string $modelLabel = 'خدمت';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                //
+                TextInput::make('name')
+                ->label(__("Service Name"))
             ]);
     }
 
@@ -34,7 +37,7 @@ class ServiceResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make("name")
+                TextColumn::make("name")->label(__("Service Name"))
             ])
             ->filters([
                 //
