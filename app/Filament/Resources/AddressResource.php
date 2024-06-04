@@ -5,8 +5,11 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\AddressResource\Pages;
 use App\Filament\Resources\AddressResource\RelationManagers;
 use App\Models\Address;
+use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -25,6 +28,7 @@ class AddressResource extends Resource
             ->schema([
                 Forms\Components\Select::make('customer_id')
                     ->relationship('customer', 'name')
+                    ->searchable()
                     ->required()
                     ->label(__('Customer Name')),
                 Forms\Components\TextInput::make('state')
@@ -33,9 +37,9 @@ class AddressResource extends Resource
                 Forms\Components\TextInput::make('city')
                     ->required()
                     ->label(__('City')),
-                Forms\Components\TextInput::make('address')
-                    ->required()
-                    ->label(__('Full Address')),
+//                Forms\Components\TextInput::make('address')
+//                    ->required()
+//                    ->label(__('Full Address')),
                 Forms\Components\TextInput::make('lat')
                     ->required()
                     ->label(__('Latitude')),
@@ -45,6 +49,30 @@ class AddressResource extends Resource
                 Forms\Components\Checkbox::make('is_active')
                     ->label(__('Active'))
                     ->default(true),
+                Map::make('address')
+                    ->hint('salam in hintesh')
+                    ->label('Location')
+                    ->columnSpanFull()
+                    ->afterStateUpdated(function (Get $get, Set $set, string|array|null $old, ?array $state): void {
+                        $set('lat', $state['lat']);
+                        $set('lng', $state['lng']);
+                    })
+                    ->extraStyles([
+                        'min-height: 50vh',
+                        'border-radius: 16px'
+                    ])
+                    ->liveLocation()
+                    ->showMarker()
+                    ->markerColor("#22c55eff")
+                    ->showFullscreenControl()
+                    ->showZoomControl()
+                    ->draggable()
+                    ->detectRetina()
+                    ->showMyLocationButton()
+                    ->extraControl([
+                        'zoomDelta' => 1,
+                        'zoomSnap' => 2,
+                    ])
             ]);
     }
 
