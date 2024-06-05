@@ -13,7 +13,11 @@ return new class extends Migration
     {
         Schema::create('properties', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->foreignId('service_item_id')->constrained();
+            $table->foreignId('parent_id')->nullable()->constrained('properties', 'id')->onDelete('cascade');
+            $table->string('name');
+            $table->text('unit');
+            $table->integer('price');
         });
     }
 

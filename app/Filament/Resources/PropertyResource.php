@@ -7,7 +7,9 @@ use App\Filament\Resources\PropertyResource\RelationManagers;
 use App\Models\Property;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Tables\Actions\Action;
 use Filament\Resources\Resource;
+use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -23,11 +25,35 @@ class PropertyResource extends Resource
     protected static ?string $modelLabel = 'ویژگی';
 
     protected static ?int $navigationSort = 3;
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                //
+                Forms\Components\Select::make('service_item_id')->relationship('serviceItem', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->required(),
+                Forms\Components\Select::make('parent_id')->relationship('parent', 'name'),
+                Forms\Components\TextInput::make('name')
+                    ->required(),
+                Forms\Components\Select::make('unit')
+                    ->required()
+                    ->options([
+                        'meter' => 'متر',
+                        'takhte' => 'تخته',
+                        'item' => 'عدد',
+                    ])
+                    ->searchable(),
+                Forms\Components\TextInput::make('price')
+                    ->required()
+                    ->translateLabel()
+                    ->integer()
+                    ->mask(RawJs::make("\$money(\$input)"))
+                    ->suffix('تومان')
+                    ->stripCharacters('.')
+                    ->mutateStateForValidationUsing(fn($state) => str_replace(',', '', $state))
+                    ->mutateDehydratedStateUsing(fn($state) => str_replace(',', '', $state)),
             ]);
     }
 
@@ -35,7 +61,19 @@ class PropertyResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('serviceItem.name'),
+                Tables\Columns\TextColumn::make('name'),
+                Tables\Columns\TextColumn::make('parent.name'),
+                Tables\Columns\TextColumn::make('unit')
+                    ->label('واحد'),
+                Tables\Columns\TextColumn::make('price')
+                    ->formatStateUsing(function ($state){
+                        return number_format($state, 0) . ' تومان';
+                    })
+                    ->badge()
+                    ->translateLabel()
+                    ->sortable()
+                    ->toggleable()
             ])
             ->filters([
                 //
