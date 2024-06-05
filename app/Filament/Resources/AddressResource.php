@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AddressResource\Pages;
 use App\Filament\Resources\AddressResource\RelationManagers;
+use App\Filament\Resources\AddressResource\RelationManagers\CustomerRelationManager;
 use App\Models\Address;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms;
@@ -29,6 +30,7 @@ class AddressResource extends Resource
                 Forms\Components\Select::make('customer_id')
                     ->relationship('customer', 'name')
                     ->searchable()
+                    ->preload()
                     ->required()
                     ->label(__('Customer Name')),
                 Forms\Components\TextInput::make('state')
@@ -37,9 +39,9 @@ class AddressResource extends Resource
                 Forms\Components\TextInput::make('city')
                     ->required()
                     ->label(__('City')),
-//                Forms\Components\TextInput::make('address')
-//                    ->required()
-//                    ->label(__('Full Address')),
+                Forms\Components\TextInput::make('address')
+                    ->required()
+                    ->label(__('Full Address')),
                 Forms\Components\TextInput::make('lat')
                     ->required()
                     ->label(__('Latitude')),
@@ -80,10 +82,15 @@ class AddressResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\CheckboxColumn::make('is_active')->sortable(),
+                Tables\Columns\TextColumn::make('customer.name')->searchable(),
+                Tables\Columns\TextColumn::make('state'),
+                Tables\Columns\TextColumn::make('city'),
+                Tables\Columns\TextColumn::make('address')->toggleable()->searchable(),
             ])
             ->filters([
-                //
+                Tables\Filters\TernaryFilter::make('is_active')
+                ->label(__('Active Address')),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -98,7 +105,7 @@ class AddressResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            CustomerRelationManager::class
         ];
     }
 
