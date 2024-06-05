@@ -18,7 +18,7 @@ class PropertyResource extends Resource
     protected static ?string $model = Property::class;
 
     protected static ?string $navigationGroup = 'Services Setting';
-    protected static ?string $navigationLabel = 'ویژگی‌ها';
+    protected static ?string $navigationLabel = 'ویژگی‌ها و قیمت‌گذاری';
     protected static ?string $pluralModelLabel = "ویژگی‌ها";
     protected static ?string $modelLabel = 'ویژگی';
 
