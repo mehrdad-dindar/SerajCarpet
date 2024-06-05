@@ -28,7 +28,12 @@ class ServiceItemResource extends Resource
     {
         return $form
             ->schema([
-                //
+                Forms\Components\Select::make('service_id')
+                    ->relationship('service', 'name')
+                    ->label('انتخاب خدمت')
+                    ->required(),
+                Forms\Components\TextInput::make('name')
+                    ->label('عنوان آیتم')
             ]);
     }
 
@@ -36,7 +41,15 @@ class ServiceItemResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('name')
+                    ->label('عنوان آیتم'),
+                Tables\Columns\TextColumn::make('service.name')
+                    ->label('خدمت')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'ترمیم' => 'warning',
+                        'شستشو' => 'success',
+                    }),
             ])
             ->filters([
                 //
