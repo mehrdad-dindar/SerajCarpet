@@ -38,9 +38,9 @@ class CustomerResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')->label(__("Customer ID")),
-                Tables\Columns\TextColumn::make("name")->label(__("Customer Name")),
-                Tables\Columns\TextColumn::make("phone")->label(__("Customer Phone")),
+                Tables\Columns\TextColumn::make('id')->label(__("Customer ID"))->sortable(),
+                Tables\Columns\TextColumn::make("name")->label(__("Customer Name"))->searchable(),
+                Tables\Columns\TextColumn::make("phone")->label(__("Customer Phone"))->searchable(),
                 Tables\Columns\TextColumn::make("created_at")->label(__("Join Date")),
             ])
             ->filters([

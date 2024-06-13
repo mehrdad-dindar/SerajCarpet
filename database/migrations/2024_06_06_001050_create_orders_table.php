@@ -15,7 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->foreignId('address_id')->nullable()->constrained();
-            $table->string('status');
+            $table->string('discount')->nullable();
+            $table->string('sub_total')->nullable();
+            $table->string('total')->nullable();
+            $table->string('status')->nullable();
             $table->timestamps();
         });
     }

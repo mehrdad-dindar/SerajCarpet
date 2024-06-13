@@ -55,6 +55,10 @@ class AddressResource extends Resource
                     ->hint('salam in hintesh')
                     ->label('Location')
                     ->columnSpanFull()
+                    ->default([
+                        'lat' => 35.699741844984004,
+                        'lng' => 51.33805990219117
+                    ])
                     ->afterStateUpdated(function (Get $get, Set $set, string|array|null $old, ?array $state): void {
                         $set('lat', $state['lat']);
                         $set('lng', $state['lng']);
@@ -66,15 +70,12 @@ class AddressResource extends Resource
                     ->liveLocation()
                     ->showMarker()
                     ->markerColor("#22c55eff")
-                    ->showFullscreenControl()
+                    ->showFullscreenControl(false)
                     ->showZoomControl()
                     ->draggable()
                     ->detectRetina()
                     ->showMyLocationButton()
-                    ->extraControl([
-                        'zoomDelta' => 1,
-                        'zoomSnap' => 2,
-                    ])
+                    ->zoom(15)
             ]);
     }
 

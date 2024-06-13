@@ -11,11 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customers', function (Blueprint $table) {
+        Schema::create('order_items', function (Blueprint $table) {
             $table->id();
-            $table->string("name");
-            $table->string('id_name')->virtualAs('concat(phone, \' \', name)');
-            $table->string("phone")->unique();
+            $table->foreignId('order_id');
+            $table->foreignId('property_id');
+            $table->string('quantity');
+            $table->string('unit_price');
+            $table->string('sub_total');
+//            $table->string('status');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
@@ -25,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('customers');
+        Schema::dropIfExists('order_items');
     }
 };

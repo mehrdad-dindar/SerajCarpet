@@ -14,7 +14,7 @@ class Customer extends Model
 
     protected $guarded;
 
-    public function address (): HasMany
+    public function addresses (): HasMany
     {
         return $this->hasMany(Address::class, 'customer_id');
     }
