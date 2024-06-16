@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('state');
             $table->string('city');
             $table->string('address');
-            $table->string('lat');
-            $table->string('lng');
+            $table->double('latitude')->nullable();
+            $table->double('longitude')->nullable();
             $table->boolean('in_traffic_zone')->default(false);
             $table->boolean('in_odd_even_zone')->default(false);
             $table->boolean('is_active')->default(false);

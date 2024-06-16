@@ -42,10 +42,10 @@ class AddressResource extends Resource
                 Forms\Components\TextInput::make('address')
                     ->required()
                     ->label(__('Full Address')),
-                Forms\Components\TextInput::make('lat')
+                Forms\Components\TextInput::make('latitude')
                     ->required()
                     ->label(__('Latitude')),
-                Forms\Components\TextInput::make('lng')
+                Forms\Components\TextInput::make('longitude')
                     ->required()
                     ->label(__('longitude')),
                 Forms\Components\Checkbox::make('is_active')
@@ -60,8 +60,9 @@ class AddressResource extends Resource
                         'lng' => 51.33805990219117
                     ])
                     ->afterStateUpdated(function (Get $get, Set $set, string|array|null $old, ?array $state): void {
-                        $set('lat', $state['lat']);
-                        $set('lng', $state['lng']);
+                        $set('latitude', $state['lat']);
+                        $set('longitude', $state['lng']);
+                        self::getFullAddress($state['lat'],$state['lng']);
                     })
                     ->extraStyles([
                         'min-height: 50vh',
@@ -76,6 +77,7 @@ class AddressResource extends Resource
                     ->detectRetina()
                     ->showMyLocationButton()
                     ->zoom(15)
+                    ->tilesUrl("https://tile.openstreetmap.de/{z}/{x}/{y}.png")
             ]);
     }
 
@@ -117,5 +119,10 @@ class AddressResource extends Resource
             'create' => Pages\CreateAddress::route('/create'),
             'edit' => Pages\EditAddress::route('/{record}/edit'),
         ];
+    }
+
+    private static function getFullAddress(mixed $latitude, mixed $longitude)
+    {
+        dd($latitude);
     }
 }
