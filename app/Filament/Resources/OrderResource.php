@@ -18,6 +18,7 @@ use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
@@ -178,8 +179,59 @@ class OrderResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('id')
+                    ->label('ID')
+                    ->translateLabel(),
+                Tables\Columns\TextColumn::make('customer.name')
+                    ->label('Name')
+                    ->translateLabel()
+                    ->url(function (Model $record): string {
+                        return route('filament.admin.resources.customers.edit', $record->customer_id);
+                    })
+                    ->alignCenter()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->translateLabel()
+                    ->sortable()
+                    ->badge()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('items_count')
+                    ->sortable()
+                    ->translateLabel()
+                    ->label('Product Count')
+                    ->toggleable()
+                    ->alignCenter()
+                    ->counts('items'),
+                Tables\Columns\TextColumn::make('subtotal')
+
+                    ->formatStateUsing(function ($state){
+                        return number_format($state, 0) . ' تومان';
+                    })
+                    ->badge()
+                    ->translateLabel()
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('total')
+                    ->formatStateUsing(function ($state){
+                        return number_format($state, 0) . ' تومان';
+                    })
+                    ->badge()
+                    ->translateLabel()
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\IconColumn::make('installer')
+                    ->translateLabel()
+                    ->sortable()
+                    ->boolean()
+                    ->alignCenter()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->translateLabel()
+                    ->sortable()
+                    ->toggleable()
             ])
             ->filters([
                 //
