@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,8 +28,14 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    public function sumPrice($items): int
+    public function total($items): int
     {
-
+        return 200;
+    }
+    protected function createdAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => verta($value)->format('d F Y - H:i'),
+        );
     }
 }

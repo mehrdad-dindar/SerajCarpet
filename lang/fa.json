@@ -2,5 +2,12 @@
     "Services" : "خدمات",
     "Services Setting" : "تنظیمات خدمات",
     "Service Name" : "عنوان خدمت",
-    "Seraj" : "سراج"
+    "Seraj" : "سراج",
+    "ID" : "شناسه",
+    "Status" : "وضعیت",
+    "Name" : "نام",
+    "Item Count" : "تعداد",
+    "Total" : "مجموع کل",
+    "Created at" : "تاریخ ایجاد",
+    "pending" : "در حال بررسی"
 }

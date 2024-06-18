@@ -18,6 +18,7 @@ use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
@@ -44,6 +45,15 @@ class OrderResource extends Resource
                                     ->preload()
                                     ->live()
                                     ->afterStateUpdated(fn(Set $set) => $set('address_id', null))
+                                    ->createOptionForm([
+                                        Forms\Components\TextInput::make("name")
+                                            ->label(__("Customer Name"))
+                                            ->required(),
+                                        Forms\Components\TextInput::make("phone")
+                                            ->label(__("Customer Phone"))
+                                            ->unique()
+                                            ->required(),
+                                    ])
                                     ->required(),
                                 Forms\Components\Select::make('address_id')
                                     ->prefixIcon('heroicon-o-map-pin')
@@ -77,7 +87,7 @@ class OrderResource extends Resource
                                     })
                                     ->searchable()
                                     ->preload()
-                                    ->requiredWithout(['address.state', 'address.city', 'address.address', 'address.lat', 'address.lng', 'address.is_active']),
+//                                    ->requiredWithout(['address.state', 'address.city', 'address.address', 'address.lat', 'address.lng', 'address.is_active']),
                             ])->columns()->icon('heroicon-o-user'),
                         Forms\Components\Section::make('Order Items')
                             ->schema([
@@ -117,7 +127,7 @@ class OrderResource extends Resource
                                         Forms\Components\TextInput::make('sub_total')
                                             ->label(__("Sub Total Price"))
                                             ->readOnly()
-                            ->dehydrated()
+                                            ->dehydrated()
                                             ->translateLabel()
                                             ->integer()
                                             ->required()
@@ -150,15 +160,14 @@ class OrderResource extends Resource
                                     ->native()
                                     ->required(),
                             ]),
-                        Forms\Components\Section::make('Total')
+                        Forms\Components\Section::make('Total Price')
                             ->schema([
-                                Forms\Components\TextInput::make('total')
-                                    ->hidden()
-                                    ->afterStateUpdated(fn(Get $get): ?int => self::calculateTotal($get('items'))),
-                                Forms\Components\Placeholder::make('total')
-                                    ->label(__('Total'))
+                                Forms\Components\Hidden::make('total')
+                                ->mutateDehydratedStateUsing(fn(Get $get) => self::calculateTotal($get('items'))),
+                                Forms\Components\Placeholder::make('order_total')
+                                    ->label(__('Order Total'))
                                     ->reactive()
-                                    ->content(fn(Get $get): ?string => number_format(self::calculateTotal($get('items')), 0) . ' تومان'),
+                                    ->content(fn(Get $get): ?string => number_format(self::calculateTotal($get('items')), 0) . ' تومان')
                             ])
                     ])
             ])->columns(3);
@@ -178,8 +187,46 @@ class OrderResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('id')
+                    ->label('ID')
+                    ->searchable()
+                    ->translateLabel(),
+                Tables\Columns\TextColumn::make('customer.name')
+                    ->label('Name')
+                    ->searchable()
+                    ->translateLabel()
+                    ->url(function (Model $record): string {
+                        return route('filament.admin.resources.customers.edit', $record->customer_id);
+                    })
+                    ->alignCenter()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->translateLabel()
+                    ->sortable()
+                    ->badge()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('items_count')
+                    ->sortable()
+                    ->translateLabel()
+                    ->label('Item Count')
+                    ->toggleable()
+                    ->alignCenter()
+                    ->counts('items'),
+                Tables\Columns\TextColumn::make('total')
+                    ->formatStateUsing(function ($state) {
+                        return number_format($state, 0) . ' تومان';
+                    })
+                    ->badge()
+                    ->translateLabel()
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->translateLabel()
+                    ->sortable()
+                    ->toggleable()
             ])
             ->filters([
                 //
