@@ -45,6 +45,15 @@ class OrderResource extends Resource
                                     ->preload()
                                     ->live()
                                     ->afterStateUpdated(fn(Set $set) => $set('address_id', null))
+                                    ->createOptionForm([
+                                        Forms\Components\TextInput::make("name")
+                                            ->label(__("Customer Name"))
+                                            ->required(),
+                                        Forms\Components\TextInput::make("phone")
+                                            ->label(__("Customer Phone"))
+                                            ->unique()
+                                            ->required(),
+                                    ])
                                     ->required(),
                                 Forms\Components\Select::make('address_id')
                                     ->prefixIcon('heroicon-o-map-pin')
@@ -78,7 +87,7 @@ class OrderResource extends Resource
                                     })
                                     ->searchable()
                                     ->preload()
-                                    ->requiredWithout(['address.state', 'address.city', 'address.address', 'address.lat', 'address.lng', 'address.is_active']),
+//                                    ->requiredWithout(['address.state', 'address.city', 'address.address', 'address.lat', 'address.lng', 'address.is_active']),
                             ])->columns()->icon('heroicon-o-user'),
                         Forms\Components\Section::make('Order Items')
                             ->schema([
