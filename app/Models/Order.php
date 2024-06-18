@@ -28,9 +28,9 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    public function sumPrice($items): int
+    public function total($items): int
     {
-
+        return 200;
     }
     protected function createdAt(): Attribute
     {

@@ -118,7 +118,7 @@ class OrderResource extends Resource
                                         Forms\Components\TextInput::make('sub_total')
                                             ->label(__("Sub Total Price"))
                                             ->readOnly()
-                            ->dehydrated()
+                                            ->dehydrated()
                                             ->translateLabel()
                                             ->integer()
                                             ->required()
@@ -151,15 +151,14 @@ class OrderResource extends Resource
                                     ->native()
                                     ->required(),
                             ]),
-                        Forms\Components\Section::make('Total')
+                        Forms\Components\Section::make('Total Price')
                             ->schema([
-                                Forms\Components\TextInput::make('total')
-                                    ->hidden()
-                                    ->afterStateUpdated(fn(Get $get): ?int => self::calculateTotal($get('items'))),
-                                Forms\Components\Placeholder::make('total')
-                                    ->label(__('Total'))
+                                Forms\Components\Hidden::make('total')
+                                ->mutateDehydratedStateUsing(fn(Get $get) => self::calculateTotal($get('items'))),
+                                Forms\Components\Placeholder::make('order_total')
+                                    ->label(__('Order Total'))
                                     ->reactive()
-                                    ->content(fn(Get $get): ?string => number_format(self::calculateTotal($get('items')), 0) . ' تومان'),
+                                    ->content(fn(Get $get): ?string => number_format(self::calculateTotal($get('items')), 0) . ' تومان')
                             ])
                     ])
             ])->columns(3);
@@ -183,9 +182,11 @@ class OrderResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
+                    ->searchable()
                     ->translateLabel(),
                 Tables\Columns\TextColumn::make('customer.name')
                     ->label('Name')
+                    ->searchable()
                     ->translateLabel()
                     ->url(function (Model $record): string {
                         return route('filament.admin.resources.customers.edit', $record->customer_id);
@@ -201,32 +202,17 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('items_count')
                     ->sortable()
                     ->translateLabel()
-                    ->label('Product Count')
+                    ->label('Item Count')
                     ->toggleable()
                     ->alignCenter()
                     ->counts('items'),
-                Tables\Columns\TextColumn::make('subtotal')
-
-                    ->formatStateUsing(function ($state){
-                        return number_format($state, 0) . ' تومان';
-                    })
-                    ->badge()
-                    ->translateLabel()
-                    ->sortable()
-                    ->toggleable(),
                 Tables\Columns\TextColumn::make('total')
-                    ->formatStateUsing(function ($state){
+                    ->formatStateUsing(function ($state) {
                         return number_format($state, 0) . ' تومان';
                     })
                     ->badge()
                     ->translateLabel()
                     ->sortable()
-                    ->toggleable(),
-                Tables\Columns\IconColumn::make('installer')
-                    ->translateLabel()
-                    ->sortable()
-                    ->boolean()
-                    ->alignCenter()
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->translateLabel()
