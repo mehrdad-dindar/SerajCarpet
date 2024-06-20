@@ -249,7 +249,17 @@ class OrderResource extends Resource
                     ->toggleable()
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('status')
+                    ->options([
+                        "pending" => "در انتظار پرداخت",
+                        "paid" => "پرداخت شده",
+                        "cancel" => "لغو شده",
+                        "reject" => "رد شده",
+                        "processing" => "در حال انجام",
+                        "on_delivery" => "در حال ارسال",
+                        "delivered" => "تحویل شده",
+                    ])
+                    ->label(__('Status')),
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([

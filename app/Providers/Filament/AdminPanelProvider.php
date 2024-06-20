@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Resources\CustomerResource;
+use App\Filament\Resources\OrderResource;
 use App\Filament\Resources\UserResource;
 use Awcodes\Overlook\OverlookPlugin;
 use Awcodes\Overlook\Widgets\OverlookWidget;
@@ -74,9 +76,10 @@ class AdminPanelProvider extends PanelProvider
                         '2xl' => null,
                     ])
                     ->includes([
-                        UserResource::class
+                        UserResource::class,
+                        CustomerResource::class,
+                        OrderResource::class,
 //                        ProductResource::class,
-//                        OrderResource::class,
 //                        UserResource::class,
 //                        ArticleResource::class,
 //                        FileResource::class
