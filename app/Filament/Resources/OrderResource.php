@@ -32,6 +32,7 @@ class OrderResource extends Resource
     protected static ?string $pluralModelLabel = "سفارش ها";
     protected static ?string $modelLabel = 'سفارش';
     protected static ?int $navigationSort = 1;
+
     public static function form(Form $form): Form
     {
         return $form
@@ -39,9 +40,11 @@ class OrderResource extends Resource
                 Forms\Components\Grid::make('Order')
                     ->columnSpan(2)
                     ->schema([
-                        Forms\Components\Section::make('Customer')
+                        Forms\Components\Section::make('اطلاعات مشتری')
                             ->schema([
                                 Forms\Components\Select::make('customer_id')
+                                    ->translateLabel()
+                                    ->label('customer')
                                     ->prefixIcon('heroicon-o-user')
                                     ->relationship('customer', 'id_name')
                                     ->searchable()
@@ -61,6 +64,7 @@ class OrderResource extends Resource
                                 Forms\Components\Select::make('address_id')
                                     ->prefixIcon('heroicon-o-map-pin')
                                     ->label(__("Customer's Address"))
+                                    ->translateLabel()
                                     ->options(fn(Get $get): Collection => Address::query()
                                         ->where('customer_id', $get('customer_id'))
                                         ->pluck('address', 'id'))
@@ -92,9 +96,11 @@ class OrderResource extends Resource
                                     ->preload()
 //                                    ->requiredWithout(['address.state', 'address.city', 'address.address', 'address.lat', 'address.lng', 'address.is_active']),
                             ])->columns()->icon('heroicon-o-user'),
-                        Forms\Components\Section::make('Order Items')
+                        Forms\Components\Section::make('موارد سفارش')
                             ->schema([
                                 Forms\Components\Repeater::make('items')
+                                    ->label(__('Items'))
+                                    ->translateLabel()
                                     ->relationship()
                                     ->reorderable()
                                     ->defaultItems(1)
@@ -102,7 +108,8 @@ class OrderResource extends Resource
                                     ->columns(12)
                                     ->schema([
                                         Forms\Components\Select::make('property_id')
-                                            ->label(__('Property'))
+                                            ->label(__('Select Service'))
+                                            ->translateLabel()
                                             ->required()
                                             ->reactive()
                                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
@@ -116,6 +123,7 @@ class OrderResource extends Resource
                                             ->columnSpan(5),
                                         Forms\Components\TextInput::make('quantity')
                                             ->label(__("Quantity"))
+                                            ->translateLabel()
                                             ->numeric()
                                             ->default(1)
                                             ->minValue(1)
@@ -147,10 +155,11 @@ class OrderResource extends Resource
                 Forms\Components\Grid::make('Order')
                     ->columnSpan(1)
                     ->schema([
-                        Forms\Components\Section::make('Order Options')
+                        Forms\Components\Section::make('سایر خدمات')
                             ->schema([
                                 Forms\Components\Select::make('options')
-                                    ->label(__('Order Options'))
+//                                    ->label(__('Order Options'))
+                                    ->hiddenLabel()
                                     ->multiple()
                                     ->options([
                                         "1" => "آبشور",
@@ -161,13 +170,15 @@ class OrderResource extends Resource
                                         "6" => "پرداخت",
                                         "7" => "کاور",
                                     ])
+                                    ->default(['1','7'])
                                     ->native()
                                     ->required(),
                             ]),
-                        Forms\Components\Section::make('Order Status')
+                        Forms\Components\Section::make('وضعیت سفارش')
                             ->schema([
                                 Forms\Components\Select::make('status')
                                     ->label(__('Order Status'))
+                                    ->hiddenLabel()
                                     ->options([
                                         "pending" => "در انتظار پرداخت",
                                         "paid" => "پرداخت شده",
@@ -177,13 +188,14 @@ class OrderResource extends Resource
                                         "on_delivery" => "در حال ارسال",
                                         "delivered" => "تحویل شده",
                                     ])
+                                    ->default('pending')
                                     ->native()
                                     ->required(),
                             ]),
-                        Forms\Components\Section::make('Total Price')
+                        Forms\Components\Section::make('قیمت کل')
                             ->schema([
                                 Forms\Components\Hidden::make('total')
-                                ->mutateDehydratedStateUsing(fn(Get $get) => self::calculateTotal($get('items'))),
+                                    ->mutateDehydratedStateUsing(fn(Get $get) => self::calculateTotal($get('items'))),
                                 Forms\Components\Placeholder::make('order_total')
                                     ->label(__('Order Total'))
                                     ->reactive()

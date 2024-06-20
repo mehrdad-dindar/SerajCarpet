@@ -1,5 +1,12 @@
 {
     "Services" : "خدمات",
+    "customer" : "مشتری",
+    "Customer's Address" : "آدرس مشتری",
+    "Select Service" : "انتخاب خدمت",
+    "Quantity" : "مقدار",
+    "Sub Total Price" : "قیمت جزء",
+    "Items" : "آیتم ها",
+    "Order Total" : "مبلغ کل سفارش",
     "Management" : "مدیریت",
     "Services Setting" : "تنظیمات خدمات",
     "User Settings" : "تنظیمات کاربران",
