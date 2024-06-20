@@ -83,11 +83,21 @@ class AdminPanelProvider extends PanelProvider
                     ]),
             ])
             ->navigationGroups([
+                'Management' => NavigationGroup::make()
+                    ->label(function () {
+                        return __("Management");
+                    })
+                    ->icon("heroicon-o-adjustments-horizontal"),
                 'Services Setting' => NavigationGroup::make()
-                ->label(function () {
-                    return __("Services Setting");
-                })
-                ->icon("heroicon-o-swatch"),
+                    ->label(function () {
+                        return __("Services Setting");
+                    })
+                    ->icon("heroicon-o-swatch"),
+                'User Settings' => NavigationGroup::make()
+                    ->label(function () {
+                        return __("User Settings");
+                    })
+                    ->icon("heroicon-o-users"),
             ])
             ->brandName(function () {
                 return __('Seraj');

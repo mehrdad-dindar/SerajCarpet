@@ -27,8 +27,11 @@ class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
+    protected static ?string $navigationGroup = 'Management';
+    protected static ?string $navigationLabel = 'سفارش ها';
+    protected static ?string $pluralModelLabel = "سفارش ها";
+    protected static ?string $modelLabel = 'سفارش';
+    protected static ?int $navigationSort = 1;
     public static function form(Form $form): Form
     {
         return $form
@@ -144,6 +147,23 @@ class OrderResource extends Resource
                 Forms\Components\Grid::make('Order')
                     ->columnSpan(1)
                     ->schema([
+                        Forms\Components\Section::make('Order Options')
+                            ->schema([
+                                Forms\Components\Select::make('options')
+                                    ->label(__('Order Options'))
+                                    ->multiple()
+                                    ->options([
+                                        "1" => "آبشور",
+                                        "2" => "اعلاء‌شوئی",
+                                        "3" => "براق‌شویی",
+                                        "4" => "رنگ‌برداری",
+                                        "5" => "رفوگری",
+                                        "6" => "پرداخت",
+                                        "7" => "کاور",
+                                    ])
+                                    ->native()
+                                    ->required(),
+                            ]),
                         Forms\Components\Section::make('Order Status')
                             ->schema([
                                 Forms\Components\Select::make('status')

@@ -23,7 +23,7 @@ class UserResource extends Resource
     protected static ?string $label = 'کاربر';
     protected static ?string $pluralLabel = "کاربران";
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+//    protected static ?string $navigationIcon = 'heroicon-o-users';
     protected static ?string $navigationGroup = 'User Settings';
 
 

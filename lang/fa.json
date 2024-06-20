@@ -1,6 +1,8 @@
 {
     "Services" : "خدمات",
+    "Management" : "مدیریت",
     "Services Setting" : "تنظیمات خدمات",
+    "User Settings" : "تنظیمات کاربران",
     "Service Name" : "عنوان خدمت",
     "Seraj" : "سراج",
     "ID" : "شناسه",

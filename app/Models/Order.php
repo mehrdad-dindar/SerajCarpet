@@ -38,4 +38,12 @@ class Order extends Model
             get: fn (string $value) => verta($value)->format('d F Y - H:i'),
         );
     }
+
+    protected function options(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => explode(',', $value),
+            set: fn ($value) => implode(',', $value),
+        );
+    }
 }

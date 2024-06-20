@@ -15,14 +15,18 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AddressResource extends Resource
 {
     protected static ?string $model = Address::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
+    protected static ?string $navigationGroup = 'Management';
+    protected static ?string $navigationLabel = 'آدرس ها';
+    protected static ?string $pluralModelLabel = "آدرس ها";
+    protected static ?string $modelLabel = 'آدرس';
+    protected static ?int $navigationSort = 3;
     public static function form(Form $form): Form
     {
         return $form
@@ -90,6 +94,13 @@ class AddressResource extends Resource
                 Tables\Columns\TextColumn::make('state'),
                 Tables\Columns\TextColumn::make('city'),
                 Tables\Columns\TextColumn::make('address')->toggleable()->searchable(),
+                Tables\Columns\TextColumn::make('googleMap')
+                    ->badge()
+                    ->toggleable()
+                    ->icon('heroicon-o-map-pin')
+                    ->url(function (Model $record): string {
+                        return "https://www.google.com/maps?q={$record->latitude},{$record->longitude}";
+                    }),
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_active')
@@ -123,6 +134,6 @@ class AddressResource extends Resource
 
     private static function getFullAddress(mixed $latitude, mixed $longitude)
     {
-        dd($latitude);
+//        dd($latitude);
     }
 }

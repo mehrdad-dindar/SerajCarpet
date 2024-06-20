@@ -8,6 +8,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AddressRelationManager extends RelationManager
@@ -48,8 +49,13 @@ class AddressRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('state'),
                 Tables\Columns\TextColumn::make('city'),
                 Tables\Columns\TextColumn::make('address'),
-                Tables\Columns\TextColumn::make('lat')->toggleable(),
-                Tables\Columns\TextColumn::make('lng')->toggleable(),
+                Tables\Columns\TextColumn::make('googleMap')
+                    ->badge()
+                    ->toggleable()
+                    ->icon('heroicon-o-map-pin')
+                    ->url(function (Model $record): string {
+                        return "https://www.google.com/maps?q={$record->latitude},{$record->longitude}";
+                    }),
             ])
             ->filters([
                 //
