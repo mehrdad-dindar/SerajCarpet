@@ -23,17 +23,19 @@ Route::middleware([
 // TODO: Hashed link for submitting location
 Route::get('test', function (){
     $hashids = new Hashids('',6);
-    $hashedID = $hashids->encode(52);
+    $hashedID = $hashids->encode(1);
     return '<a href="'.\route("set-location",$hashedID).'">hi</a>';
 });
-Route::get('/set-location/{customer}', function ($customer) {
-    $hashids = new Hashids('',6);
-    $customerID = $hashids->decode($customer)[0];
+Route::get('/set-location/{id}', function ($id) {
+    $hashid = new Hashids('',6);
+    $customerID = $hashid->decode($id)[0];
     $customer = Customer::findOrFail($customerID);
     return view('set-location')
         ->with([
-            'customer' => $customer
+            'customer' => $customer,
+            'hashid' => $id,
         ]);
 })->name('set-location');
 
 Route::post('neshan', [CustomerController::class, 'getFullAddress'])->name('getFullAddress');
+Route::post('create_address', [CustomerController::class, 'createAddress'])->name('create.address');

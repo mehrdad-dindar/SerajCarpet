@@ -12,26 +12,28 @@
 </head>
 <body class="py-16 bg-blue-950">
 <div class="container m-auto px-6 text-gray-500 md:px-12 xl:px-0">
-    <form class="mx-auto w-full" method="post">
+    <form class="mx-auto w-full" method="post" action="{{ route('create.address') }}">
         @csrf
         <div
             class="border border-gray-100 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 p-6 shadow-2xl shadow-gray-600/10 dark:shadow-none sm:px-12 lg:px-8">
-            <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">با استفاده از نقشه محل تحویل را انتخاب کنید <span class="text-xs text-red-500">(الزامی)</span></h3>
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">با استفاده از نقشه محل تحویل را انتخاب
+                کنید <span class="text-xs text-red-500">(الزامی)</span></h3>
             <div id="map" class="w-100 min-h-80 rounded-lg mb-6"></div>
             <pre id="coordinates" class="hidden"></pre>
             <input type="hidden" name="latitude" id="latitude" value="">
             <input type="hidden" name="longitude" id="longitude" value="">
+            <input type="hidden" name="id" value="{{$hashid}}">
             <div class="grid gap-6 mb-6 md:grid-cols-2">
                 <div>
                     <label for="state"
                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">State</label>
-                    <input type="text" id="state"
+                    <input type="text" id="state" name="state"
                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-0"
                            required readonly/>
                 </div>
                 <div>
                     <label for="city" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">City</label>
-                    <input type="text" id="city"
+                    <input type="text" id="city" name="city"
                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white focus:ring-0"
                            required readonly/>
                 </div>
@@ -40,26 +42,28 @@
                 <div class="md:col-span-5">
                     <label for="address"
                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Address</label>
-                    <input type="text" id="address"
+                    <input type="text" id="address" name="address"
                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white focus:ring-0"
                            required readonly/>
                 </div>
                 <div>
                     <label for="no" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">No.</label>
-                    <input type="text" id="no"
-                           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                           required/>
+                    <input type="text" id="no" name="no"
+                           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"/>
                 </div>
                 <div class="md:col-span-6">
                     <label for="message" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your
                         message</label>
-                    <textarea id="message" rows="4"
+                    <textarea id="message" rows="4" name="note"
                               class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
                               placeholder="Write your message here..."></textarea>
                 </div>
 
             </div>
-            <button type="submit" class="text-white bg-[rgb(245_158_11)] hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">Submit</button>
+            <button type="submit"
+                    class="text-white bg-[rgb(245_158_11)] hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">
+                Submit
+            </button>
         </div>
     </form>
 </div>
