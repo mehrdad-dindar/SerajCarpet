@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CustomerController;
 use App\Models\Customer;
 use Hashids\Hashids;
 use Illuminate\Support\Facades\Hash;
@@ -20,17 +21,19 @@ Route::middleware([
 });
 
 // TODO: Hashed link for submitting location
-//Route::get('test', function (){
-//    $hashids = new Hashids('',6);
-//    $hashedID = $hashids->encode(1);
-//    return '<a href="'.\route("set-location",$hashedID).'">hi</a>';
-//});
-//Route::get('/set-location/{customer}', function ($customer) {
-//    $hashids = new Hashids('',6);
-//    dd($hashids->decode($customer));
-//    $hashedUrl = Hash::make($customer->id);
-//
-//    return response()->json([
-//        'hashed_url' => $hashedUrl
-//    ]);
-//})->name('set-location');
+Route::get('test', function (){
+    $hashids = new Hashids('',6);
+    $hashedID = $hashids->encode(52);
+    return '<a href="'.\route("set-location",$hashedID).'">hi</a>';
+});
+Route::get('/set-location/{customer}', function ($customer) {
+    $hashids = new Hashids('',6);
+    $customerID = $hashids->decode($customer)[0];
+    $customer = Customer::findOrFail($customerID);
+    return view('set-location')
+        ->with([
+            'customer' => $customer
+        ]);
+})->name('set-location');
+
+Route::post('neshan', [CustomerController::class, 'getFullAddress'])->name('getFullAddress');

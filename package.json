@@ -10,9 +10,9 @@
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.7",
         "@tailwindcss/typography": "^0.5.10",
+        "autoprefixer": "^10.4.17",
         "axios": "^1.6.4",
         "laravel-vite-plugin": "^1.0",
-        "autoprefixer": "^10.4.17",
         "postcss": "^8.4.35",
         "prettier": "^3.2.5",
         "prettier-plugin-tailwindcss": "^0.1.11",
@@ -21,6 +21,7 @@
     },
     "dependencies": {
         "@tailus/themer": "^0.0.5",
+        "mapbox-gl": "^3.4.0",
         "swiper": "^11.0.6"
     }
 }
