@@ -23,7 +23,7 @@ Route::middleware([
 // TODO: Hashed link for submitting location
 Route::get('test', function (){
     $hashids = new Hashids('',6);
-    $hashedID = $hashids->encode(1);
+    $hashedID = $hashids->encode(51);
     return '<a href="'.\route("set-location",$hashedID).'">hi</a>';
 });
 Route::get('/set-location/{id}', function ($id) {
