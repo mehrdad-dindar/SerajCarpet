@@ -2,8 +2,12 @@
 
 namespace App\Filament\Resources\CustomerResource\RelationManagers;
 
+use App\Filament\Resources\AddressResource;
+use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -19,25 +23,70 @@ class AddressRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('state')
-                    ->required()
-                    ->label(__('State')),
-                Forms\Components\TextInput::make('city')
-                    ->required()
-                    ->label(__('City')),
-                Forms\Components\TextInput::make('address')
-                    ->required()
-                    ->label(__('Full Address')),
-                Forms\Components\TextInput::make('lat')
-                    ->required()
-                    ->label(__('Latitude')),
-                Forms\Components\TextInput::make('lng')
-                    ->required()
-                    ->label(__('longitude')),
+                Forms\Components\Grid::make('Address')->schema([
+                    Forms\Components\TextInput::make('state')
+                        ->required()
+                        ->columnSpan(2)
+                        ->label(__('State')),
+                    Forms\Components\TextInput::make('city')
+                        ->required()
+                        ->columnSpan(2)
+                        ->label(__('City')),
+                    Forms\Components\TextInput::make('address')
+                        ->required()
+                        ->columnSpan(8)
+                        ->label(__('Full Address')),
+                    Forms\Components\TextInput::make('no')
+                        ->required()
+                        ->columnSpan(2)
+                        ->label(__('No.')),
+                    Forms\Components\TextInput::make('floor')
+                        ->required()
+                        ->columnSpan(2)
+                        ->label(__('Floor')),
+                    Forms\Components\TextInput::make('unit')
+                        ->columnSpan(2)
+                        ->label(__('Unit')),
+                    Forms\Components\Hidden::make('latitude')
+                        ->required()
+                        ->label(__('Latitude')),
+                    Forms\Components\Hidden::make('longitude')
+                        ->required()
+                        ->label(__('longitude')),
+                ])->columns(12),
                 Forms\Components\Checkbox::make('is_active')
                     ->label(__('Active'))
                     ->default(true),
+                Map::make('location')
+                    ->hint('با کشیدن و اسکرول ')
+                    ->label('Location')
+                    ->columnSpanFull()
+                    ->default([
+                        'lat' => 35.699741844984004,
+                        'lng' => 51.33805990219117
+                    ])
+                    ->afterStateUpdated(function (Get $get, Set $set, string|array|null $old, ?array $state): void {
+                        $set('latitude', $state['lat']);
+                        $set('longitude', $state['lng']);
+                        $addressResource = new AddressResource();
+                        $addressResource->getFullAddress($state['lat'], $state['lng'], $set);
+                    })
+                    ->extraStyles([
+                        'min-height: 50vh',
+                        'border-radius: 16px'
+                    ])
+                    ->liveLocation()
+                    ->showMarker()
+                    ->markerColor("#40E0D0")
+                    ->showFullscreenControl()
+                    ->showZoomControl()
+                    ->draggable()
+                    ->detectRetina()
+                    ->showMyLocationButton()
+                    ->zoom(11)
+                    ->tilesUrl("http://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}")
             ]);
+
     }
 
     public function table(Table $table): Table
