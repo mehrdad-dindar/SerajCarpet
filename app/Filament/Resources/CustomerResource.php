@@ -18,7 +18,12 @@ class CustomerResource extends Resource
 {
     protected static ?string $model = Customer::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static ?string $navigationGroup = 'Management';
+    protected static ?string $navigationLabel = 'مشتریان';
+    protected static ?string $pluralModelLabel = "مشتریان";
+    protected static ?string $modelLabel = 'مشتری';
+    protected static ?int $navigationSort = 2;
+
 
     public static function form(Form $form): Form
     {
@@ -38,10 +43,10 @@ class CustomerResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')->label(__("Customer ID"))->sortable(),
-                Tables\Columns\TextColumn::make("name")->label(__("Customer Name"))->searchable(),
-                Tables\Columns\TextColumn::make("phone")->label(__("Customer Phone"))->searchable(),
-                Tables\Columns\TextColumn::make("created_at")->label(__("Join Date")),
+                Tables\Columns\TextColumn::make('id')->label('شناسه مشتری')->sortable(),
+                Tables\Columns\TextColumn::make("name")->label('نام')->searchable(),
+                Tables\Columns\TextColumn::make("phone")->label('شماره تماس')->searchable(),
+                Tables\Columns\TextColumn::make("created_at")->label('تاریخ عضویت'),
             ])
             ->filters([
                 //

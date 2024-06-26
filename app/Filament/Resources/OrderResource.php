@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\CustomerResource\RelationManagers\AddressRelationManager;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Models\Address;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Property;
+use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -27,7 +29,11 @@ class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Management';
+    protected static ?string $navigationLabel = 'سفارش ها';
+    protected static ?string $pluralModelLabel = "سفارش ها";
+    protected static ?string $modelLabel = 'سفارش';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
@@ -36,9 +42,11 @@ class OrderResource extends Resource
                 Forms\Components\Grid::make('Order')
                     ->columnSpan(2)
                     ->schema([
-                        Forms\Components\Section::make('Customer')
+                        Forms\Components\Section::make('اطلاعات مشتری')
                             ->schema([
                                 Forms\Components\Select::make('customer_id')
+                                    ->translateLabel()
+                                    ->label('customer')
                                     ->prefixIcon('heroicon-o-user')
                                     ->relationship('customer', 'id_name')
                                     ->searchable()
@@ -46,40 +54,89 @@ class OrderResource extends Resource
                                     ->live()
                                     ->afterStateUpdated(fn(Set $set) => $set('address_id', null))
                                     ->createOptionForm([
-                                        Forms\Components\TextInput::make("name")
-                                            ->label(__("Customer Name"))
-                                            ->required(),
-                                        Forms\Components\TextInput::make("phone")
-                                            ->label(__("Customer Phone"))
-                                            ->unique()
-                                            ->required(),
+                                        Forms\Components\Grid::make()
+                                            ->schema([
+                                                Forms\Components\TextInput::make("name")
+                                                    ->label(__("Customer Name"))
+                                                    ->required(),
+                                                Forms\Components\TextInput::make("phone")
+                                                    ->label(__("Customer Phone"))
+                                                    ->unique()
+                                                    ->required(),
+                                            ])
+                                            ->columns()
                                     ])
                                     ->required(),
                                 Forms\Components\Select::make('address_id')
                                     ->prefixIcon('heroicon-o-map-pin')
                                     ->label(__("Customer's Address"))
+                                    ->translateLabel()
                                     ->options(fn(Get $get): Collection => Address::query()
                                         ->where('customer_id', $get('customer_id'))
                                         ->pluck('address', 'id'))
                                     ->createOptionForm([
-                                        Forms\Components\TextInput::make('state')
-                                            ->required()
-                                            ->label(__('State')),
-                                        Forms\Components\TextInput::make('city')
-                                            ->required()
-                                            ->label(__('City')),
-                                        Forms\Components\TextInput::make('address')
-                                            ->required()
-                                            ->label(__('Full Address')),
-                                        Forms\Components\TextInput::make('lat')
-                                            ->required()
-                                            ->label(__('Latitude')),
-                                        Forms\Components\TextInput::make('lng')
-                                            ->required()
-                                            ->label(__('longitude')),
+                                        Forms\Components\Grid::make('Address')->schema([
+                                            Forms\Components\TextInput::make('state')
+                                                ->required()
+                                                ->columnSpan(2)
+                                                ->label(__('State')),
+                                            Forms\Components\TextInput::make('city')
+                                                ->required()
+                                                ->columnSpan(2)
+                                                ->label(__('City')),
+                                            Forms\Components\TextInput::make('address')
+                                                ->required()
+                                                ->columnSpan(8)
+                                                ->label(__('Full Address')),
+                                            Forms\Components\TextInput::make('no')
+                                                ->required()
+                                                ->columnSpan(2)
+                                                ->label(__('No.')),
+                                            Forms\Components\TextInput::make('floor')
+                                                ->required()
+                                                ->columnSpan(2)
+                                                ->label(__('Floor')),
+                                            Forms\Components\TextInput::make('unit')
+                                                ->columnSpan(2)
+                                                ->label(__('Unit')),
+                                            Forms\Components\Hidden::make('latitude')
+                                                ->required()
+                                                ->label(__('Latitude')),
+                                            Forms\Components\Hidden::make('longitude')
+                                                ->required()
+                                                ->label(__('longitude')),
+                                        ])->columns(12),
                                         Forms\Components\Checkbox::make('is_active')
                                             ->label(__('Active'))
                                             ->default(true),
+                                        Map::make('location')
+                                            ->hint('با کشیدن و اسکرول ')
+                                            ->label('Location')
+                                            ->columnSpanFull()
+                                            ->default([
+                                                'lat' => 35.699741844984004,
+                                                'lng' => 51.33805990219117
+                                            ])
+                                            ->afterStateUpdated(function (Get $get, Set $set, string|array|null $old, ?array $state): void {
+                                                $set('latitude', $state['lat']);
+                                                $set('longitude', $state['lng']);
+                                                $addressResource = new AddressResource();
+                                                $addressResource->getFullAddress($state['lat'], $state['lng'], $set);
+                                            })
+                                            ->extraStyles([
+                                                'min-height: 50vh',
+                                                'border-radius: 16px'
+                                            ])
+                                            ->liveLocation()
+                                            ->showMarker()
+                                            ->markerColor("#40E0D0")
+                                            ->showFullscreenControl()
+                                            ->showZoomControl()
+                                            ->draggable()
+                                            ->detectRetina()
+                                            ->showMyLocationButton()
+                                            ->zoom(11)
+                                            ->tilesUrl("http://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}")
                                     ])
                                     ->createOptionUsing(function (array $data, Get $get): int {
                                         $customer = Customer::findOrFail($get('customer_id'));
@@ -89,9 +146,11 @@ class OrderResource extends Resource
                                     ->preload()
 //                                    ->requiredWithout(['address.state', 'address.city', 'address.address', 'address.lat', 'address.lng', 'address.is_active']),
                             ])->columns()->icon('heroicon-o-user'),
-                        Forms\Components\Section::make('Order Items')
+                        Forms\Components\Section::make('موارد سفارش')
                             ->schema([
                                 Forms\Components\Repeater::make('items')
+                                    ->label(__('Items'))
+                                    ->translateLabel()
                                     ->relationship()
                                     ->reorderable()
                                     ->defaultItems(1)
@@ -99,7 +158,8 @@ class OrderResource extends Resource
                                     ->columns(12)
                                     ->schema([
                                         Forms\Components\Select::make('property_id')
-                                            ->label(__('Property'))
+                                            ->label(__('Select Service'))
+                                            ->translateLabel()
                                             ->required()
                                             ->reactive()
                                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
@@ -113,6 +173,7 @@ class OrderResource extends Resource
                                             ->columnSpan(5),
                                         Forms\Components\TextInput::make('quantity')
                                             ->label(__("Quantity"))
+                                            ->translateLabel()
                                             ->numeric()
                                             ->default(1)
                                             ->minValue(1)
@@ -144,10 +205,30 @@ class OrderResource extends Resource
                 Forms\Components\Grid::make('Order')
                     ->columnSpan(1)
                     ->schema([
-                        Forms\Components\Section::make('Order Status')
+                        Forms\Components\Section::make('سایر خدمات')
+                            ->schema([
+                                Forms\Components\Select::make('options')
+//                                    ->label(__('Order Options'))
+                                    ->hiddenLabel()
+                                    ->multiple()
+                                    ->options([
+                                        "1" => "آبشور",
+                                        "2" => "اعلاء‌شوئی",
+                                        "3" => "براق‌شویی",
+                                        "4" => "رنگ‌برداری",
+                                        "5" => "رفوگری",
+                                        "6" => "پرداخت",
+                                        "7" => "کاور",
+                                    ])
+                                    ->default(['1', '7'])
+                                    ->native()
+                                    ->required(),
+                            ]),
+                        Forms\Components\Section::make('وضعیت سفارش')
                             ->schema([
                                 Forms\Components\Select::make('status')
                                     ->label(__('Order Status'))
+                                    ->hiddenLabel()
                                     ->options([
                                         "pending" => "در انتظار پرداخت",
                                         "paid" => "پرداخت شده",
@@ -157,13 +238,14 @@ class OrderResource extends Resource
                                         "on_delivery" => "در حال ارسال",
                                         "delivered" => "تحویل شده",
                                     ])
+                                    ->default('pending')
                                     ->native()
                                     ->required(),
                             ]),
-                        Forms\Components\Section::make('Total Price')
+                        Forms\Components\Section::make('قیمت کل')
                             ->schema([
                                 Forms\Components\Hidden::make('total')
-                                ->mutateDehydratedStateUsing(fn(Get $get) => self::calculateTotal($get('items'))),
+                                    ->mutateDehydratedStateUsing(fn(Get $get) => self::calculateTotal($get('items'))),
                                 Forms\Components\Placeholder::make('order_total')
                                     ->label(__('Order Total'))
                                     ->reactive()
@@ -229,7 +311,17 @@ class OrderResource extends Resource
                     ->toggleable()
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('status')
+                    ->options([
+                        "pending" => "در انتظار پرداخت",
+                        "paid" => "پرداخت شده",
+                        "cancel" => "لغو شده",
+                        "reject" => "رد شده",
+                        "processing" => "در حال انجام",
+                        "on_delivery" => "در حال ارسال",
+                        "delivered" => "تحویل شده",
+                    ])
+                    ->label(__('Status')),
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
@@ -248,7 +340,7 @@ class OrderResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            AddressRelationManager::class
         ];
     }
 

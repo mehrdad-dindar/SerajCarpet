@@ -16,6 +16,14 @@ class Address extends Model
     {
         return $this->belongsTo(Customer::class);
     }
+    protected function googleMap(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value, array $attributes) => [
+                'mark' => 'نمایش'
+            ]
+        );
+    }
 
     protected function location(): Attribute
     {

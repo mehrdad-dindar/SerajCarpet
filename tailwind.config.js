@@ -2,6 +2,7 @@ import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
 import typography from '@tailwindcss/typography';
 import preset from './vendor/filament/support/tailwind.config.preset'
+import themer from "@tailus/themer";
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -23,8 +24,32 @@ export default {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
                 iranSans : ['IRANSansX', ...defaultTheme.fontFamily.sans],
             },
+            keyframes: {
+                loop: {
+                    to: {
+                        "offset-distance": "100%",
+                    },
+                },
+            },
         },
     },
 
-    plugins: [forms, typography],
+    plugins: [
+        forms,
+        typography,
+        themer({
+            palette: {
+                extend : "nature"
+            },
+            radius: "smoothest",
+            background: "light",
+            border: "light",
+            padding:"large",
+            components: {
+                button: {
+                    rounded : "2xl"
+                }
+            }
+        })
+    ],
 };

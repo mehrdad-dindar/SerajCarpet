@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->foreignId('address_id')->nullable()->constrained();
             $table->string('discount')->nullable();
+            $table->string('options')->nullable();
             $table->string('sub_total')->nullable();
             $table->string('total')->nullable();
             $table->string('status')->nullable();
