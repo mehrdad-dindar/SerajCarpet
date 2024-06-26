@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('city');
             $table->string('address');
             $table->string('no')->nullable();
+            $table->string('floor')->nullable();
+            $table->string('unit')->nullable();
             $table->text('note')->nullable();
             $table->double('latitude')->nullable();
             $table->double('longitude')->nullable();

@@ -9,7 +9,7 @@ trait Neshan
 {
     public function reverseGeocoding($latitude, $longitude)
     {
-        $apiKey = env('NESHAN_API_KEY');
+        $apiKey = env('NESHAN_API_KEY','service.df64f13754cc4cde9c69362bed1a62c4');
         $url = "https://api.neshan.org/v5/reverse?lat={$latitude}&lng={$longitude}";
         try {
             $response = Http::withHeaders([
