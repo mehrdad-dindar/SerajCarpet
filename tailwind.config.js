@@ -31,6 +31,9 @@ export default {
                     },
                 },
             },
+            backgroundImage: {
+                'gradient-radial': 'radial-gradient(circle, rgba(22,96,159,1) 6%, rgba(31,45,81,1) 38%, rgba(9,8,22,1) 77%)',
+            }
         },
     },
 
