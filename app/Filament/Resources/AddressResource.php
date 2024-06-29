@@ -18,6 +18,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Support\Colors\Color;
 
 class AddressResource extends Resource
 {
@@ -35,7 +36,7 @@ class AddressResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Customer')
+                Forms\Components\Section::make('مشتری')
                     ->icon('heroicon-o-user')
                     ->schema([
                         Forms\Components\Select::make('customer_id')
@@ -45,37 +46,46 @@ class AddressResource extends Resource
                             ->required()
                             ->label(__('Customer Name')),
                     ]),
-                Forms\Components\Section::make('Location')
+                Forms\Components\Section::make('آدرس')
                     ->schema([
-                        Forms\Components\TextInput::make('state')
-                            ->required()
-                            ->label(__('State')),
-                        Forms\Components\TextInput::make('city')
-                            ->required()
-                            ->label(__('City')),
-                        Forms\Components\TextInput::make('address')
-                            ->required()
-                            ->label(__('Full Address')),
-                        Forms\Components\TextInput::make('no')
-                            ->required()
-                            ->label(__('No.')),
-                        Forms\Components\TextInput::make('floor')
-                            ->required()
-                            ->label(__('Floor')),
-                        Forms\Components\TextInput::make('unit')
-                            ->label(__('Unit')),
-                        Forms\Components\Hidden::make('latitude')
-                            ->required()
-                            ->label(__('Latitude')),
-                        Forms\Components\Hidden::make('longitude')
-                            ->required()
-                            ->label(__('longitude')),
+                        Forms\Components\Grid::make('Address')->schema([
+                            Forms\Components\TextInput::make('state')
+                                ->required()
+                                ->columnSpan(2)
+                                ->label(__('State')),
+                            Forms\Components\TextInput::make('city')
+                                ->required()
+                                ->columnSpan(2)
+                                ->label(__('City')),
+                            Forms\Components\TextInput::make('address')
+                                ->required()
+                                ->columnSpan(8)
+                                ->label(__('Full Address')),
+                            Forms\Components\TextInput::make('no')
+                                ->required()
+                                ->columnSpan(2)
+                                ->label(__('No.')),
+                            Forms\Components\TextInput::make('floor')
+                                ->required()
+                                ->columnSpan(2)
+                                ->label(__('Floor')),
+                            Forms\Components\TextInput::make('unit')
+                                ->columnSpan(2)
+                                ->label(__('Unit')),
+                            Forms\Components\Hidden::make('latitude')
+                                ->required()
+                                ->label(__('Latitude')),
+                            Forms\Components\Hidden::make('longitude')
+                                ->required()
+                                ->label(__('longitude')),
+                        ])->columns(12),
+
                         Forms\Components\Checkbox::make('is_active')
                             ->label(__('Active'))
                             ->default(true),
                         Map::make('location')
-                            ->hint('با کشیدن و اسکرول ')
-                            ->label('Location')
+                            ->hint('با کشیدن و اسکرول موقعیت مورد نظر را انتخاب کنید')
+                            ->label(__('Location'))
                             ->columnSpanFull()
                             ->default([
                                 'lat' => 35.699741844984004,
@@ -118,12 +128,22 @@ class AddressResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\CheckboxColumn::make('is_active')->sortable(),
-                Tables\Columns\TextColumn::make('customer.name')->searchable(),
-                Tables\Columns\TextColumn::make('state'),
-                Tables\Columns\TextColumn::make('city'),
-                Tables\Columns\TextColumn::make('address')->toggleable()->searchable(),
+                Tables\Columns\CheckboxColumn::make('is_active')
+                    ->label(__('Active'))
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('customer.name')
+                    ->label(__('Customer Name'))
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('state')
+                    ->toggleable()
+                    ->toggledHiddenByDefault()
+                    ->translateLabel(),
+                Tables\Columns\TextColumn::make('city')
+                    ->translateLabel(),
+                Tables\Columns\TextColumn::make('address')->toggleable()->searchable()
+                    ->translateLabel(),
                 Tables\Columns\TextColumn::make('googleMap')
+                    ->translateLabel()
                     ->badge()
                     ->toggleable()
                     ->icon('heroicon-o-map-pin')

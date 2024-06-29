@@ -192,7 +192,7 @@ class OrderResource extends Resource
                                             ->translateLabel()
                                             ->integer()
                                             ->required()
-                                            ->columnSpan(3)
+                                            ->columnSpan(5)
                                             ->mask(RawJs::make("\$money(\$input)"))
                                             ->suffix('تومان')
                                             ->stripCharacters('.')

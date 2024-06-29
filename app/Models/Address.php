@@ -33,8 +33,8 @@ class Address extends Model
                 'longitude' => $attributes['longitude']
             ],
             set: fn (array $value) => [
-                'latitude' => $value['latitude'],
-                'longitude' => $value['longitude']
+                'latitude' => $value['lat'],
+                'longitude' => $value['lng']
             ],
         );
     }

@@ -30,15 +30,21 @@ class PropertyResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('service_item_id')->relationship('serviceItem', 'name')
+                Forms\Components\Select::make('service_item_id')
+                    ->relationship('serviceItem', 'name')
+                    ->label(__('Service Item'))
                     ->searchable()
                     ->preload()
                     ->required(),
-                Forms\Components\Select::make('parent_id')->relationship('parent', 'name'),
+                Forms\Components\Select::make('parent_id')
+                    ->relationship('parent', 'name')
+                    ->label(__('Parent')),
                 Forms\Components\TextInput::make('name')
+                    ->translateLabel()
                     ->required(),
                 Forms\Components\Select::make('unit')
                     ->required()
+                    ->translateLabel()
                     ->options([
                         'meter' => 'متر',
                         'takhte' => 'تخته',
@@ -47,7 +53,7 @@ class PropertyResource extends Resource
                     ->searchable(),
                 Forms\Components\TextInput::make('price')
                     ->required()
-                    ->translateLabel()
+                    ->label(__("Price"))
                     ->integer()
                     ->mask(RawJs::make("\$money(\$input)"))
                     ->suffix('تومان')
@@ -61,11 +67,14 @@ class PropertyResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('serviceItem.name'),
-                Tables\Columns\TextColumn::make('name'),
-                Tables\Columns\TextColumn::make('parent.name'),
+                Tables\Columns\TextColumn::make('serviceItem.name')
+                    ->label(__('Service Item')),
+                Tables\Columns\TextColumn::make('name')
+                    ->translateLabel(),
+                Tables\Columns\TextColumn::make('parent.name')
+                    ->translateLabel(),
                 Tables\Columns\TextColumn::make('unit')
-                    ->label('واحد'),
+                    ->translateLabel(),
                 Tables\Columns\TextColumn::make('price')
                     ->formatStateUsing(function ($state){
                         return number_format($state, 0) . ' تومان';
