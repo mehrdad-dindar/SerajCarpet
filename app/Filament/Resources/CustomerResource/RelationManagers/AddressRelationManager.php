@@ -18,6 +18,10 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class AddressRelationManager extends RelationManager
 {
     protected static string $relationship = 'addresses';
+    protected static ?string $label = 'آدرس';
+    protected static ?string $title = 'آدرس ها';
+
+
 
     public function form(Form $form): Form
     {
@@ -58,8 +62,8 @@ class AddressRelationManager extends RelationManager
                     ->label(__('Active'))
                     ->default(true),
                 Map::make('location')
-                    ->hint('با کشیدن و اسکرول ')
-                    ->label('Location')
+                    ->hint('با کشیدن و اسکرول موقعیت مورد نظر را انتخاب کنید')
+                    ->label(__('Location'))
                     ->columnSpanFull()
                     ->default([
                         'lat' => 35.699741844984004,

@@ -18,7 +18,7 @@ class Order extends Model
         return $this->belongsTo(Customer::class);
     }
 
-    public function address(): BelongsTo
+    public function addresses(): BelongsTo
     {
         return $this->belongsTo(Address::class);
     }
