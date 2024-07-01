@@ -232,24 +232,27 @@ class OrderResource extends Resource
                                     ->hiddenLabel()
                                     ->options(OrderStatus::class)
                                     ->default(OrderStatus::RESERVED)
-                                    ->native()
                                     ->live()
-                                    ->afterStateUpdated(
-                                        fn ($state, callable $set) => $state == OrderStatus::RESERVED ? $set('created_at', null) : $set('created_at', 'hidden')
-                                    )
+//                                    ->before(fn($record, $get) => dd($record))
                                     ->required(),
-                                Forms\Components\DateTimePicker::make('created_at')
-                                    ->label('Reservation Time')
-                                    ->translateLabel()
-                                    ->displayFormat('H:i Y-m-d')
-                                    ->seconds(false)
-                                    ->firstDayOfWeek(4)
-                                    ->default(now())
-                                    ->live()
-                                    ->hidden(
-                                        fn (Get $get): bool => $get('status') == "reserved"
+                                Forms\Components\Fieldset::make('تنظیم تاریخ رزرو')
+//                                    ->hidden(fn(Get $get): bool => $get('status') != OrderStatus::RESERVED)
+                                    ->visible(
+                                        fn(Get $get): bool => $get('status') == OrderStatus::RESERVED
                                     )
-                                    ->jalali(),
+                                    ->schema([
+                                        Forms\Components\DateTimePicker::make('reserved_for')
+                                            ->prefixIcon('heroicon-o-calendar-days')
+                                            ->label('Reservation Time')
+                                            ->translateLabel()
+                                            ->displayFormat('H:i Y-m-d')
+                                            ->seconds(false)
+                                            ->firstDayOfWeek(4)
+                                            ->default(null)
+                                            ->columnSpanFull()
+                                            ->jalali(),
+                                    ]),
+
                             ]),
                         Forms\Components\Section::make('قیمت کل')
                             ->schema([
