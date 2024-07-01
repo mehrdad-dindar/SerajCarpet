@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\OrderStatus;
 use App\Filament\Resources\CustomerResource\RelationManagers\AddressRelationManager;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers;
@@ -229,15 +230,7 @@ class OrderResource extends Resource
                                 Forms\Components\Select::make('status')
                                     ->label(__('Order Status'))
                                     ->hiddenLabel()
-                                    ->options([
-                                        "pending" => "در انتظار پرداخت",
-                                        "paid" => "پرداخت شده",
-                                        "cancel" => "لغو شده",
-                                        "reject" => "رد شده",
-                                        "processing" => "در حال انجام",
-                                        "on_delivery" => "در حال ارسال",
-                                        "delivered" => "تحویل شده",
-                                    ])
+                                    ->options(OrderStatus::class)
                                     ->default('pending')
                                     ->native()
                                     ->required(),
