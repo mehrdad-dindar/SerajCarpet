@@ -231,9 +231,25 @@ class OrderResource extends Resource
                                     ->label(__('Order Status'))
                                     ->hiddenLabel()
                                     ->options(OrderStatus::class)
-                                    ->default('pending')
+                                    ->default(OrderStatus::RESERVED)
                                     ->native()
+                                    ->live()
+                                    ->afterStateUpdated(
+                                        fn ($state, callable $set) => $state == OrderStatus::RESERVED ? $set('created_at', null) : $set('created_at', 'hidden')
+                                    )
                                     ->required(),
+                                Forms\Components\DateTimePicker::make('created_at')
+                                    ->label('Reservation Time')
+                                    ->translateLabel()
+                                    ->displayFormat('H:i Y-m-d')
+                                    ->seconds(false)
+                                    ->firstDayOfWeek(4)
+                                    ->default(now())
+                                    ->live()
+                                    ->hidden(
+                                        fn (Get $get): bool => $get('status') == "reserved"
+                                    )
+                                    ->jalali(),
                             ]),
                         Forms\Components\Section::make('قیمت کل')
                             ->schema([
