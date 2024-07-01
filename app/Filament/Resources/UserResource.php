@@ -32,7 +32,7 @@ class UserResource extends Resource
         return $form
             ->schema([
                 TextInput::make('name'),
-                TextInput::make('email')->disabled(),
+                TextInput::make('email')->required(),
                 TextInput::make('password')->password()->minLength(8)->same('password_confirmation'),
                 TextInput::make('password_confirmation')->password()->minLength(8),
             ]);

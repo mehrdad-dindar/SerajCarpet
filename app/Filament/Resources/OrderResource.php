@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\OrderStatus;
 use App\Filament\Resources\CustomerResource\RelationManagers\AddressRelationManager;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers;
@@ -229,18 +230,29 @@ class OrderResource extends Resource
                                 Forms\Components\Select::make('status')
                                     ->label(__('Order Status'))
                                     ->hiddenLabel()
-                                    ->options([
-                                        "pending" => "در انتظار پرداخت",
-                                        "paid" => "پرداخت شده",
-                                        "cancel" => "لغو شده",
-                                        "reject" => "رد شده",
-                                        "processing" => "در حال انجام",
-                                        "on_delivery" => "در حال ارسال",
-                                        "delivered" => "تحویل شده",
-                                    ])
-                                    ->default('pending')
-                                    ->native()
+                                    ->options(OrderStatus::class)
+                                    ->default(OrderStatus::RESERVED)
+                                    ->live()
+//                                    ->before(fn($record, $get) => dd($record))
                                     ->required(),
+                                Forms\Components\Fieldset::make('تنظیم تاریخ رزرو')
+//                                    ->hidden(fn(Get $get): bool => $get('status') != OrderStatus::RESERVED)
+                                    ->visible(
+                                        fn(Get $get): bool => $get('status') == OrderStatus::RESERVED
+                                    )
+                                    ->schema([
+                                        Forms\Components\DateTimePicker::make('reserved_for')
+                                            ->prefixIcon('heroicon-o-calendar-days')
+                                            ->label('Reservation Time')
+                                            ->translateLabel()
+                                            ->displayFormat('H:i Y-m-d')
+                                            ->seconds(false)
+                                            ->firstDayOfWeek(4)
+                                            ->default(null)
+                                            ->columnSpanFull()
+                                            ->jalali(),
+                                    ]),
+
                             ]),
                         Forms\Components\Section::make('قیمت کل')
                             ->schema([
