@@ -324,15 +324,7 @@ class OrderResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
-                    ->options([
-                        "pending" => "در انتظار پرداخت",
-                        "paid" => "پرداخت شده",
-                        "cancel" => "لغو شده",
-                        "reject" => "رد شده",
-                        "processing" => "در حال انجام",
-                        "on_delivery" => "در حال ارسال",
-                        "delivered" => "تحویل شده",
-                    ])
+                    ->options(OrderStatus::class)
                     ->label(__('Status')),
             ])
             ->actions([

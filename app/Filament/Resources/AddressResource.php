@@ -52,15 +52,22 @@ class AddressResource extends Resource
                             Forms\Components\TextInput::make('state')
                                 ->required()
                                 ->columnSpan(2)
+                                ->hint('')
                                 ->label(__('State')),
                             Forms\Components\TextInput::make('city')
                                 ->required()
                                 ->columnSpan(2)
+                                ->hint('')
                                 ->label(__('City')),
                             Forms\Components\TextInput::make('address')
                                 ->required()
-                                ->columnSpan(8)
+                                ->columnSpan(7)
+                                ->hint('')
                                 ->label(__('Full Address')),
+                            Forms\Components\Toggle::make('suggest')
+                                ->onIcon('heroicon-s-sparkles')
+                                ->offIcon('heroicon-o-star')
+                                ->inline(false),
                             Forms\Components\TextInput::make('no')
                                 ->required()
                                 ->columnSpan(2)
@@ -95,7 +102,7 @@ class AddressResource extends Resource
                                 $set('latitude', $state['lat']);
                                 $set('longitude', $state['lng']);
                                 $addressResource = new AddressResource();
-                                $addressResource->getFullAddress($state['lat'], $state['lng'], $set);
+                                $addressResource->getFullAddress($state['lat'], $state['lng'], $set, $get);
                             })
                             ->extraStyles([
                                 'min-height: 50vh',
@@ -115,13 +122,19 @@ class AddressResource extends Resource
             ]);
     }
 
-    public function getFullAddress(mixed $latitude, mixed $longitude, Set $set)
+    public function getFullAddress(mixed $latitude, mixed $longitude, Set $set, Get $get)
     {
         $neshan = $this->reverseGeocoding($latitude, $longitude)->getData();
-        $set('address', $neshan->formatted_address);
-        $set('state', $neshan->state);
-        $set('city', $neshan->city);
-//        dd($latitude,$longitude);
+
+        if ($get('suggest')) {
+            $set('address', $neshan->formatted_address);
+            $set('state', $neshan->state);
+            $set('city', $neshan->city);
+        } else {
+            $set('address',$get('address'))->hint($neshan->formatted_address);
+            $set('state', $get('state'))->hint($neshan->state);
+            $set('city', $get('city'))->hint($neshan->city);
+        }
     }
 
     public static function table(Table $table): Table
