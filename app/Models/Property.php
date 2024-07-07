@@ -39,7 +39,7 @@ class Property extends Model
         if (!is_null($parent)) {
             $title .= $parent->name . ' ';
         }
-        $title .= $this->name . ' (' . number_format($this->price) . ' تومان' .' هر ' . $this->unit .')';
+        $title .= $this->name . ' (' . number_format($this->price) . ' تومان' .' هر ' . __($this->unit) .')';
 
         return Attribute::make(
             get: fn() => $title,
