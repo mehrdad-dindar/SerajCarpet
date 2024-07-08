@@ -163,15 +163,41 @@ class OrderResource extends Resource
                                             ->translateLabel()
                                             ->required()
                                             ->reactive()
+                                            ->helperText(fn(Get $get) => Property::find($get('property_id'))->helperText ?? '')
                                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                                $set('sub_total', $get('quantity') * Property::find($state)->price);
+                                                $set('sub_total', ((int)$get('dimensions') ?? 1) * $get('quantity') * Property::find($state)->price);
                                                 $set('unit_price', Property::find($state)->price);
                                             })
                                             ->relationship('property', 'fullTitle')
                                             ->getOptionLabelFromRecordUsing(function (Property $property) {
                                                 return $property->fullTitle;
                                             })
-                                            ->columnSpan(5),
+                                            ->columnSpan(3),
+                                        Forms\Components\Select::make('dimensions')
+                                            ->options(function ($state, Get $get) {
+                                                if ($propertyId = $get('property_id')) {
+                                                    $dimensions = Property::find($propertyId)->dimensions ?? [];
+                                                    return array_combine($dimensions, $dimensions);
+                                                }
+                                                return [];
+                                            })
+                                            ->afterStateUpdated(function ($state,Set $set, Get $get) {
+                                                $set('sub_total', ((int)$get('dimensions') ?? 1) * $get('quantity') * Property::find($get('property_id'))->price);
+                                                $set('unit_price', Property::find($get('property_id'))->price);
+                                            })
+                                            ->translateLabel()
+                                            ->live()
+                                            ->hidden(function ($get, $set) {
+                                                $propertyId = $get('property_id');
+                                                $property = $propertyId ? Property::find($propertyId) : null;
+
+                                                if (!$propertyId || !$property || !$property->dimensions) {
+                                                    $set('dimensions', 1);
+                                                    return true;
+                                                }
+                                                return false;
+                                            })
+                                            ->columnSpan(2),
                                         Forms\Components\TextInput::make('quantity')
                                             ->label(__("Quantity"))
                                             ->translateLabel()
@@ -180,8 +206,9 @@ class OrderResource extends Resource
                                             ->minValue(1)
                                             ->reactive()
                                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                                $set('sub_total', $state * Property::find($get("property_id"))->price);
-                                                $set('unit_price', Property::find($get("property_id"))->price);
+                                                $price = Property::find($get("property_id"))->price;
+                                                $set('sub_total', ((int)$get('dimensions') ?? 1) * $state * $price);
+                                                $set('unit_price', $price);
                                             })
                                             ->columnSpan(2)
                                             ->required(),
@@ -193,7 +220,7 @@ class OrderResource extends Resource
                                             ->translateLabel()
                                             ->integer()
                                             ->required()
-                                            ->columnSpan(5)
+                                            ->columnSpan(4)
                                             ->mask(RawJs::make("\$money(\$input)"))
                                             ->suffix('تومان')
                                             ->stripCharacters('.')
@@ -271,11 +298,16 @@ class OrderResource extends Resource
     {
         $total = 0;
         foreach ($items as $item) {
+            $dimensions = (int)$item['dimensions'] ?? 1;
             $quantity = (int)$item['quantity'] ?? 0;
             $unitPrice = (int)$item['unit_price'] ?? 0;
-            $total += $quantity * $unitPrice;
+            $total += $dimensions * $quantity * $unitPrice;
         }
-        return $total;
+        if ($total) {
+            return $total;
+        } else {
+            return 1;
+        }
     }
 
     public static function table(Table $table): Table
@@ -302,7 +334,7 @@ class OrderResource extends Resource
                     ->sortable()
                     ->badge()
                     ->toggleable()
-                    ->formatStateUsing(fn (string $state): string => OrderStatus::from($state)->getLabel()),
+                    ->formatStateUsing(fn(string $state): string => OrderStatus::from($state)->getLabel()),
                 Tables\Columns\TextColumn::make('items_count')
                     ->sortable()
                     ->translateLabel()
