@@ -301,7 +301,8 @@ class OrderResource extends Resource
                     ->translateLabel()
                     ->sortable()
                     ->badge()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->formatStateUsing(fn (string $state): string => OrderStatus::from($state)->getLabel()),
                 Tables\Columns\TextColumn::make('items_count')
                     ->sortable()
                     ->translateLabel()
