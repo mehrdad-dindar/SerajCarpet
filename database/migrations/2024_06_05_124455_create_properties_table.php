@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('service_item_id')->constrained();
             $table->foreignId('parent_id')->nullable()->constrained('properties', 'id')->onDelete('cascade');
             $table->string('name');
+            $table->json('dimensions')->nullable();
             $table->text('unit');
             $table->integer('price');
         });

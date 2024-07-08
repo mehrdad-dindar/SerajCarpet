@@ -51,6 +51,9 @@ class PropertyResource extends Resource
                         'item' => 'عدد',
                     ])
                     ->searchable(),
+                Forms\Components\TagsInput::make('dimensions')
+                    ->color('success')
+                    ->label(__('Dimensions')),
                 Forms\Components\TextInput::make('price')
                     ->required()
                     ->label(__("Price"))
@@ -75,6 +78,9 @@ class PropertyResource extends Resource
                     ->translateLabel(),
                 Tables\Columns\TextColumn::make('unit')
                     ->translateLabel(),
+                Tables\Columns\TextColumn::make('dimensions')
+                    ->translateLabel()
+                    ->badge(),
                 Tables\Columns\TextColumn::make('price')
                     ->formatStateUsing(function ($state){
                         return number_format($state, 0) . ' تومان';
