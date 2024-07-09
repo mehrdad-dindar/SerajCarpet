@@ -319,7 +319,7 @@ class OrderResource extends Resource
                                 Forms\Components\Fieldset::make('تنظیم تاریخ رزرو')
 //                                    ->hidden(fn(Get $get): bool => $get('status') != OrderStatus::RESERVED)
                                     ->visible(
-                                        fn(Get $get): bool => $get('status') == OrderStatus::RESERVED
+                                        fn(Get $get): bool => (is_object($get('status')) ? $get('status')->value : $get('status')) == OrderStatus::RESERVED->value
                                     )
                                     ->schema([
                                         Forms\Components\DateTimePicker::make('reserved_for')
