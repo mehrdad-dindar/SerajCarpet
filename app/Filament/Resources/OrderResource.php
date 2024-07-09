@@ -144,8 +144,7 @@ class OrderResource extends Resource
                                         return $customer->addresses()->create($data)->getKey();
                                     })
                                     ->searchable()
-                                    ->preload()
-//                                    ->requiredWithout(['address.state', 'address.city', 'address.address', 'address.lat', 'address.lng', 'address.is_active']),
+                                    ->preload(),
                             ])->columns()->icon('heroicon-o-user'),
                         Forms\Components\Section::make('موارد سفارش')
                             ->schema([
@@ -181,7 +180,7 @@ class OrderResource extends Resource
                                                 }
                                                 return [];
                                             })
-                                            ->afterStateUpdated(function ($state,Set $set, Get $get) {
+                                            ->afterStateUpdated(function ($state, Set $set, Get $get) {
                                                 $set('sub_total', ((int)$get('dimensions') ?? 1) * $get('quantity') * Property::find($get('property_id'))->price);
                                                 $set('unit_price', Property::find($get('property_id'))->price);
                                             })
@@ -226,6 +225,59 @@ class OrderResource extends Resource
                                             ->stripCharacters('.')
                                             ->mutateStateForValidationUsing(fn($state) => str_replace(',', '', $state))
                                             ->mutateDehydratedStateUsing(fn($state) => str_replace(',', '', $state)),
+                                    ])
+                                    ->columnSpanFull(),
+                                Forms\Components\Repeater::make('other_items')
+                                    ->label(__('Other Items'))
+                                    ->translateLabel()
+                                    ->defaultItems(0)
+                                    ->hiddenLabel()
+                                    ->columns(12)
+                                    ->schema([
+                                        Forms\Components\TextInput::make('title')
+                                            ->columnSpan(4),
+                                        Forms\Components\TextInput::make('quantity')
+                                            ->label(__("Quantity"))
+                                            ->translateLabel()
+                                            ->numeric()
+                                            ->default(1)
+                                            ->minValue(1)
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                                if ($price = str_replace(',', '',$get('unit_price'))) {
+                                                    $set('sub_total', (int)$state * (int)$price);
+                                                }
+                                            })
+                                            ->columnSpan(2)
+                                            ->required(),
+                                        Forms\Components\TextInput::make('unit_price')
+                                            ->label(__("Unit Price"))
+                                            ->columnSpan(3)
+                                            ->mask(RawJs::make("\$money(\$input)"))
+                                            ->suffix('تومان')
+                                            ->stripCharacters('.')
+                                            ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                                if ($price = str_replace(',', '',$state)) {
+                                                    $set('sub_total',(int)$get('quantity') * (int)$price);
+                                                    $set('unit_price', (int)str_replace(',','',$state));
+                                                }
+                                            })
+                                            ->mutateStateForValidationUsing(fn($state) => str_replace(',', '', $state))
+                                            ->mutateDehydratedStateUsing(fn($state) => str_replace(',', '', $state)),
+                                        Forms\Components\TextInput::make('sub_total')
+                                            ->label(__("Sub Total Price"))
+                                            ->readOnly()
+                                            ->dehydrated()
+                                            ->translateLabel()
+                                            ->integer()
+                                            ->required()
+                                            ->columnSpan(3)
+                                            ->mask(RawJs::make("\$money(\$input)"))
+                                            ->suffix('تومان')
+                                            ->stripCharacters('.')
+                                            ->mutateStateForValidationUsing(fn($state) => str_replace(',', '', $state))
+                                            ->mutateDehydratedStateUsing(fn($state) => str_replace(',', '', $state)),
+
                                     ])
                                     ->columnSpanFull(),
                             ])->icon('heroicon-o-list-bullet')
@@ -284,21 +336,25 @@ class OrderResource extends Resource
                         Forms\Components\Section::make('قیمت کل')
                             ->schema([
                                 Forms\Components\Hidden::make('total')
-                                    ->mutateDehydratedStateUsing(fn(Get $get) => self::calculateTotal($get('items'))),
+                                    ->mutateDehydratedStateUsing(fn(Get $get) => self::calculateTotal($get)),
                                 Forms\Components\Placeholder::make('order_total')
                                     ->label(__('Order Total'))
                                     ->reactive()
-                                    ->content(fn(Get $get): ?string => number_format(self::calculateTotal($get('items')), 0) . ' تومان')
+                                    ->content(fn(Get $get): ?string => number_format(self::calculateTotal($get), 0) . ' تومان')
                             ])
                     ])
             ])->columns(3);
     }
 
-    private static function calculateTotal($items): int
+    private static function calculateTotal($data): int
     {
+        $items = array_merge($data('items') , $data('other_items'));
         $total = 0;
         foreach ($items as $item) {
-            $dimensions = (int)$item['dimensions'] ?? 1;
+            $dimensions = 1 ;
+                if (isset($item['dimensions'])){
+                    $dimensions = $item['dimensions'];
+                }
             $quantity = (int)$item['quantity'] ?? 0;
             $unitPrice = (int)$item['unit_price'] ?? 0;
             $total += $dimensions * $quantity * $unitPrice;
