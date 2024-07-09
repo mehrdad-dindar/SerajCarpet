@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('order_id')->nullable();
             $table->foreignId('property_id')->nullable();
-            $table->string('quantity');
+            $table->integer('dimensions')->default(1);
+            $table->integer('quantity');
             $table->string('unit_price');
             $table->string('sub_total');
             $table->string('title')->nullable();

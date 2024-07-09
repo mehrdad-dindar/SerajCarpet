@@ -230,10 +230,12 @@ class OrderResource extends Resource
                                 Forms\Components\Repeater::make('other_items')
                                     ->label(__('Other Items'))
                                     ->translateLabel()
+                                    ->relationship()
                                     ->defaultItems(0)
                                     ->hiddenLabel()
                                     ->columns(12)
                                     ->schema([
+                                        Forms\Components\Hidden::make('is_custom')->default(1),
                                         Forms\Components\TextInput::make('title')
                                             ->columnSpan(4),
                                         Forms\Components\TextInput::make('quantity')
@@ -353,7 +355,7 @@ class OrderResource extends Resource
         foreach ($items as $item) {
             $dimensions = 1 ;
                 if (isset($item['dimensions'])){
-                    $dimensions = $item['dimensions'];
+                    $dimensions = (int)$item['dimensions'] ?? 1;
                 }
             $quantity = (int)$item['quantity'] ?? 0;
             $unitPrice = (int)$item['unit_price'] ?? 0;
