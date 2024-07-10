@@ -80,15 +80,38 @@ class OrderResource extends Resource
                                             Forms\Components\TextInput::make('state')
                                                 ->required()
                                                 ->columnSpan(2)
+                                                ->helperText(fn(Get $get) => AddressResource::getHint('state', $get))
                                                 ->label(__('State')),
                                             Forms\Components\TextInput::make('city')
                                                 ->required()
                                                 ->columnSpan(2)
+                                                ->helperText(fn(Get $get) => AddressResource::getHint('city', $get))
                                                 ->label(__('City')),
                                             Forms\Components\TextInput::make('address')
                                                 ->required()
-                                                ->columnSpan(8)
+                                                ->columnSpan(6)
+                                                ->helperText(fn(Get $get) => AddressResource::getHint('address', $get))
                                                 ->label(__('Full Address')),
+                                            Forms\Components\Toggle::make('is_suggested')
+                                                ->onIcon('heroicon-s-sparkles')
+                                                ->offIcon('heroicon-o-star')
+                                                ->inline(false)
+                                                ->reactive()
+                                                ->default(false)
+                                                ->translateLabel()
+                                                ->columnSpan(2)
+                                                ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                                                    if ($state) {
+                                                        $latitude = $get('latitude');
+                                                        $longitude = $get('longitude');
+                                                        if ($latitude && $longitude) {
+                                                            $neshan = AddressResource::reverseGeocoding($latitude, $longitude)->getData();
+                                                            $set('address', $neshan->formatted_address);
+                                                            $set('state', $neshan->state);
+                                                            $set('city', $neshan->city);
+                                                        }
+                                                    }
+                                                }),
                                             Forms\Components\TextInput::make('no')
                                                 ->required()
                                                 ->columnSpan(2)
@@ -107,12 +130,13 @@ class OrderResource extends Resource
                                                 ->required()
                                                 ->label(__('longitude')),
                                         ])->columns(12),
+
                                         Forms\Components\Checkbox::make('is_active')
                                             ->label(__('Active'))
                                             ->default(true),
                                         Map::make('location')
-                                            ->hint('با کشیدن و اسکرول ')
-                                            ->label('Location')
+                                            ->hint('با کشیدن و اسکرول موقعیت مورد نظر را انتخاب کنید')
+                                            ->label(__('Location'))
                                             ->columnSpanFull()
                                             ->default([
                                                 'lat' => 35.699741844984004,
@@ -121,8 +145,14 @@ class OrderResource extends Resource
                                             ->afterStateUpdated(function (Get $get, Set $set, string|array|null $old, ?array $state): void {
                                                 $set('latitude', $state['lat']);
                                                 $set('longitude', $state['lng']);
-                                                $addressResource = new AddressResource();
-                                                $addressResource->getFullAddress($state['lat'], $state['lng'], $set);
+                                                if ($get('is_suggested')) {
+                                                    $set('state', AddressResource::getHint('state', $get));
+                                                    $set('city', AddressResource::getHint('city', $get));
+                                                    $set('address', AddressResource::getHint('address', $get));
+                                                }
+                                            })
+                                            ->afterStateHydrated(function ($state, $record, Set $set): void {
+                                                is_null($record) ?: $set('location', ['lat' => $record->latitude, 'lng' => $record->longitude]);
                                             })
                                             ->extraStyles([
                                                 'min-height: 50vh',
@@ -258,10 +288,11 @@ class OrderResource extends Resource
                                             ->mask(RawJs::make("\$money(\$input)"))
                                             ->suffix('تومان')
                                             ->stripCharacters('.')
+                                            ->reactive()
                                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
                                                 if ($price = str_replace(',', '',$state)) {
-                                                    $set('sub_total',(int)$get('quantity') * (int)$price);
-                                                    $set('unit_price', (int)str_replace(',','',$state));
+                                                    $set('sub_total',number_format((int)$get('quantity') * (int)$price));
+                                                    $set('unit_price', number_format($price));
                                                 }
                                             })
                                             ->mutateStateForValidationUsing(fn($state) => str_replace(',', '', $state))
@@ -358,7 +389,7 @@ class OrderResource extends Resource
                     $dimensions = (int)$item['dimensions'] ?? 1;
                 }
             $quantity = (int)$item['quantity'] ?? 0;
-            $unitPrice = (int)$item['unit_price'] ?? 0;
+            $unitPrice = (int)str_replace(',', '',$item['unit_price']);
             $total += $dimensions * $quantity * $unitPrice;
         }
         if ($total) {
@@ -396,7 +427,7 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('items_count')
                     ->sortable()
                     ->translateLabel()
-                    ->label('Item Count')
+                    ->label('Order Item Count')
                     ->toggleable()
                     ->alignCenter()
                     ->counts('items'),

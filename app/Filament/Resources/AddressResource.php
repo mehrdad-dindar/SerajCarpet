@@ -52,22 +52,36 @@ class AddressResource extends Resource
                             Forms\Components\TextInput::make('state')
                                 ->required()
                                 ->columnSpan(2)
-                                ->hint('')
+                                ->helperText(fn(Get $get) => self::getHint('state', $get))
                                 ->label(__('State')),
                             Forms\Components\TextInput::make('city')
                                 ->required()
                                 ->columnSpan(2)
-                                ->hint('')
+                                ->helperText(fn(Get $get) => self::getHint('city', $get))
                                 ->label(__('City')),
                             Forms\Components\TextInput::make('address')
                                 ->required()
                                 ->columnSpan(7)
-                                ->hint('')
+                                ->helperText(fn(Get $get) => self::getHint('address', $get))
                                 ->label(__('Full Address')),
-                            Forms\Components\Toggle::make('suggest')
+                            Forms\Components\Toggle::make('is_suggested')
                                 ->onIcon('heroicon-s-sparkles')
                                 ->offIcon('heroicon-o-star')
-                                ->inline(false),
+                                ->inline(false)
+                                ->reactive()
+                                ->default(false)
+                                ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                                    if ($state) {
+                                        $latitude = $get('latitude');
+                                        $longitude = $get('longitude');
+                                        if ($latitude && $longitude) {
+                                            $neshan = self::reverseGeocoding($latitude, $longitude)->getData();
+                                            $set('address', $neshan->formatted_address);
+                                            $set('state', $neshan->state);
+                                            $set('city', $neshan->city);
+                                        }
+                                    }
+                                }),
                             Forms\Components\TextInput::make('no')
                                 ->required()
                                 ->columnSpan(2)
@@ -101,8 +115,14 @@ class AddressResource extends Resource
                             ->afterStateUpdated(function (Get $get, Set $set, string|array|null $old, ?array $state): void {
                                 $set('latitude', $state['lat']);
                                 $set('longitude', $state['lng']);
-                                $addressResource = new AddressResource();
-                                $addressResource->getFullAddress($state['lat'], $state['lng'], $set, $get);
+                                if ($get('is_suggested')) {
+                                    $set('state', self::getHint('state', $get));
+                                    $set('city', self::getHint('city', $get));
+                                    $set('address', self::getHint('address', $get));
+                                }
+                            })
+                            ->afterStateHydrated(function ($state, $record, Set $set): void {
+                                is_null($record) ?: $set('location', ['lat' => $record->latitude, 'lng' => $record->longitude]);
                             })
                             ->extraStyles([
                                 'min-height: 50vh',
@@ -122,19 +142,22 @@ class AddressResource extends Resource
             ]);
     }
 
-    public function getFullAddress(mixed $latitude, mixed $longitude, Set $set, Get $get)
+    public static function getHint(string $field, Get $get)
     {
-        $neshan = $this->reverseGeocoding($latitude, $longitude)->getData();
+        $latitude = $get('latitude');
+        $longitude = $get('longitude');
 
-        if ($get('suggest')) {
-            $set('address', $neshan->formatted_address);
-            $set('state', $neshan->state);
-            $set('city', $neshan->city);
-        } else {
-            $set('address',$get('address'))->hint($neshan->formatted_address);
-            $set('state', $get('state'))->hint($neshan->state);
-            $set('city', $get('city'))->hint($neshan->city);
+        if ($latitude && $longitude) {
+            $neshan = self::reverseGeocoding($latitude, $longitude)->getData();
+            return match ($field) {
+                'address' => $neshan->formatted_address ?? '',
+                'state' => $neshan->state ?? '',
+                'city' => $neshan->city ?? '',
+                default => '',
+            };
         }
+
+        return '';
     }
 
     public static function table(Table $table): Table
@@ -192,5 +215,21 @@ class AddressResource extends Resource
             'create' => Pages\CreateAddress::route('/create'),
             'edit' => Pages\EditAddress::route('/{record}/edit'),
         ];
+    }
+
+    public function getFullAddress(mixed $latitude, mixed $longitude, Set $set, Get $get)
+    {
+        $neshan = $this->reverseGeocoding($latitude, $longitude)->getData();
+
+//        dd($neshan);
+        if ($get('is_suggested')) {
+            $set('address', $neshan->formatted_address);
+            $set('state', $neshan->state);
+            $set('city', $neshan->city);
+        } else {
+            $set('address', 'address')->hint('$neshan->formatted_address');
+            $set('state', 'state')->hint('$neshan->state');
+            $set('city', 'city')->hint('$neshan->city');
+        }
     }
 }
