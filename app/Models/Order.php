@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
-    use HasFactory;
     protected $guarded;
 
     public function customer(): BelongsTo
@@ -26,7 +25,11 @@ class Order extends Model
 
     public function items(): HasMany
     {
-        return $this->hasMany(OrderItem::class);
+        return $this->hasMany(OrderItem::class)->nonCustom();
+    }
+    public function other_items(): HasMany
+    {
+        return $this->hasMany(OrderItem::class)->custom();
     }
 
     public function total($items): int

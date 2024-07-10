@@ -31,15 +31,36 @@ class AddressRelationManager extends RelationManager
                     Forms\Components\TextInput::make('state')
                         ->required()
                         ->columnSpan(2)
+                        ->helperText(fn(Get $get) => AddressResource::getHint('state', $get))
                         ->label(__('State')),
                     Forms\Components\TextInput::make('city')
                         ->required()
                         ->columnSpan(2)
+                        ->helperText(fn(Get $get) => AddressResource::getHint('city', $get))
                         ->label(__('City')),
                     Forms\Components\TextInput::make('address')
                         ->required()
-                        ->columnSpan(8)
+                        ->columnSpan(7)
+                        ->helperText(fn(Get $get) => AddressResource::getHint('address', $get))
                         ->label(__('Full Address')),
+                    Forms\Components\Toggle::make('is_suggested')
+                        ->onIcon('heroicon-s-sparkles')
+                        ->offIcon('heroicon-o-star')
+                        ->inline(false)
+                        ->reactive()
+                        ->default(false)
+                        ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                            if ($state) {
+                                $latitude = $get('latitude');
+                                $longitude = $get('longitude');
+                                if ($latitude && $longitude) {
+                                    $neshan = AddressResource::reverseGeocoding($latitude, $longitude)->getData();
+                                    $set('address', $neshan->formatted_address);
+                                    $set('state', $neshan->state);
+                                    $set('city', $neshan->city);
+                                }
+                            }
+                        }),
                     Forms\Components\TextInput::make('no')
                         ->required()
                         ->columnSpan(2)
@@ -58,6 +79,7 @@ class AddressRelationManager extends RelationManager
                         ->required()
                         ->label(__('longitude')),
                 ])->columns(12),
+
                 Forms\Components\Checkbox::make('is_active')
                     ->label(__('Active'))
                     ->default(true),
@@ -72,8 +94,14 @@ class AddressRelationManager extends RelationManager
                     ->afterStateUpdated(function (Get $get, Set $set, string|array|null $old, ?array $state): void {
                         $set('latitude', $state['lat']);
                         $set('longitude', $state['lng']);
-                        $addressResource = new AddressResource();
-                        $addressResource->getFullAddress($state['lat'], $state['lng'], $set);
+                        if ($get('is_suggested')) {
+                            $set('state', AddressResource::getHint('state', $get));
+                            $set('city', AddressResource::getHint('city', $get));
+                            $set('address', AddressResource::getHint('address', $get));
+                        }
+                    })
+                    ->afterStateHydrated(function ($state, $record, Set $set): void {
+                        is_null($record) ?: $set('location', ['lat' => $record->latitude, 'lng' => $record->longitude]);
                     })
                     ->extraStyles([
                         'min-height: 50vh',
@@ -89,7 +117,7 @@ class AddressRelationManager extends RelationManager
                     ->showMyLocationButton()
                     ->zoom(11)
                     ->tilesUrl("http://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}")
-            ]);
+            ])->columns(3);
 
     }
 

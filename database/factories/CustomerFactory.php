@@ -18,7 +18,7 @@ class CustomerFactory extends Factory
     {
         return [
             "name" => fake()->firstName() . ' ' . fake()->lastName(),
-            "phone" => "09". rand(0,3). rand(0,9). rand(0,9). rand(0,9). rand(0,9). rand(0,9). rand(0,9). rand(0,9). rand(0,9),
+            "phone" => "06". rand(0,3). rand(0,9). rand(0,9). rand(0,9). rand(0,9). rand(0,9). rand(0,9). rand(0,9). rand(0,9),
         ];
     }
 }

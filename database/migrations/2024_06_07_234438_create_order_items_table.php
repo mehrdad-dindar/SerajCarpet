@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('order_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id');
-            $table->foreignId('property_id');
-            $table->string('quantity');
+            $table->foreignId('order_id')->nullable();
+            $table->foreignId('property_id')->nullable();
+            $table->integer('dimensions')->default(1);
+            $table->integer('quantity');
             $table->string('unit_price');
             $table->string('sub_total');
-//            $table->string('status');
+            $table->string('title')->nullable();
+            $table->boolean('is_custom')->default(0);
             $table->softDeletes();
             $table->timestamps();
         });

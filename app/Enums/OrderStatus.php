@@ -14,7 +14,6 @@ enum OrderStatus: string implements HasLabel
     case POST_WASH_REPAIR_SERVICE = 'post_wash_repair_service';
     case READY_FOR_DELIVERY_TO_CUSTOMER = 'ready_for_delivery_to_customer';
     case DELIVERED_AND_PAID = 'delivered_and_paid';
-
     public function getLabel(): ?string
     {
         return match ($this) {
