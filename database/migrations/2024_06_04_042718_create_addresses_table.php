@@ -23,6 +23,7 @@ return new class extends Migration
             $table->text('note')->nullable();
             $table->double('latitude')->nullable();
             $table->double('longitude')->nullable();
+            $table->boolean('is_suggested')->default(false);
             $table->boolean('is_active')->default(false);
             $table->timestamps();
         });

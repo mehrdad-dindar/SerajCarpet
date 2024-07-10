@@ -80,15 +80,38 @@ class OrderResource extends Resource
                                             Forms\Components\TextInput::make('state')
                                                 ->required()
                                                 ->columnSpan(2)
+                                                ->helperText(fn(Get $get) => AddressResource::getHint('state', $get))
                                                 ->label(__('State')),
                                             Forms\Components\TextInput::make('city')
                                                 ->required()
                                                 ->columnSpan(2)
+                                                ->helperText(fn(Get $get) => AddressResource::getHint('city', $get))
                                                 ->label(__('City')),
                                             Forms\Components\TextInput::make('address')
                                                 ->required()
-                                                ->columnSpan(8)
+                                                ->columnSpan(6)
+                                                ->helperText(fn(Get $get) => AddressResource::getHint('address', $get))
                                                 ->label(__('Full Address')),
+                                            Forms\Components\Toggle::make('is_suggested')
+                                                ->onIcon('heroicon-s-sparkles')
+                                                ->offIcon('heroicon-o-star')
+                                                ->inline(false)
+                                                ->reactive()
+                                                ->default(false)
+                                                ->translateLabel()
+                                                ->columnSpan(2)
+                                                ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                                                    if ($state) {
+                                                        $latitude = $get('latitude');
+                                                        $longitude = $get('longitude');
+                                                        if ($latitude && $longitude) {
+                                                            $neshan = AddressResource::reverseGeocoding($latitude, $longitude)->getData();
+                                                            $set('address', $neshan->formatted_address);
+                                                            $set('state', $neshan->state);
+                                                            $set('city', $neshan->city);
+                                                        }
+                                                    }
+                                                }),
                                             Forms\Components\TextInput::make('no')
                                                 ->required()
                                                 ->columnSpan(2)
@@ -107,12 +130,13 @@ class OrderResource extends Resource
                                                 ->required()
                                                 ->label(__('longitude')),
                                         ])->columns(12),
+
                                         Forms\Components\Checkbox::make('is_active')
                                             ->label(__('Active'))
                                             ->default(true),
                                         Map::make('location')
-                                            ->hint('با کشیدن و اسکرول ')
-                                            ->label('Location')
+                                            ->hint('با کشیدن و اسکرول موقعیت مورد نظر را انتخاب کنید')
+                                            ->label(__('Location'))
                                             ->columnSpanFull()
                                             ->default([
                                                 'lat' => 35.699741844984004,
@@ -121,8 +145,14 @@ class OrderResource extends Resource
                                             ->afterStateUpdated(function (Get $get, Set $set, string|array|null $old, ?array $state): void {
                                                 $set('latitude', $state['lat']);
                                                 $set('longitude', $state['lng']);
-                                                $addressResource = new AddressResource();
-                                                $addressResource->getFullAddress($state['lat'], $state['lng'], $set);
+                                                if ($get('is_suggested')) {
+                                                    $set('state', AddressResource::getHint('state', $get));
+                                                    $set('city', AddressResource::getHint('city', $get));
+                                                    $set('address', AddressResource::getHint('address', $get));
+                                                }
+                                            })
+                                            ->afterStateHydrated(function ($state, $record, Set $set): void {
+                                                is_null($record) ?: $set('location', ['lat' => $record->latitude, 'lng' => $record->longitude]);
                                             })
                                             ->extraStyles([
                                                 'min-height: 50vh',
@@ -144,8 +174,7 @@ class OrderResource extends Resource
                                         return $customer->addresses()->create($data)->getKey();
                                     })
                                     ->searchable()
-                                    ->preload()
-//                                    ->requiredWithout(['address.state', 'address.city', 'address.address', 'address.lat', 'address.lng', 'address.is_active']),
+                                    ->preload(),
                             ])->columns()->icon('heroicon-o-user'),
                         Forms\Components\Section::make('موارد سفارش')
                             ->schema([
@@ -163,15 +192,41 @@ class OrderResource extends Resource
                                             ->translateLabel()
                                             ->required()
                                             ->reactive()
+                                            ->helperText(fn(Get $get) => Property::find($get('property_id'))->helperText ?? '')
                                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                                $set('sub_total', $get('quantity') * Property::find($state)->price);
+                                                $set('sub_total', ((int)$get('dimensions') ?? 1) * $get('quantity') * Property::find($state)->price);
                                                 $set('unit_price', Property::find($state)->price);
                                             })
                                             ->relationship('property', 'fullTitle')
                                             ->getOptionLabelFromRecordUsing(function (Property $property) {
                                                 return $property->fullTitle;
                                             })
-                                            ->columnSpan(5),
+                                            ->columnSpan(3),
+                                        Forms\Components\Select::make('dimensions')
+                                            ->options(function ($state, Get $get) {
+                                                if ($propertyId = $get('property_id')) {
+                                                    $dimensions = Property::find($propertyId)->dimensions ?? [];
+                                                    return array_combine($dimensions, $dimensions);
+                                                }
+                                                return [];
+                                            })
+                                            ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                                $set('sub_total', ((int)$get('dimensions') ?? 1) * $get('quantity') * Property::find($get('property_id'))->price);
+                                                $set('unit_price', Property::find($get('property_id'))->price);
+                                            })
+                                            ->translateLabel()
+                                            ->live()
+                                            ->hidden(function ($get, $set) {
+                                                $propertyId = $get('property_id');
+                                                $property = $propertyId ? Property::find($propertyId) : null;
+
+                                                if (!$propertyId || !$property || !$property->dimensions) {
+                                                    $set('dimensions', 1);
+                                                    return true;
+                                                }
+                                                return false;
+                                            })
+                                            ->columnSpan(2),
                                         Forms\Components\TextInput::make('quantity')
                                             ->label(__("Quantity"))
                                             ->translateLabel()
@@ -180,8 +235,9 @@ class OrderResource extends Resource
                                             ->minValue(1)
                                             ->reactive()
                                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                                $set('sub_total', $state * Property::find($get("property_id"))->price);
-                                                $set('unit_price', Property::find($get("property_id"))->price);
+                                                $price = Property::find($get("property_id"))->price;
+                                                $set('sub_total', ((int)$get('dimensions') ?? 1) * $state * $price);
+                                                $set('unit_price', $price);
                                             })
                                             ->columnSpan(2)
                                             ->required(),
@@ -193,12 +249,68 @@ class OrderResource extends Resource
                                             ->translateLabel()
                                             ->integer()
                                             ->required()
-                                            ->columnSpan(5)
+                                            ->columnSpan(4)
                                             ->mask(RawJs::make("\$money(\$input)"))
                                             ->suffix('تومان')
                                             ->stripCharacters('.')
                                             ->mutateStateForValidationUsing(fn($state) => str_replace(',', '', $state))
                                             ->mutateDehydratedStateUsing(fn($state) => str_replace(',', '', $state)),
+                                    ])
+                                    ->columnSpanFull(),
+                                Forms\Components\Repeater::make('other_items')
+                                    ->label(__('Other Items'))
+                                    ->translateLabel()
+                                    ->relationship()
+                                    ->defaultItems(0)
+                                    ->hiddenLabel()
+                                    ->columns(12)
+                                    ->schema([
+                                        Forms\Components\Hidden::make('is_custom')->default(1),
+                                        Forms\Components\TextInput::make('title')
+                                            ->columnSpan(4),
+                                        Forms\Components\TextInput::make('quantity')
+                                            ->label(__("Quantity"))
+                                            ->translateLabel()
+                                            ->numeric()
+                                            ->default(1)
+                                            ->minValue(1)
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                                if ($price = str_replace(',', '',$get('unit_price'))) {
+                                                    $set('sub_total', (int)$state * (int)$price);
+                                                }
+                                            })
+                                            ->columnSpan(2)
+                                            ->required(),
+                                        Forms\Components\TextInput::make('unit_price')
+                                            ->label(__("Unit Price"))
+                                            ->columnSpan(3)
+                                            ->mask(RawJs::make("\$money(\$input)"))
+                                            ->suffix('تومان')
+                                            ->stripCharacters('.')
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                                if ($price = str_replace(',', '',$state)) {
+                                                    $set('sub_total',number_format((int)$get('quantity') * (int)$price));
+                                                    $set('unit_price', number_format($price));
+                                                }
+                                            })
+                                            ->mutateStateForValidationUsing(fn($state) => str_replace(',', '', $state))
+                                            ->mutateDehydratedStateUsing(fn($state) => str_replace(',', '', $state)),
+                                        Forms\Components\TextInput::make('sub_total')
+                                            ->label(__("Sub Total Price"))
+                                            ->readOnly()
+                                            ->dehydrated()
+                                            ->translateLabel()
+                                            ->integer()
+                                            ->required()
+                                            ->columnSpan(3)
+                                            ->mask(RawJs::make("\$money(\$input)"))
+                                            ->suffix('تومان')
+                                            ->stripCharacters('.')
+                                            ->mutateStateForValidationUsing(fn($state) => str_replace(',', '', $state))
+                                            ->mutateDehydratedStateUsing(fn($state) => str_replace(',', '', $state)),
+
                                     ])
                                     ->columnSpanFull(),
                             ])->icon('heroicon-o-list-bullet')
@@ -238,7 +350,7 @@ class OrderResource extends Resource
                                 Forms\Components\Fieldset::make('تنظیم تاریخ رزرو')
 //                                    ->hidden(fn(Get $get): bool => $get('status') != OrderStatus::RESERVED)
                                     ->visible(
-                                        fn(Get $get): bool => $get('status') == OrderStatus::RESERVED
+                                        fn(Get $get): bool => (is_object($get('status')) ? $get('status')->value : $get('status')) == OrderStatus::RESERVED->value
                                     )
                                     ->schema([
                                         Forms\Components\DateTimePicker::make('reserved_for')
@@ -257,25 +369,34 @@ class OrderResource extends Resource
                         Forms\Components\Section::make('قیمت کل')
                             ->schema([
                                 Forms\Components\Hidden::make('total')
-                                    ->mutateDehydratedStateUsing(fn(Get $get) => self::calculateTotal($get('items'))),
+                                    ->mutateDehydratedStateUsing(fn(Get $get) => self::calculateTotal($get)),
                                 Forms\Components\Placeholder::make('order_total')
                                     ->label(__('Order Total'))
                                     ->reactive()
-                                    ->content(fn(Get $get): ?string => number_format(self::calculateTotal($get('items')), 0) . ' تومان')
+                                    ->content(fn(Get $get): ?string => number_format(self::calculateTotal($get), 0) . ' تومان')
                             ])
                     ])
             ])->columns(3);
     }
 
-    private static function calculateTotal($items): int
+    private static function calculateTotal($data): int
     {
+        $items = array_merge($data('items') , $data('other_items'));
         $total = 0;
         foreach ($items as $item) {
+            $dimensions = 1 ;
+                if (isset($item['dimensions'])){
+                    $dimensions = (int)$item['dimensions'] ?? 1;
+                }
             $quantity = (int)$item['quantity'] ?? 0;
-            $unitPrice = (int)$item['unit_price'] ?? 0;
-            $total += $quantity * $unitPrice;
+            $unitPrice = (int)str_replace(',', '',$item['unit_price']);
+            $total += $dimensions * $quantity * $unitPrice;
         }
-        return $total;
+        if ($total) {
+            return $total;
+        } else {
+            return 1;
+        }
     }
 
     public static function table(Table $table): Table
@@ -301,11 +422,12 @@ class OrderResource extends Resource
                     ->translateLabel()
                     ->sortable()
                     ->badge()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->formatStateUsing(fn(string $state): string => OrderStatus::from($state)->getLabel()),
                 Tables\Columns\TextColumn::make('items_count')
                     ->sortable()
                     ->translateLabel()
-                    ->label('Item Count')
+                    ->label('Order Item Count')
                     ->toggleable()
                     ->alignCenter()
                     ->counts('items'),
@@ -324,15 +446,7 @@ class OrderResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
-                    ->options([
-                        "pending" => "در انتظار پرداخت",
-                        "paid" => "پرداخت شده",
-                        "cancel" => "لغو شده",
-                        "reject" => "رد شده",
-                        "processing" => "در حال انجام",
-                        "on_delivery" => "در حال ارسال",
-                        "delivered" => "تحویل شده",
-                    ])
+                    ->options(OrderStatus::class)
                     ->label(__('Status')),
             ])
             ->actions([

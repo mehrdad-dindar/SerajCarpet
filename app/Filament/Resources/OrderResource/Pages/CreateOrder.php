@@ -27,4 +27,9 @@ class CreateOrder extends CreateRecord
             info($e->getMessage());
         }
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }
