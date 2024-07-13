@@ -333,7 +333,7 @@ class OrderResource extends Resource
                                         "6" => "پرداخت",
                                         "7" => "کاور",
                                     ])
-                                    ->default(['1', '7'])
+                                    ->default(['1', '2', '7'])
                                     ->native()
                                     ->required(),
                             ]),
@@ -440,6 +440,10 @@ class OrderResource extends Resource
                     ->sortable()
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->translateLabel()
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('reserved_for')
                     ->translateLabel()
                     ->sortable()
                     ->toggleable()
