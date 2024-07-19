@@ -39,3 +39,13 @@ Route::get('/set-location/{id}', function ($id) {
 
 Route::post('neshan', [CustomerController::class, 'getFullAddress'])->name('getFullAddress');
 Route::post('create_address', [CustomerController::class, 'createAddress'])->name('create.address');
+
+
+
+
+Route::get('/login-phone', [\App\Http\Controllers\AuthController::class, 'loginPhone'])->name('loginPhone');
+Route::post('/login-phone', [\App\Http\Controllers\AuthController::class, 'doLoginPhone'])->name('doLoginPhone');
+Route::get('/verify', [\App\Http\Controllers\AuthController::class, 'verify'])->name('verify');
+Route::post('/doVerify', [\App\Http\Controllers\AuthController::class, 'doVerify'])->name('doVerify');
+
+

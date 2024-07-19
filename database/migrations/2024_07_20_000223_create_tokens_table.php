@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customers', function (Blueprint $table) {
+        Schema::create('tokens', function (Blueprint $table) {
             $table->id();
-            $table->string("name")->nullable();
-            $table->string('id_name')->virtualAs('concat(phone, \' \', name)')->nullable();
-            $table->string("phone")->unique();
+            $table->string('code', 4);
+            $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
+            $table->boolean('used')->default(false);
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('customers');
+        Schema::dropIfExists('tokens');
     }
 };

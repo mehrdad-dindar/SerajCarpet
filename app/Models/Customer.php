@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class Customer extends Model
+class Customer extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     protected $guarded;
 
@@ -25,5 +27,15 @@ class Customer extends Model
             get: fn (string $value) => verta($value)->format('d F Y - H:i'),
         );
 
+    }
+
+    /**
+     * Retrieve the tokens associated with this instance.
+     *
+     * @return HasMany
+     */
+    public function tokens(): HasMany
+    {
+        return $this->hasMany(Token::class);
     }
 }
