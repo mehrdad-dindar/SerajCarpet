@@ -8,15 +8,19 @@ use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Models\Address;
 use App\Models\Customer;
+use App\Models\Driver;
 use App\Models\Order;
 use App\Models\Property;
 use Dotswan\MapPicker\Fields\Map;
+use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Support\Colors\Color;
 use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -35,6 +39,115 @@ class OrderResource extends Resource
     protected static ?string $pluralModelLabel = "سفارش ها";
     protected static ?string $modelLabel = 'سفارش';
     protected static ?int $navigationSort = 1;
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->defaultSort('created_at', 'desc')
+            ->columns([
+                Tables\Columns\TextColumn::make('id')
+                    ->label('ID')
+                    ->searchable()
+                    ->translateLabel(),
+                Tables\Columns\TextColumn::make('customer.name')
+                    ->label('Name')
+                    ->searchable()
+                    ->translateLabel()
+                    ->url(function (Model $record): string {
+                        return route('filament.admin.resources.customers.edit', $record->customer_id);
+                    })
+                    ->alignCenter()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->translateLabel()
+                    ->sortable()
+                    ->badge()
+                    ->color(fn(string $state): string => OrderStatus::from($state)->getColor())
+                    ->toggleable()
+                    ->formatStateUsing(fn(string $state): string => OrderStatus::from($state)->getLabel()),
+                Tables\Columns\TextColumn::make('items_count')
+                    ->sortable()
+                    ->translateLabel()
+                    ->label('Order Item Count')
+                    ->toggleable()
+                    ->alignCenter()
+                    ->counts('items'),
+                Tables\Columns\TextColumn::make('total')
+                    ->formatStateUsing(function ($state) {
+                        return number_format($state, 0) . ' تومان';
+                    })
+                    ->badge()
+                    ->translateLabel()
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->translateLabel()
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('reserved_for')
+                    ->translateLabel()
+                    ->sortable()
+                    ->toggleable()
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('status')
+                    ->options(OrderStatus::class)
+                    ->label(__('Status')),
+            ])
+            ->actions([
+                Tables\Actions\ActionGroup::make([
+                    Action::make('set_driver')
+                        ->label(__('Set Driver'))
+                        ->icon('heroicon-o-arrows-right-left')
+                        ->form([
+                            Forms\Components\Select::make('status')
+                                ->label(__('Order Status'))
+                                ->hiddenLabel()
+                                ->options(OrderStatus::class)
+                                ->default(OrderStatus::RESERVED)
+                                ->live()
+                                ->required(),
+                        ])
+                        ->action(function (Order $record, array $data) {
+                            $record->driver_id = $data['driver_id'];
+                            $record->save();
+                            Notification::make()
+                                ->title($record->driver_id ? __('Driver Assigned') : __('Driver Unassigned'))
+                                ->body('yesss')
+                                ->success();
+                        }),
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                    Action::make('set_driver')
+                        ->label(__('Set Driver'))
+                        ->icon('heroicon-o-arrows-right-left')
+                        ->form([
+                            Forms\Components\Select::make('status')
+                                ->label(__('Order Status'))
+                                ->hiddenLabel()
+                                ->options(OrderStatus::class)
+                                ->default(OrderStatus::RESERVED)
+                                ->live()
+                                ->required(),
+                        ])
+                        ->action(function ($record, array $data) {
+                            $record->driver_id = $data['driver_id'];
+                            $record->save();
+                            Notification::make()
+                                ->title($record->driver_id ? __('Driver Assigned') : __('Driver Unassigned'))
+                                ->body('yesss')
+                                ->success();
+                        })
+                ]),
+            ]);
+    }
 
     public static function form(Form $form): Form
     {
@@ -276,7 +389,7 @@ class OrderResource extends Resource
                                             ->minValue(1)
                                             ->reactive()
                                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                                if ($price = str_replace(',', '',$get('unit_price'))) {
+                                                if ($price = str_replace(',', '', $get('unit_price'))) {
                                                     $set('sub_total', (int)$state * (int)$price);
                                                 }
                                             })
@@ -290,8 +403,8 @@ class OrderResource extends Resource
                                             ->stripCharacters('.')
                                             ->reactive()
                                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                                if ($price = str_replace(',', '',$state)) {
-                                                    $set('sub_total',number_format((int)$get('quantity') * (int)$price));
+                                                if ($price = str_replace(',', '', $state)) {
+                                                    $set('sub_total', number_format((int)$get('quantity') * (int)$price));
                                                     $set('unit_price', number_format($price));
                                                 }
                                             })
@@ -381,15 +494,15 @@ class OrderResource extends Resource
 
     private static function calculateTotal($data): int
     {
-        $items = array_merge($data('items') , $data('other_items'));
+        $items = array_merge($data('items'), $data('other_items'));
         $total = 0;
         foreach ($items as $item) {
-            $dimensions = 1 ;
-                if (isset($item['dimensions'])){
-                    $dimensions = (int)$item['dimensions'] ?? 1;
-                }
+            $dimensions = 1;
+            if (isset($item['dimensions'])) {
+                $dimensions = (int)$item['dimensions'] ?? 1;
+            }
             $quantity = (int)$item['quantity'] ?? 0;
-            $unitPrice = (int)str_replace(',', '',$item['unit_price']);
+            $unitPrice = (int)str_replace(',', '', $item['unit_price']);
             $total += $dimensions * $quantity * $unitPrice;
         }
         if ($total) {
@@ -397,74 +510,6 @@ class OrderResource extends Resource
         } else {
             return 1;
         }
-    }
-
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->defaultSort('created_at', 'desc')
-            ->columns([
-                Tables\Columns\TextColumn::make('id')
-                    ->label('ID')
-                    ->searchable()
-                    ->translateLabel(),
-                Tables\Columns\TextColumn::make('customer.name')
-                    ->label('Name')
-                    ->searchable()
-                    ->translateLabel()
-                    ->url(function (Model $record): string {
-                        return route('filament.admin.resources.customers.edit', $record->customer_id);
-                    })
-                    ->alignCenter()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('status')
-                    ->label('Status')
-                    ->translateLabel()
-                    ->sortable()
-                    ->badge()
-                    ->toggleable()
-                    ->formatStateUsing(fn(string $state): string => OrderStatus::from($state)->getLabel()),
-                Tables\Columns\TextColumn::make('items_count')
-                    ->sortable()
-                    ->translateLabel()
-                    ->label('Order Item Count')
-                    ->toggleable()
-                    ->alignCenter()
-                    ->counts('items'),
-                Tables\Columns\TextColumn::make('total')
-                    ->formatStateUsing(function ($state) {
-                        return number_format($state, 0) . ' تومان';
-                    })
-                    ->badge()
-                    ->translateLabel()
-                    ->sortable()
-                    ->toggleable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->translateLabel()
-                    ->sortable()
-                    ->toggleable(),
-                Tables\Columns\TextColumn::make('reserved_for')
-                    ->translateLabel()
-                    ->sortable()
-                    ->toggleable()
-            ])
-            ->filters([
-                Tables\Filters\SelectFilter::make('status')
-                    ->options(OrderStatus::class)
-                    ->label(__('Status')),
-            ])
-            ->actions([
-                Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
-                    Tables\Actions\EditAction::make(),
-                    Tables\Actions\DeleteAction::make(),
-                ])
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
     }
 
     public static function getRelations(): array

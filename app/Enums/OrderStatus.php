@@ -28,4 +28,18 @@ enum OrderStatus: string implements HasLabel
             default => 'وضعیت نامشخص',
         };
     }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::RESERVED => 'primary',
+            self::IN_WAITING_LIST => 'warning',
+            self::CARPETS_RECEIVED => 'info',
+            self::PRE_WASH_REPAIR_SERVICE => 'warning',
+            self::SENT_TO_FACTORY_FOR_WASHING => 'success',
+            self::POST_WASH_REPAIR_SERVICE => 'danger',
+            self::READY_FOR_DELIVERY_TO_CUSTOMER => 'success',
+            self::DELIVERED_AND_PAID => 'success',
+        };
+    }
 }

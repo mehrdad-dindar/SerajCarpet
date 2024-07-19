@@ -15,6 +15,10 @@
     "Service Name" : "عنوان خدمت",
     "Customer Name" : "نام مشتری",
     "Customer Phone" : "شماره تماس",
+    "Phone" : "موبایل",
+    "License" : "مجوز",
+    "Image" : "تصویر",
+    "Car tag" : "پلاک خودرو",
     "Seraj" : "سراج",
     "ID" : "شناسه",
     "Status" : "وضعیت",
@@ -48,5 +52,6 @@
     "takhte" : "تخته",
     "reserved" : "رزرو شده",
     "Dimensions" : "ابعاد",
+    "Set Driver" : "تنظیم راننده",
     "Customer" : "مشتری"
 }
