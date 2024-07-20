@@ -14,7 +14,15 @@ class Customer extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $guarded;
+    protected $guarded = [];
+
+    protected $hidden = [
+        'password', 'remember_token',
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
 
     public function addresses (): HasMany
     {

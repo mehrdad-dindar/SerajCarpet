@@ -6,12 +6,17 @@ use App\Http\Requests\AuthRequest;
 use App\Models\Customer;
 use App\Models\Token;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
     public function loginPhone()
     {
-        return view('auth.phone-login');
+        if (!auth()->check()) {
+            return view('auth.phone-login');
+        }
+        return redirect()->route("customer.panel.index");
     }
 
     public function doLoginPhone(AuthRequest $request)
@@ -46,20 +51,15 @@ class AuthController extends Controller
 
     public function doVerify(Request $request)
     {
-        /*$this->validate($request, [
-            'code' => 'required|numeric'
-        ]);*/
+        $this->validator($request->all())->validate();
 
         if (!session()->has('code_id') || !session()->has('customer_id'))
             redirect()->route('loginPhone');
 
         $token = Token::where('customer_id', session()->get('customer_id'))->find(session()->get('code_id'));
-//        dd(session()->get('code_id'),session()->get('customer_id'));
 
         if (!$token || empty($token->id))
             redirect()->route('loginPhone');
-
-
         if (!$token->isValid())
             redirect()->back()->withErrors('The code is either expired or used.');
 
@@ -72,8 +72,15 @@ class AuthController extends Controller
 
         $customer = Customer::find(session()->get('customer_id'));
         $rememberMe = session()->get('remember');
-        auth()->login($customer, $rememberMe);
-        return redirect()->route('index');
+//        auth()->login($customer, $rememberMe);
+        Auth::guard('customer')->login($customer, $rememberMe);
+        return redirect()->route('customer.panel.index');
     }
 
+    protected function validator(array $data)
+    {
+        return Validator::make($data, [
+            'code' => ['required', 'numeric']
+        ]);
+    }
 }

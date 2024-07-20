@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Models\Customer;
 use Hashids\Hashids;
 use Illuminate\Support\Facades\Hash;
@@ -47,5 +49,6 @@ Route::get('/login-phone', [\App\Http\Controllers\AuthController::class, 'loginP
 Route::post('/login-phone', [\App\Http\Controllers\AuthController::class, 'doLoginPhone'])->name('doLoginPhone');
 Route::get('/verify', [\App\Http\Controllers\AuthController::class, 'verify'])->name('verify');
 Route::post('/doVerify', [\App\Http\Controllers\AuthController::class, 'doVerify'])->name('doVerify');
-
-
+Route::middleware(['auth:customer'])->prefix('panel')->group(function (){
+    Route::get('/', [CustomerDashboardController::class, 'index'])->name('customer.panel.index');
+});
