@@ -1,5 +1,4 @@
 <x-layouts.base>
-    @dd(Request::is('rtl'))
     @auth
         @if (Request::is('static-sign-up'))
             <div class="flex flex-wrap -mx-3">
@@ -20,7 +19,7 @@
             {{ $slot }}
             @include('layouts.footers.guest.footer')
         @else
-            @if (Request::is('rtl'))
+            @if (true) {{--Request::is('rtl')--}}
                 @include('layouts.navbars.auth.sidebar')
                 <main class="ease-soft-in-out xl:mr-68.5 relative h-full max-h-screen rounded-xl transition-all duration-200">
                     @include('layouts.navbars.auth.nav')

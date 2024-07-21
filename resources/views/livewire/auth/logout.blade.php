@@ -1,3 +1,4 @@
-<div>
-    {{-- If your happiness depends on money, you will never be happy with yourself. --}}
+<div wire:click='logout'>
+    <span class="hidden sm:inline">{{ __("Log out") }}</span>
+    <i class="fa fa-user sm:mr-1"></i>
 </div>

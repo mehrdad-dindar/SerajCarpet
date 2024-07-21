@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string("name")->nullable();
             $table->string('id_name')->virtualAs('concat(phone, \' \', name)')->nullable();
             $table->string("phone")->unique();
+            $table->rememberToken();
             $table->timestamps();
         });
     }
