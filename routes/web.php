@@ -1,10 +1,14 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
+use App\Livewire\Panel;
 use App\Models\Customer;
 use Hashids\Hashids;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\RoutePath;
 
 Route::get('/', function () {
     return redirect("/admin");
@@ -39,3 +43,14 @@ Route::get('/set-location/{id}', function ($id) {
 
 Route::post('neshan', [CustomerController::class, 'getFullAddress'])->name('getFullAddress');
 Route::post('create_address', [CustomerController::class, 'createAddress'])->name('create.address');
+
+
+Route::middleware(['guest'])->group(function () {
+    Route::get('login-phone', [AuthController::class, 'loginPhone'])->name('login');
+    Route::post('login-phone', [AuthController::class, 'doLoginPhone'])->name('doLoginPhone');
+    Route::get('verify', [AuthController::class, 'verify'])->name('verify');
+    Route::post('doVerify', [AuthController::class, 'doVerify'])->name('doVerify');
+});
+Route::middleware(['auth:customer'])->prefix('panel')->group(function () {
+    Route::get('/', Panel::class)->name('customer.panel.index');
+});

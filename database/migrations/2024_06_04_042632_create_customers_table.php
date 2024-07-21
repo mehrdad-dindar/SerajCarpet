@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->string("name");
-            $table->string('id_name')->virtualAs('concat(phone, \' \', name)');
+            $table->string("name")->nullable();
+            $table->string('id_name')->virtualAs('concat(phone, \' \', name)')->nullable();
             $table->string("phone")->unique();
+            $table->rememberToken();
             $table->timestamps();
         });
     }
