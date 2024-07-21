@@ -50,7 +50,7 @@
     <!-- Main Styling -->
     <link href="{{ asset('panel/css/styles.css') }}?v=1.0.3" rel="stylesheet"/>
 
-    @vite('resources/css/app.css')
+    @vite('resources/css/customer.css')
 
     @livewireStyles
 </head>
