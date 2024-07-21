@@ -119,7 +119,7 @@
                             <li class="relative block px-0 py-2 bg-white border-0 rounded-t-lg text-inherit">
                                 <div class="min-h-6 mb-0.5 block pl-0">
                                     <input id="follow"
-                                           class="mt-0.54 rounded-10 duration-250 ease-soft-in-out after:rounded-circle after:shadow-soft-2xl after:duration-250 checked:after:translate-x-5.25 h-5-em relative float-left ml-auto w-10 cursor-pointer appearance-none border border-solid border-gray-200 bg-slate-800/10 bg-none bg-contain bg-left bg-no-repeat align-top transition-all after:absolute after:top-px after:h-4 after:w-4 after:translate-x-px after:bg-white after:content-[''] checked:border-slate-800/95 checked:bg-slate-800/95 checked:bg-none checked:bg-right" type="checkbox" checked />
+                                           class="mt-0.54 rounded-[2.5rem] duration-250 ease-soft-in-out after:rounded-circle after:shadow-soft-2xl after:duration-250 checked:after:translate-x-5.25 h-5-em relative float-left ml-auto w-10 cursor-pointer appearance-none border border-solid border-gray-200 bg-slate-800/10 bg-none bg-contain bg-left bg-no-repeat align-top transition-all after:absolute after:top-px after:h-4 after:w-4 after:translate-x-px after:bg-white after:content-[''] checked:border-slate-800/95 checked:bg-slate-800/95 checked:bg-none checked:bg-right" type="checkbox" checked />
                                     <label for=" follow"
                                            class="w-4/5 mb-0 ml-4 overflow-hidden font-normal cursor-pointer select-none text-size-sm text-ellipsis whitespace-nowrap text-slate-500"
                                            for="flexSwitchCheckDefault">Email me when someone follows me</label>
@@ -128,7 +128,7 @@
                             <li class="relative block px-0 py-2 bg-white border-0 text-inherit">
                                 <div class="min-h-6 mb-0.5 block pl-0">
                                     <input id="answer"
-                                           class="mt-0.54 rounded-10 duration-250 ease-soft-in-out after:rounded-circle after:shadow-soft-2xl after:duration-250 checked:after:translate-x-5.25 h-5-em relative float-left ml-auto w-10 cursor-pointer appearance-none border border-solid border-gray-200 bg-slate-800/10 bg-none bg-contain bg-left bg-no-repeat align-top transition-all after:absolute after:top-px after:h-4 after:w-4 after:translate-x-px after:bg-white after:content-[''] checked:border-slate-800/95 checked:bg-slate-800/95 checked:bg-none checked:bg-right"
+                                           class="mt-0.54 rounded-[2.5rem] duration-250 ease-soft-in-out after:rounded-circle after:shadow-soft-2xl after:duration-250 checked:after:translate-x-5.25 h-5-em relative float-left ml-auto w-10 cursor-pointer appearance-none border border-solid border-gray-200 bg-slate-800/10 bg-none bg-contain bg-left bg-no-repeat align-top transition-all after:absolute after:top-px after:h-4 after:w-4 after:translate-x-px after:bg-white after:content-[''] checked:border-slate-800/95 checked:bg-slate-800/95 checked:bg-none checked:bg-right"
                                            type="checkbox" />
                                     <label for="answer"
                                            class="w-4/5 mb-0 ml-4 overflow-hidden font-normal cursor-pointer select-none text-size-sm text-ellipsis whitespace-nowrap text-slate-500"
@@ -138,7 +138,7 @@
                             <li class="relative block px-0 py-2 bg-white border-0 rounded-b-lg text-inherit">
                                 <div class="min-h-6 mb-0.5 block pl-0">
                                     <input id="mention"
-                                           class="mt-0.54 rounded-10 duration-250 ease-soft-in-out after:rounded-circle after:shadow-soft-2xl after:duration-250 checked:after:translate-x-5.25 h-5-em relative float-left ml-auto w-10 cursor-pointer appearance-none border border-solid border-gray-200 bg-slate-800/10 bg-none bg-contain bg-left bg-no-repeat align-top transition-all after:absolute after:top-px after:h-4 after:w-4 after:translate-x-px after:bg-white after:content-[''] checked:border-slate-800/95 checked:bg-slate-800/95 checked:bg-none checked:bg-right"
+                                           class="mt-0.54 rounded-[2.5rem] duration-250 ease-soft-in-out after:rounded-circle after:shadow-soft-2xl after:duration-250 checked:after:translate-x-5.25 h-5-em relative float-left ml-auto w-10 cursor-pointer appearance-none border border-solid border-gray-200 bg-slate-800/10 bg-none bg-contain bg-left bg-no-repeat align-top transition-all after:absolute after:top-px after:h-4 after:w-4 after:translate-x-px after:bg-white after:content-[''] checked:border-slate-800/95 checked:bg-slate-800/95 checked:bg-none checked:bg-right"
                                            type="checkbox" checked />
                                     <label for="mention"
                                            class="w-4/5 mb-0 ml-4 overflow-hidden font-normal cursor-pointer select-none text-size-sm text-ellipsis whitespace-nowrap text-slate-500"
@@ -151,7 +151,7 @@
                             <li class="relative block px-0 py-2 bg-white border-0 rounded-t-lg text-inherit">
                                 <div class="min-h-6 mb-0.5 block pl-0">
                                     <input id="launches projects"
-                                           class="mt-0.54 rounded-10 duration-250 ease-soft-in-out after:rounded-circle after:shadow-soft-2xl after:duration-250 checked:after:translate-x-5.25 h-5-em relative float-left ml-auto w-10 cursor-pointer appearance-none border border-solid border-gray-200 bg-slate-800/10 bg-none bg-contain bg-left bg-no-repeat align-top transition-all after:absolute after:top-px after:h-4 after:w-4 after:translate-x-px after:bg-white after:content-[''] checked:border-slate-800/95 checked:bg-slate-800/95 checked:bg-none checked:bg-right"
+                                           class="mt-0.54 rounded-[2.5rem] duration-250 ease-soft-in-out after:rounded-circle after:shadow-soft-2xl after:duration-250 checked:after:translate-x-5.25 h-5-em relative float-left ml-auto w-10 cursor-pointer appearance-none border border-solid border-gray-200 bg-slate-800/10 bg-none bg-contain bg-left bg-no-repeat align-top transition-all after:absolute after:top-px after:h-4 after:w-4 after:translate-x-px after:bg-white after:content-[''] checked:border-slate-800/95 checked:bg-slate-800/95 checked:bg-none checked:bg-right"
                                            type="checkbox" />
                                     <label for="launches projects"
                                            class="w-4/5 mb-0 ml-4 overflow-hidden font-normal cursor-pointer select-none text-size-sm text-ellipsis whitespace-nowrap text-slate-500"
@@ -161,7 +161,7 @@
                             <li class="relative block px-0 py-2 bg-white border-0 text-inherit">
                                 <div class="min-h-6 mb-0.5 block pl-0">
                                     <input id="product updates"
-                                           class="mt-0.54 rounded-10 duration-250 ease-soft-in-out after:rounded-circle after:shadow-soft-2xl after:duration-250 checked:after:translate-x-5.25 h-5-em relative float-left ml-auto w-10 cursor-pointer appearance-none border border-solid border-gray-200 bg-slate-800/10 bg-none bg-contain bg-left bg-no-repeat align-top transition-all after:absolute after:top-px after:h-4 after:w-4 after:translate-x-px after:bg-white after:content-[''] checked:border-slate-800/95 checked:bg-slate-800/95 checked:bg-none checked:bg-right"
+                                           class="mt-0.54 rounded-[2.5rem] duration-250 ease-soft-in-out after:rounded-circle after:shadow-soft-2xl after:duration-250 checked:after:translate-x-5.25 h-5-em relative float-left ml-auto w-10 cursor-pointer appearance-none border border-solid border-gray-200 bg-slate-800/10 bg-none bg-contain bg-left bg-no-repeat align-top transition-all after:absolute after:top-px after:h-4 after:w-4 after:translate-x-px after:bg-white after:content-[''] checked:border-slate-800/95 checked:bg-slate-800/95 checked:bg-none checked:bg-right"
                                            type="checkbox" checked />
                                     <label for="product updates"
                                            class="w-4/5 mb-0 ml-4 overflow-hidden font-normal cursor-pointer select-none text-size-sm text-ellipsis whitespace-nowrap text-slate-500"
@@ -171,7 +171,7 @@
                             <li class="relative block px-0 py-2 pb-0 bg-white border-0 rounded-b-lg text-inherit">
                                 <div class="min-h-6 mb-0.5 block pl-0">
                                     <input id="subscribe"
-                                           class="mt-0.54 rounded-10 duration-250 ease-soft-in-out after:rounded-circle after:shadow-soft-2xl after:duration-250 checked:after:translate-x-5.25 h-5-em relative float-left ml-auto w-10 cursor-pointer appearance-none border border-solid border-gray-200 bg-slate-800/10 bg-none bg-contain bg-left bg-no-repeat align-top transition-all after:absolute after:top-px after:h-4 after:w-4 after:translate-x-px after:bg-white after:content-[''] checked:border-slate-800/95 checked:bg-slate-800/95 checked:bg-none checked:bg-right"
+                                           class="mt-0.54 rounded-[2.5rem] duration-250 ease-soft-in-out after:rounded-circle after:shadow-soft-2xl after:duration-250 checked:after:translate-x-5.25 h-5-em relative float-left ml-auto w-10 cursor-pointer appearance-none border border-solid border-gray-200 bg-slate-800/10 bg-none bg-contain bg-left bg-no-repeat align-top transition-all after:absolute after:top-px after:h-4 after:w-4 after:translate-x-px after:bg-white after:content-[''] checked:border-slate-800/95 checked:bg-slate-800/95 checked:bg-none checked:bg-right"
                                            type="checkbox" />
                                     <label for="subscribe"
                                            class="w-4/5 mb-0 ml-4 overflow-hidden font-normal cursor-pointer select-none text-size-sm text-ellipsis whitespace-nowrap text-slate-500"
@@ -424,7 +424,7 @@
                                                 <a href="javascript:;"
                                                    class="relative z-20 inline-flex items-center justify-center w-6 h-6 text-white transition-all duration-200 border-2 border-white border-solid ease-soft-in-out text-size-xs rounded-circle hover:z-30"
                                                    data-target="tooltip_trigger" data-placement="bottom">
-                                                    <img class="w-full rounded-circle" alt="Image placeholder" src="{{ asset("anel/img/team-3.jpg") }}" />
+                                                    <img class="w-full rounded-circle" alt="Image placeholder" src="{{ asset("panel/img/team-3.jpg") }}" />
                                                 </a>
                                                 <div data-target="tooltip" class="hidden px-2 py-1 text-white bg-black rounded-lg text-size-sm"
                                                      role="tooltip">

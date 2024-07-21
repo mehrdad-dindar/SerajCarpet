@@ -39,10 +39,10 @@ if (pageName != "rtl") {
     fixedPluginCard.classList.toggle("right-0");
   });
 
-  fixedPluginButtonNav.addEventListener("click", function () {
+  /*fixedPluginButtonNav.addEventListener("click", function () {
     fixedPluginCard.classList.toggle("-right-90");
     fixedPluginCard.classList.toggle("right-0");
-  });
+  });*/
 
   fixedPluginCloseButton.addEventListener("click", function () {
     fixedPluginCard.classList.toggle("-right-90");
@@ -62,10 +62,10 @@ if (pageName != "rtl") {
     fixedPluginCard.classList.toggle("left-0");
   });
 
-  fixedPluginButtonNav.addEventListener("click", function () {
+  /*fixedPluginButtonNav.addEventListener("click", function () {
     fixedPluginCard.classList.toggle("-left-90");
     fixedPluginCard.classList.toggle("left-0");
-  });
+  });*/
 
   fixedPluginCloseButton.addEventListener("click", function () {
     fixedPluginCard.classList.toggle("-left-90");
