@@ -2,13 +2,11 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
-use App\Livewire\Panel;
+use App\Livewire\Customer\Panel;
+use App\Livewire\Customer\Profile;
 use App\Models\Customer;
 use Hashids\Hashids;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\RoutePath;
 
 Route::get('/', function () {
     return redirect("/admin");
@@ -53,4 +51,5 @@ Route::middleware(['guest'])->group(function () {
 });
 Route::middleware(['auth:customer'])->prefix('panel')->group(function () {
     Route::get('/', Panel::class)->name('customer.panel.index');
+    Route::get('/profile', Profile::class)->name('customer.panel.profile');
 });
