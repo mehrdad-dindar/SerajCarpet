@@ -19,8 +19,8 @@
                         <p class="mb-0 font-semibold leading-normal text-size-sm">CEO / Co-Founder</p>
                     </div>
                 </div>
-                <div class="w-full max-w-full px-3 mx-auto mt-4 sm:my-auto sm:mr-0 md:w-1/2 md:flex-none lg:w-4/12">
-                    <div class="relative right-0">
+                <div class="w-full max-w-full px-3 mx-auto mt-4 sm:my-auto sm:me-0 md:w-1/2 md:flex-none lg:w-4/12">
+                    <div class="relative end-0">
                         <ul class="relative flex flex-wrap p-1 list-none bg-transparent rounded-xl" nav-pills role="tablist">
                             <li class="z-30 flex-auto text-center">
                                 <a class="z-30 block w-full px-0 py-1 mb-0 transition-all border-0 rounded-lg ease-soft-in-out bg-inherit text-slate-700"

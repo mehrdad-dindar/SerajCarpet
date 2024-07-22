@@ -22,15 +22,15 @@
     <hr
       class="h-px mt-0 bg-transparent {{ (Request::is('virtual-reality') ? 'bg-gradient-horizontal-dark' : 'via-black/40 bg-gradient-to-r from-transparent to-transparent') }} " />
 
-    <div class="items-center block w-auto max-h-screen overflow-auto h-sidenav grow basis-full">
+    <div class="items-center block w-auto max-h-screen overflow-auto grow basis-full">
       <ul class="flex flex-col pl-0 mb-0">
         <li class="mt-0.5 w-full">
-          <a class="py-2.7 text-size-sm ease-nav-brand my-0 mx-4 flex items-center whitespace-nowrap px-4 transition-colors
+          <a class="py-2.7 text-size-sm ease-nav-brand my-0 mx-4 flex items-center gap-2 whitespace-nowrap px-4 transition-colors
                 {{ (Request::is('panel') ? 'shadow-soft-xl rounded-lg bg-white font-semibold text-slate-700' : '') }}"
-            href="{{ url('dashboard') }}">
+            href="{{ route("customer.panel.index") }}">
 
             <div
-              class="{{ (Request::is('panel') ? ' bg-gradient-fuchsia' : '') }} shadow-soft-2xl mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white bg-center stroke-0 text-center xl:p-2.5">
+              class="{{ (Request::is('panel') ? ' bg-gradient-fuchsia' : '') }} shadow-soft-2xl flex h-8 w-8 items-center justify-center rounded-lg bg-white bg-center stroke-0 text-center xl:p-2.5">
               <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink">
                 <title>shop</title>
@@ -51,7 +51,7 @@
               </svg>
             </div>
             <span
-              class="{{ (true ? 'mr-1' : 'ml-1') }} duration-300 opacity-100 pointer-events-none ease-soft">Dashboard</span>
+              class="{{ (true ? 'mr-1' : 'ml-1') }} duration-300 opacity-100 pointer-events-none ease-soft">{{ __("Dashboard") }}</span>
           </a>
         </li>
 
@@ -62,11 +62,11 @@
         </li>
 
         <li class="mt-0.5 w-full">
-          <a class="py-2.7 text-size-sm ease-nav-brand my-0 mx-4 flex items-center whitespace-nowrap px-4 transition-colors
-              {{ (Request::is('profile') ? 'shadow-soft-xl rounded-lg bg-white font-semibold text-slate-700' : '') }}"
+          <a class="py-2.7 text-size-sm ease-nav-brand my-0 mx-4 flex items-center gap-2 whitespace-nowrap px-4 transition-colors
+              {{ (Request::is('panel/profile') ? 'shadow-soft-xl rounded-lg bg-white font-semibold text-slate-700' : '') }}"
             href="{{ route("customer.panel.profile") }}">
             <div
-              class="{{ (Request::is('user-profile') ? ' bg-gradient-fuchsia' : '') }} shadow-soft-2xl mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white bg-center stroke-0 text-center xl:p-2.5">
+              class="{{ (Request::is('panel/profile') ? ' bg-gradient-fuchsia' : '') }} shadow-soft-2xl flex h-8 w-8 items-center justify-center rounded-lg bg-white bg-center stroke-0 text-center xl:p-2.5">
 
               <svg width="12px" height="12px" viewBox="0 0 46 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -76,13 +76,13 @@
                     fill-rule="nonzero">
                     <g id="Icons-with-opacity" transform="translate(1716.000000, 291.000000)">
                       <g id="customer-support" transform="translate(1.000000, 0.000000)">
-                        <path class="{{ (Request::is('user-profile') ? '' : 'fill-slate-800') }}"
+                        <path class="{{ (Request::is('panel/profile') ? '' : 'fill-slate-800') }}"
                           d="M45,0 L26,0 C25.447,0 25,0.447 25,1 L25,20 C25,20.379 25.214,20.725 25.553,20.895 C25.694,20.965 25.848,21 26,21 C26.212,21 26.424,20.933 26.6,20.8 L34.333,15 L45,15 C45.553,15 46,14.553 46,14 L46,1 C46,0.447 45.553,0 45,0 Z"
                           id="Path" opacity="0.59858631"></path>
-                        <path class="{{ (Request::is('user-profile') ? '' : 'fill-slate-800') }}"
+                        <path class="{{ (Request::is('panel/profile') ? '' : 'fill-slate-800') }}"
                           d="M22.883,32.86 C20.761,32.012 17.324,31 13,31 C8.676,31 5.239,32.012 3.116,32.86 C1.224,33.619 0,35.438 0,37.494 L0,41 C0,41.553 0.447,42 1,42 L25,42 C25.553,42 26,41.553 26,41 L26,37.494 C26,35.438 24.776,33.619 22.883,32.86 Z"
                           id="Path"></path>
-                        <path class="{{ (Request::is('user-profile') ? '' : 'fill-slate-800') }}"
+                        <path class="{{ (Request::is('panel/profile') ? '' : 'fill-slate-800') }}"
                           d="M13,28 C17.432,28 21,22.529 21,18 C21,13.589 17.411,10 13,10 C8.589,10 5,13.589 5,18 C5,22.529 8.568,28 13,28 Z"
                           id="Path"></path>
                       </g>
@@ -94,8 +94,7 @@
 
             </div>
             <span
-              class="{{ (true ? 'mr-1' : 'ml-1') }} duration-300 opacity-100 pointer-events-none ease-soft">User
-              Profile</span>
+              class="{{ (true ? 'mr-1' : 'ml-1') }} duration-300 opacity-100 pointer-events-none ease-soft">{{ __("User Profile") }}</span>
           </a>
         </li>
 
@@ -228,40 +227,6 @@
           </a>
         </li>
 
-        <li class="mt-0.5 w-full">
-          <a class="py-2.7 text-size-sm ease-nav-brand my-0 mx-4 flex items-center whitespace-nowrap px-4 transition-colors
-              {{ (true ? 'shadow-soft-xl rounded-lg bg-white font-semibold text-slate-700' : '') }}"
-            href="{{ url('rtl') }}">
-            <div
-              class="{{ (true ? ' bg-gradient-fuchsia' : '') }} shadow-soft-2xl mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white bg-center stroke-0 text-center xl:p-2.5">
-
-              <svg width="12px" height="12px" viewBox="0 0 40 40" version="1.1" xmlns="http://www.w3.org/2000/svg"
-                xmlns:xlink="http://www.w3.org/1999/xlink">
-                <title>settings</title>
-                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                  <g transform="translate(-2020.000000, -442.000000)" fill="#FFFFFF" fill-rule="nonzero">
-                    <g transform="translate(1716.000000, 291.000000)">
-                      <g transform="translate(304.000000, 151.000000)">
-                        <polygon class="{{ (true ? '' : 'fill-slate-800') }}"
-                          points="18.0883333 15.7316667 11.1783333 8.82166667 13.3333333 6.66666667 6.66666667 0 0 6.66666667 6.66666667 13.3333333 8.82166667 11.1783333 15.315 17.6716667">
-                        </polygon>
-                        <path class="{{ (true ? '' : 'fill-slate-800') }}"
-                          d="M31.5666667,23.2333333 C31.0516667,23.2933333 30.53,23.3333333 30,23.3333333 C29.4916667,23.3333333 28.9866667,23.3033333 28.48,23.245 L22.4116667,30.7433333 L29.9416667,38.2733333 C32.2433333,40.575 35.9733333,40.575 38.275,38.2733333 L38.275,38.2733333 C40.5766667,35.9716667 40.5766667,32.2416667 38.275,29.94 L31.5666667,23.2333333 Z">
-                        </path>
-                        <path class="{{ (true ? '' : 'fill-slate-800') }}"
-                          d="M33.785,11.285 L28.715,6.215 L34.0616667,0.868333333 C32.82,0.315 31.4483333,0 30,0 C24.4766667,0 20,4.47666667 20,10 C20,10.99 20.1483333,11.9433333 20.4166667,12.8466667 L2.435,27.3966667 C0.95,28.7083333 0.0633333333,30.595 0.00333333333,32.5733333 C-0.0583333333,34.5533333 0.71,36.4916667 2.11,37.89 C3.47,39.2516667 5.27833333,40 7.20166667,40 C9.26666667,40 11.2366667,39.1133333 12.6033333,37.565 L27.1533333,19.5833333 C28.0566667,19.8516667 29.01,20 30,20 C35.5233333,20 40,15.5233333 40,10 C40,8.55166667 39.685,7.18 39.1316667,5.93666667 L33.785,11.285 Z">
-                        </path>
-                      </g>
-                    </g>
-                  </g>
-                </g>
-              </svg>
-
-            </div>
-            <span
-              class="{{ (true ? 'mr-1' : 'ml-1') }} duration-300 opacity-100 pointer-events-none ease-soft">RTL</span>
-          </a>
-        </li>
 
         <li class="w-full mt-4">
           <h6
@@ -377,32 +342,6 @@
       <p
         class="hidden after:bg-gradient-dark-gray after:bg-gradient-cyan after:bg-gradient-orange after:bg-gradient-lime after:bg-gradient-red after:bg-gradient-slate">
       </p>
-
-      <div
-        class="after:opacity-65 after:bg-gradient-slate relative flex min-w-0 flex-col items-center break-words rounded-2xl border-0 border-solid border-blue-900 bg-white bg-clip-border shadow-none after:absolute after:top-0 after:bottom-0 after:left-0 after:z-10 after:block after:h-full after:w-full after:rounded-2xl after:content-['']"
-        sidenav-card>
-        <div class="mb-7.5 absolute h-full w-full rounded-2xl bg-cover bg-center"
-          style="background-image: url('{{asset("panel/img/curved-images/white-curved.jpeg")}}')"></div>
-        <div class="relative z-20 flex-auto w-full p-4 text-left text-white">
-          <div
-            class="flex items-center justify-center w-8 h-8 mb-4 text-center bg-white bg-center rounded-lg icon shadow-soft-2xl">
-            <i class="top-0 z-10 text-transparent ni ni-diamond text-size-lg bg-gradient-slate bg-clip-text opacity-80"
-              sidenav-card-icon></i>
-          </div>
-          <div class="transition-all duration-200 ease-nav-brand">
-            <h6 class="mb-0 text-white {{ (true ? 'text-right' : '') }}">Need help?</h6>
-            <p
-              class="mt-0 mb-4 font-semibold leading-tight text-size-xs {{ (true ? 'text-right' : '') }}">
-              Please check our docs</p>
-            <a href="https://www.creative-tim.com/learning-lab/tailwind/html/quick-start/soft-ui-dashboard/"
-              target="_blank"
-              class="inline-block w-full px-8 py-2 mb-0 font-bold text-center text-black uppercase transition-all ease-in bg-white border-0 border-white rounded-lg shadow-soft-md bg-150 leading-pro text-size-xs hover:shadow-soft-2xl hover:scale-102">Documentation</a>
-          </div>
-        </div>
-      </div>
-      <!-- pro btn  -->
-      <a class="inline-block w-full px-6 py-3 my-4 font-bold text-center text-white uppercase align-middle transition-all ease-in border-0 rounded-lg select-none shadow-soft-md bg-150 bg-x-25 leading-pro text-size-xs bg-gradient-fuchsia hover:shadow-soft-2xl hover:scale-102"
-        href="https://www.creative-tim.com/product/soft-ui-dashboard-pro-tall" target="_blank">Upgrade to pro</a>
     </div>
   </aside>
 
