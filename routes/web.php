@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
+use App\Livewire\Auth\Login;
 use App\Livewire\Customer\Panel;
 use App\Livewire\Customer\Profile;
 use App\Models\Customer;
@@ -48,6 +49,9 @@ Route::middleware(['guest'])->group(function () {
     Route::post('login-phone', [AuthController::class, 'doLoginPhone'])->name('doLoginPhone');
     Route::get('verify', [AuthController::class, 'verify'])->name('verify');
     Route::post('doVerify', [AuthController::class, 'doVerify'])->name('doVerify');
+});
+Route::middleware('guest')->group(function () {
+    Route::get('/login', Login::class)->name('login');
 });
 Route::middleware(['auth:customer'])->prefix('panel')->group(function () {
     Route::get('/', Panel::class)->name('customer.panel.index');
