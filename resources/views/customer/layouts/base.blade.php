@@ -55,7 +55,7 @@
     @livewireStyles
 </head>
 
-<body class="m-0 font-sans antialiased font-normal text-size-base leading-default bg-gray-50 text-slate-500">
+<body class="m-0 font-iranSans antialiased font-normal text-size-base leading-default bg-gray-50 text-slate-500">
 {{ $slot }}
 
 @livewireScripts
