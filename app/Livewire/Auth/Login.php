@@ -19,7 +19,9 @@ class Login extends Component
 
     public function mount()
     {
-        $this->fill(['email' => 'aSmin@softui.com', 'password' => 'secret']);
+        if (auth('customer')->check()) {
+            return redirect()->route('customer.panel.index');
+        }
     }
 
     public function login()

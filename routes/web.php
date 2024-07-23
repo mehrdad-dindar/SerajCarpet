@@ -45,7 +45,7 @@ Route::post('create_address', [CustomerController::class, 'createAddress'])->nam
 
 
 Route::middleware(['guest'])->group(function () {
-    Route::get('login-phone', [AuthController::class, 'loginPhone'])->name('login');
+    Route::get('login-phone', [AuthController::class, 'loginPhone'])->name('login-phone');
     Route::post('login-phone', [AuthController::class, 'doLoginPhone'])->name('doLoginPhone');
     Route::get('verify', [AuthController::class, 'verify'])->name('verify');
     Route::post('doVerify', [AuthController::class, 'doVerify'])->name('doVerify');
