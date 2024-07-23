@@ -42,10 +42,6 @@ class Login extends Component
     #[Layout('customer.layouts.app')]
     public function render()
     {
-        if (!auth('customer')->check()) {
-            return view('livewire.auth.login');
-        } else {
-            return Redirect::route('customer.panel.index');
-        }
+        return view('livewire.auth.login');
     }
 }
