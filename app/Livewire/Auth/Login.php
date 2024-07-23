@@ -6,6 +6,8 @@ use App\Http\Requests\AuthRequest;
 use App\Models\Customer;
 use App\Models\Token;
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -24,8 +26,8 @@ class Login extends Component
 
 
     protected $rules = [
-        'email' => 'required|email:rfc,dns',
-        'password' => 'required',
+        'phone' => 'required',
+        'code' => 'required',
     ];
 
     public function mount()
@@ -45,17 +47,17 @@ class Login extends Component
             'customer_id' => $customer->id
         ]);
 
-
         if ($token->sendCode()) {
             session()->put("code_id", $token->id);
             session()->put("customer_id", $customer->id);
             session()->put("remember", $this->remember_me);
-            $this->code = session("code");
+//            $this->code = session("code");
             $this->codeSent = true;
             $this->startTimer();
+        } else {
+            $token->delete();
+            $this->errors = "Unable to send verification code";
         }
-        $token->delete();
-        $this->errors = "Unable to send verification code";
     }
 
     public function startTimer()
@@ -79,27 +81,31 @@ class Login extends Component
     }
 
 
-    public function verifyCode()
-    {
-        if ($this->verificationCode == '1234') {
-            // ورود کاربر
-            Auth::guard('customer')->loginUsingId(1, $this->remember); // فرض کنیم کاربر با آیدی 1 وجود دارد
-            return redirect()->route('customer.panel.index'); // تغییر مسیر به صفحه پنل
-        } else {
-            $this->addError('verificationCode', 'کد تایید اشتباه است.');
-        }
-    }
-
-
     public function login()
     {
-        if (auth()->attempt(['email' => $this->email, 'password' => $this->password], $this->remember_me)) {
-            $user = User::where(["email" => $this->email])->first();
-            auth()->login($user, $this->remember_me);
-            return redirect()->intended('/dashboard');
-        } else {
-            return $this->addError('email', trans('auth.failed'));
+
+        if (!session()->has('code_id') || !session()->has('customer_id'))
+            redirect()->route('login');
+        $token = Token::where('customer_id', session()->get('customer_id'))->find(session()->get('code_id'));
+
+        if (!$token || empty($token->id))
+            redirect()->route('login');
+
+        if (!$token->isValid())
+            redirect()->back()->withErrors('The code is either expired or used.');
+
+        if ($token->code !== $this->code) {
+            $this->codeSent = false;
+            $this->code = '';
+            return redirect()->route('login');
         }
+        $token->update([
+            'used' => true
+        ]);
+
+        $customer = Customer::find(session()->get('customer_id'));
+        Auth::guard('customer')->login($customer, $this->remember_me);
+        return redirect()->route('customer.panel.index');
     }
 
     #[Layout('customer.layouts.app')]

@@ -130,12 +130,6 @@
                           </li>
                       </ul>
           </li>
-        <li class="flex items-center">
-          <a href="javascript:;"
-            class="block px-0 py-2 font-semibold transition-all ease-nav-brand text-size-sm text-slate-500">
-            <livewire:auth.logout />
-          </a>
-        </li>
         <li class="flex items-center {{ (true ? 'pr-4' : 'pl-4') }}{{--Request::is('rtl')--}} xl:hidden">
           <a href="javascript:;" class="block p-0 transition-all ease-nav-brand text-size-sm text-slate-500"
             sidenav-trigger>

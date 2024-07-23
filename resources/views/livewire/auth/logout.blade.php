@@ -1,4 +1,1 @@
-<div wire:click='logout' class="flex items-center gap-2">
-    <span class="hidden sm:inline">{{ __("Log out") }}</span>
-    <i class="fa fa-user"></i>
-</div>
+<div wire:click='logout' class="mr-1 duration-300 opacity-100 pointer-events-none ease-soft">{{ __("Log out") }}</div>
