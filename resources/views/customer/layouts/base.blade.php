@@ -43,9 +43,9 @@
     <link href="{{ asset('panel/css/nucleo-svg.css') }}" rel="stylesheet"/>
 
     <!-- Font Awesome Icons -->
-    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+{{--    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>--}}
     <!-- Popper -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.5/umd/popper.min.js"></script>
+{{--    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.5/umd/popper.min.js"></script>--}}
 
     <!-- Main Styling -->
     <link href="{{ asset('panel/css/styles.css') }}?v=1.0.3" rel="stylesheet"/>

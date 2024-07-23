@@ -3247,6 +3247,9 @@ select {
 .row-start-2 {
   grid-row-start: 2;
 }
+.float-start {
+  float: inline-start;
+}
 .float-right {
   float: right;
 }
@@ -3385,9 +3388,6 @@ select {
 }
 .-me-2 {
   margin-inline-end: -0.5rem;
-}
-.-ml-12 {
-  margin-left: -3rem;
 }
 .-ml-16 {
   margin-left: -4rem;
@@ -3572,6 +3572,9 @@ select {
 .mt-8 {
   margin-top: 2rem;
 }
+.mt-\[0\.135rem\] {
+  margin-top: 0.135rem;
+}
 .mt-auto {
   margin-top: auto;
 }
@@ -3746,6 +3749,9 @@ select {
 }
 .h-96 {
   height: 24rem;
+}
+.h-\[1\.25em\] {
+  height: 1.25em;
 }
 .h-\[1\.5px\] {
   height: 1.5px;
@@ -4654,10 +4660,6 @@ select {
 .rounded-xl {
   border-radius: 0.75rem;
 }
-.rounded-b-2xl {
-  border-bottom-right-radius: 1rem;
-  border-bottom-left-radius: 1rem;
-}
 .rounded-b-\[--card-border-radius\] {
   border-bottom-right-radius: var(--card-border-radius);
   border-bottom-left-radius: var(--card-border-radius);
@@ -4925,6 +4927,10 @@ select {
 .bg-custom-600 {
   --tw-bg-opacity: 1;
   background-color: rgba(var(--c-600), var(--tw-bg-opacity));
+}
+.bg-cyan-200 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(165 243 252 / var(--tw-bg-opacity));
 }
 .bg-fuchsia-500 {
   --tw-bg-opacity: 1;
@@ -5698,6 +5704,10 @@ select {
   --tw-text-opacity: 1;
   color: rgb(6 182 212 / var(--tw-text-opacity));
 }
+.text-cyan-700 {
+  --tw-text-opacity: 1;
+  color: rgb(14 116 144 / var(--tw-text-opacity));
+}
 .text-danger-600 {
   --tw-text-opacity: 1;
   color: rgb(220 38 38 / var(--tw-text-opacity));
@@ -5822,10 +5832,6 @@ select {
 .text-slate-700 {
   --tw-text-opacity: 1;
   color: rgb(51 65 85 / var(--tw-text-opacity));
-}
-.text-slate-800 {
-  --tw-text-opacity: 1;
-  color: rgb(30 41 59 / var(--tw-text-opacity));
 }
 .text-transparent {
   color: transparent;
@@ -6003,6 +6009,9 @@ select {
 .ring-gray-300 {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(193 208 213 / var(--tw-ring-opacity));
+}
+.ring-gray-500\/10 {
+  --tw-ring-color: rgb(110 125 132 / 0.1);
 }
 .ring-gray-600\/10 {
   --tw-ring-color: rgb(78 93 100 / 0.1);
@@ -6838,6 +6847,10 @@ select {
 
 .checked\:bg-none:checked {
   background-image: none;
+}
+
+.checked\:bg-left:checked {
+  background-position: left;
 }
 
 .checked\:bg-right:checked {
