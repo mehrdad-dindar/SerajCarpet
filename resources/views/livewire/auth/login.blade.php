@@ -81,7 +81,7 @@
                             <div
                                 class="absolute top-0 hidden w-2/5 h-full -mr-2 overflow-hidden -skew-x-10 -left-16 rounded-br-xl md:block">
                                 <div class="absolute inset-x-0 top-0 z-0 h-full -ml-16 bg-cover"
-                                     style="background-image: url('{{asset("panel/img/persian_carpet.webp")}}');background-size: cover;"></div>
+                                     style="background-image: url('{{asset("panel/img/curved-images/123.jpg")}}');background-size: cover;"></div>
                             </div>
                         </div>
                     </div>
