@@ -10,7 +10,7 @@ use Hashids\Hashids;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect("/admin");
+    return redirect()->route("login");
 });
 
 Route::middleware([

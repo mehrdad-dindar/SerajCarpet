@@ -3,14 +3,17 @@
 namespace App\Livewire\Auth;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Redirect;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 class Login extends Component
 {
-    public $email = '';
+    public $phone = '';
     public $password = '';
     public $remember_me = false;
+    public $verificationCode;
+    public $codeSent = false;
 
     protected $rules = [
         'email' => 'required|email:rfc,dns',
@@ -22,6 +25,7 @@ class Login extends Component
         if (auth('customer')->check()) {
             return redirect()->route('customer.panel.index');
         }
+        return null;
     }
 
     public function login()
@@ -38,6 +42,10 @@ class Login extends Component
     #[Layout('customer.layouts.app')]
     public function render()
     {
-        return view('livewire.auth.login');
+        if (!auth('customer')->check()) {
+            return view('livewire.auth.login');
+        } else {
+            return Redirect::route('customer.panel.index');
+        }
     }
 }
