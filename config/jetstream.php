@@ -30,7 +30,7 @@ return [
      */
 
     'middleware' => ['web'],
-    'logout_redirect' => '/login-phone',
+    'logout_redirect' => '/login',
     'auth_session' => AuthenticateSession::class,
 
     /*

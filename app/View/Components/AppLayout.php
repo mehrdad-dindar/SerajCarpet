@@ -4,6 +4,7 @@ namespace App\View\Components;
 
 use Illuminate\View\Component;
 use Illuminate\View\View;
+use Livewire\Attributes\Layout;
 
 class AppLayout extends Component
 {
@@ -12,6 +13,6 @@ class AppLayout extends Component
      */
     public function render(): View
     {
-        return view('layouts.app');
+        return view('customer.layouts.app');
     }
 }

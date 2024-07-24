@@ -17,12 +17,12 @@
 */
 var page = window.location.pathname.split("/").pop().split(".")[0];
 var aux = window.location.pathname.split("/");
-var to_build = (aux.includes('pages')?'../':'./');
+var to_build = (aux.includes('panel')?'../':'./');
 var root = window.location.pathname.split("/")
-// if (!aux.includes("pages")) {
-//   page = "dashboard";
-// }
-
+/*if (!aux.includes("panel")) {
+  page = "panel";
+}*/
+console.log(aux.includes('pages'));
 loadStylesheet(to_build + "panel/css/perfect-scrollbar.css");
 loadJS(to_build + "panel/js/perfect-scrollbar.js", true);
 
