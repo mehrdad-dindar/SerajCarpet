@@ -8,7 +8,6 @@ class Logout extends Component
 {
     public function logout()
     {
-        dd('hiiii');
         auth('customer')->logout();
         return redirect()->route('login');
     }
