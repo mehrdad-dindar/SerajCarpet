@@ -10,6 +10,11 @@ use Livewire\Component;
 
 class Profile extends Component
 {
+    public function mount()
+    {
+
+    }
+
     #[Layout("customer.layouts.app")]
     public function render(): Factory|Application|View|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {

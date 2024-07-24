@@ -77,7 +77,7 @@
                     <div class="p-4 pb-0 mb-0 bg-white border-b-0 rounded-t-2xl">
                         <div class="flex flex-wrap -mx-3">
                             <div class="flex items-center w-full max-w-full px-3 shrink-0 md:w-8/12 md:flex-none">
-                                <h6 class="mb-0">Profile Information</h6>
+                                <h6 class="mb-0">{{__("Profile Information")}}</h6>
                             </div>
                             <div class="w-full max-w-full px-3 text-left shrink-0 md:w-4/12 md:flex-none">
                                 <a href="javascript:;" data-target="tooltip_trigger" data-placement="top">
@@ -85,7 +85,7 @@
                                 </a>
                                 <div data-target="tooltip"
                                      class="hidden px-2 py-1 text-center text-white bg-black rounded-lg text-size-sm" role="tooltip">
-                                    Edit Profile
+                                    {{__("Edit Profile")}}
                                     <div
                                         class="invisible absolute h-2 w-2 bg-inherit before:visible before:absolute before:h-2 before:w-2 before:rotate-45 before:bg-inherit before:content-['']"
                                         data-popper-arrow></div>
@@ -94,9 +94,8 @@
                         </div>
                     </div>
                     <div class="flex-auto p-4">
-                        <p class="leading-normal text-size-sm">Hi, I’m Alec Thompson, Decisions: If you can’t decide, the answer is
-                            no. If two equally difficult paths, choose the one more painful in the short term (pain avoidance is
-                            creating an illusion of equality).</p>
+                        <p class="leading-normal text-size-sm">اطلاعات شما در قالی‌شویی سراج کاملاً محرمانه و امن نگهداری می‌شود. اطمینان داشته باشید که حریم خصوصی شما اولویت ماست.
+                        </p>
                         <hr class="h-px my-6 bg-transparent bg-gradient-horizontal-light" />
                         <ul class="flex flex-col pl-0 mb-0 rounded-lg">
                             <li
