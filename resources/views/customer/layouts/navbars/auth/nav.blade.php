@@ -7,13 +7,13 @@
       <!-- breadcrumb -->
       <ol class="flex flex-wrap pt-1 bg-transparent rounded-lg">
         <li class="{{ (true ? 'pl-2' : '') }}{{--Request::is('rtl')--}} leading-normal text-size-sm">
-          <a class="opacity-50 text-slate-700" href="{{ route("customer.panel.index") }}">Panel</a>
+          <a class="opacity-50 text-slate-700" href="{{ route("customer.panel.index") }}">{{__("Dashboard")}}</a>
         </li>
         <li
-          class="text-size-sm capitalize leading-normal text-slate-700 {{ (true ? 'before:float-right before:pl-2' : 'before:float-left before:pr-2') }}{{--Request::is('rtl')--}} before:text-gray-600 before:content-['/']"
+          class="{{ (Request::is("panel") ? 'hidden' : '') }} text-size-sm capitalize leading-normal text-slate-700 {{ (true ? 'before:float-right before:pl-2' : 'before:float-left before:pr-2') }}{{--Request::is('rtl')--}} before:text-gray-600 before:content-['/']"
           aria-current="page">{{ str_replace('panel/', ' ', Request::path()) }}</li>
       </ol>
-      <h6 class="mb-0 font-bold capitalize">{{ str_replace('panel/', ' ', Request::path()) }}</h6>
+      <h6 class="{{ (Request::is("panel") ? 'hidden' : '') }} mb-0 font-bold capitalize">{{ str_replace('panel/', ' ', Request::path()) }}</h6>
     </nav>
 
     <div
@@ -22,16 +22,7 @@
       <div class="flex items-center md:ms-auto md:pe-4">
         <!-- pro btn  -->
         <a class="inline-block w-full px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all ease-in border-0 rounded-lg select-none shadow-soft-md bg-150 bg-x-25 leading-pro text-size-xs bg-gradient-fuchsia hover:shadow-soft-2xl hover:scale-102"
-          href="https://www.creative-tim.com/product/soft-ui-dashboard-tall" target="_blank">{{ __("New Order") }}</a>
-        <div class="ms-2 relative flex flex-wrap items-stretch w-full transition-all rounded-lg ease-soft">
-          <span
-            class="text-size-sm ease-soft leading-5.6 absolute z-50 {{ (true ? '-mr-px border-l-0 rounded-tl-none rounded-bl-none' : '-ml-px border-r-0 rounded-tr-none rounded-br-none') }}{{--Request::is('rtl')--}} flex h-full items-center whitespace-nowrap rounded-lg border border-transparent bg-transparent py-2 px-2.5 text-center font-normal text-slate-500 transition-all">
-            <i class="fas fa-search"></i>
-          </span>
-          <input type="text"
-            class="{{ (true ? 'pr-9 -mr-px pl-0' : 'pl-8.75 -ml-px pr-3') }}{{--Request::is('rtl')--}} text-size-sm focus:shadow-soft-primary-outline ease-soft leading-5.6 relative block min-w-0 flex-auto rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding py-2 text-gray-700 transition-all placeholder:text-gray-500 focus:border-fuchsia-300 focus:outline-none focus:transition-shadow"
-            placeholder="Type here..." />
-        </div>
+          href="#" target="_blank">{{ __("New Order") }}</a>
       </div>
       <ul
         class="flex flex-row justify-end pl-0 mb-0 list-none md-max:w-full {{ (true ? 'pr-10 ml-0 mr-auto' : '') }}{{--Request::is('rtl')--}}">
