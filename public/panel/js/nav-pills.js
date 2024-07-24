@@ -42,13 +42,15 @@ total.forEach(function (item, i) {
           for (var j = 1; j <= nodes.indexOf(li); j++) {
             sum += item.querySelector("li:nth-child(" + j + ")").offsetHeight;
           }
-          moving_div.style.transform = "translate3d(0px," + sum + "px, 0px)";
+          moving_div.style.transform = "translate3d(0px,-" + sum + "px, 0px)";
           moving_div.style.height = item.querySelector("li:nth-child(" + j + ")").offsetHeight;
         } else {
           for (var j = 1; j <= nodes.indexOf(li); j++) {
             sum += item.querySelector("li:nth-child(" + j + ")").offsetWidth;
+            /*console.log(item.querySelector("li:nth-child(" + j + ")").offsetWidth)
+            console.log(sum)*/
           }
-          moving_div.style.transform = "translate3d(" + sum + "px, 0px, 0px)";
+          moving_div.style.transform = "translate3d(-" + sum + "px, 0px, 0px)";
           moving_div.style.width = item.querySelector("li:nth-child(" + index + ")").offsetWidth + "px";
         }
       };

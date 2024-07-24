@@ -1,12 +1,12 @@
 <?php
 
-namespace App\View\Components\plugins;
+namespace App\View\Components\customer\layouts;
 
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class fixed-plugin extends Component
+class Base extends Component
 {
     /**
      * Create a new component instance.
@@ -21,6 +21,6 @@ class fixed-plugin extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.plugins.fixed-plugin');
+        return view('customer.layouts.base');
     }
 }

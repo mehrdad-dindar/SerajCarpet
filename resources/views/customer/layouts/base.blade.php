@@ -43,19 +43,19 @@
     <link href="{{ asset('panel/css/nucleo-svg.css') }}" rel="stylesheet"/>
 
     <!-- Font Awesome Icons -->
-    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+    <script src="{{ asset('panel/js/fontawesome.js') }}" crossorigin="anonymous"></script>
     <!-- Popper -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.5/umd/popper.min.js"></script>
+    <script src="{{ asset('panel/js/popper.js') }}"></script>
 
     <!-- Main Styling -->
     <link href="{{ asset('panel/css/styles.css') }}?v=1.0.3" rel="stylesheet"/>
 
-    @vite('resources/css/app.css')
+    @vite('resources/css/customer.css')
 
     @livewireStyles
 </head>
 
-<body class="m-0 font-sans antialiased font-normal text-size-base leading-default bg-gray-50 text-slate-500">
+<body class="m-0 font-iranSans antialiased font-normal text-size-base leading-default bg-gray-50 text-slate-500">
 {{ $slot }}
 
 @livewireScripts

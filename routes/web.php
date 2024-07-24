@@ -2,16 +2,15 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
-use App\Livewire\Panel;
+use App\Livewire\Auth\Login;
+use App\Livewire\Customer\Panel;
+use App\Livewire\Customer\Profile;
 use App\Models\Customer;
 use Hashids\Hashids;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\RoutePath;
 
 Route::get('/', function () {
-    return redirect("/admin");
+    return redirect()->route("login");
 });
 
 Route::middleware([
@@ -46,11 +45,15 @@ Route::post('create_address', [CustomerController::class, 'createAddress'])->nam
 
 
 Route::middleware(['guest'])->group(function () {
-    Route::get('login-phone', [AuthController::class, 'loginPhone'])->name('login');
+    Route::get('login-phone', [AuthController::class, 'loginPhone'])->name('login-phone');
     Route::post('login-phone', [AuthController::class, 'doLoginPhone'])->name('doLoginPhone');
     Route::get('verify', [AuthController::class, 'verify'])->name('verify');
     Route::post('doVerify', [AuthController::class, 'doVerify'])->name('doVerify');
 });
+Route::middleware('guest')->group(function () {
+    Route::get('/login', Login::class)->name('login');
+});
 Route::middleware(['auth:customer'])->prefix('panel')->group(function () {
     Route::get('/', Panel::class)->name('customer.panel.index');
+    Route::get('/profile', Profile::class)->name('customer.panel.profile');
 });

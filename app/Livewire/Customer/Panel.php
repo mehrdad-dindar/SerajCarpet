@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Customer;
 
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 class Panel extends Component
 {
-    #[Layout('layouts.app')]
+    #[Layout('customer.layouts.app')]
     public function render()
     {
-        return view('livewire.panel');
+        return view('livewire.customer.panel');
     }
 }
