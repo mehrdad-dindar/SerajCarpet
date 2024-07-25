@@ -1,4 +1,5 @@
-<x-customer.layouts.base>
+@extends('customer.layouts.master')
+@section("content")
     @auth
         @if (Request::is('static-sign-up'))
             <div class="flex flex-wrap -mx-3">
@@ -72,4 +73,4 @@
 
     @endguest
 
-</x-customer.layouts.base>
+@endsection
