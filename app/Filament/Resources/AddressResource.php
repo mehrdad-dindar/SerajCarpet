@@ -44,7 +44,7 @@ class AddressResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required()
-                            ->label(__('Customer Name')),
+                            /*->label(__('Customer Name'))*/,
                     ]),
                 Forms\Components\Section::make('آدرس')
                     ->schema([
