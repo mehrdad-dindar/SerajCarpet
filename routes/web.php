@@ -5,6 +5,7 @@ use App\Http\Controllers\CustomerController;
 use App\Livewire\Auth\Login;
 use App\Livewire\Customer\Panel;
 use App\Livewire\Customer\Profile;
+use App\Models\Address;
 use App\Models\Customer;
 use Hashids\Hashids;
 use Illuminate\Support\Facades\Route;
@@ -56,4 +57,9 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth:customer'])->prefix('panel')->group(function () {
     Route::get('/', Panel::class)->name('customer.panel.index');
     Route::get('/profile', Profile::class)->name('customer.panel.profile');
+    Route::get('/test/{address}', function (Address $address){
+        $lat = $address->latitude;
+        $lng = $address->longitude;
+        return redirect("");
+    })->name("admin.users.edit");
 });

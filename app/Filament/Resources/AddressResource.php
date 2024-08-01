@@ -40,11 +40,28 @@ class AddressResource extends Resource
                     ->icon('heroicon-o-user')
                     ->schema([
                         Forms\Components\Select::make('customer_id')
-                            ->relationship('customer', 'name')
+                            ->translateLabel()
+                            ->label('customer')
+                            ->prefixIcon('heroicon-o-user')
+                            ->relationship('customer', 'id_name')
                             ->searchable()
                             ->preload()
-                            ->required()
-                            ->label(__('Customer Name')),
+                            ->live()
+//                            ->afterStateUpdated(fn(Set $set) => $set('address_id', null))
+                            ->createOptionForm([
+                                Forms\Components\Grid::make()
+                                    ->schema([
+                                        Forms\Components\TextInput::make("name")
+                                            ->label(__("Customer Name"))
+                                            ->required(),
+                                        Forms\Components\TextInput::make("phone")
+                                            ->label(__("Customer Phone"))
+                                            ->unique()
+                                            ->required(),
+                                    ])
+                                    ->columns()
+                            ])
+                            ->required(),
                     ]),
                 Forms\Components\Section::make('آدرس')
                     ->schema([
