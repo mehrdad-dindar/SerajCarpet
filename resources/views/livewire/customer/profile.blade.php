@@ -132,12 +132,9 @@
             <div class="hidden w-full max-w-full px-3 lg-max:mt-6" id="address" role="tabpanel" aria-labelledby="address-tab">
             <div
                 class="relative flex flex-col h-full min-w-0 break-words bg-white border-0 shadow-soft-xl rounded-2xl bg-clip-border">
-                <div class="p-4 pb-0 mb-0 bg-white border-b-0 rounded-t-2xl">
-                    <h6 class="mb-0">Conversations</h6>
-                </div>
                 <div class="w-full max-w-full">
                     <div class="relative flex flex-col min-w-0 break-words bg-white border-0 shadow-soft-xl rounded-2xl bg-clip-border">
-                        <livewire:customer.addresses>
+                        <livewire:customer.addresses />
                     </div>
                 </div>
 
@@ -241,7 +238,6 @@
                 });
             });
         });
-        new DataTable('#datatable-search');
     </script>
 
 </div>

@@ -3,34 +3,15 @@
 namespace App\Livewire\Customer;
 
 use App\Models\Address;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
+use Livewire\Component;
 
-class Addresses extends DataTableComponent
+class Addresses extends Component
 {
-//    public function render()
-//    {
-//        $addresses = auth()->user()->addresses()->get();
-//        return view('livewire.customer.addresses', [
-//            'addresses' => $addresses
-//        ]);
-//    }
-
-    protected $model = Address::class;
-
-
-    public function configure(): void
+    public function render()
     {
-        $this->setPrimaryKey('id');
-    }
-
-    public function columns(): array
-    {
-        return [
-            Column::make('ID', 'id')
-                ->sortable(),
-            Column::make('State')
-                ->sortable(),
-        ];
+        $addresses = auth()->user()->addresses()->get();
+        return view('livewire.customer.addresses', [
+            'addresses' => $addresses
+        ]);
     }
 }
