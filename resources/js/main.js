@@ -1,4 +1,4 @@
-import "../css/customer.css";
+import "../css/client.css";
 // import Alpine from 'alpinejs'
 //
 // window.Alpine = Alpine

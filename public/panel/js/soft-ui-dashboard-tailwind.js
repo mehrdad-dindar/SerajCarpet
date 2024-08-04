@@ -22,7 +22,6 @@ var root = window.location.pathname.split("/")
 /*if (!aux.includes("panel")) {
   page = "panel";
 }*/
-console.log(aux.includes('pages'));
 loadStylesheet(to_build + "panel/css/perfect-scrollbar.css");
 loadJS(to_build + "panel/js/perfect-scrollbar.js", true);
 

@@ -37,7 +37,7 @@
     <link rel="icon" type="image/png" href="{{ asset('panel/img/favicon.png') }}"/>
     <title>Soft UI Dashboard TALL by Creative Tim & UPDIVISION</title>
     <!-- Fonts and icons -->
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet"/>
+{{--    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet"/>--}}
     <!-- Nucleo Icons -->
     <link href="{{ asset('panel/css/nucleo-icons.css') }}" rel="stylesheet"/>
     <link href="{{ asset('panel/css/nucleo-svg.css') }}" rel="stylesheet"/>
@@ -50,7 +50,7 @@
     <!-- Main Styling -->
     <link href="{{ asset('panel/css/styles.css') }}?v=1.0.3" rel="stylesheet"/>
 
-    @vite('resources/css/customer.css')
+    @vite('resources/css/client.css')
 
     @livewireStyles
     <wireui:scripts />

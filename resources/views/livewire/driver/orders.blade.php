@@ -1,5 +1,9 @@
 <div>
-    <x-alrt title="Alert Message!" warning />
+    <div x-data="{ open: false }">
+        <x-sbtn :label="__('New Order')" icon="plus" green @click="open = true"/>
 
-    <x-sbtn label="Delete" right-icon="trash" interaction="negative" />
+        <div x-show="open" @click.away="open = false">
+            <livewire:driver.new-order/>
+        </div>
+    </div>
 </div>

@@ -12,4 +12,9 @@ class Orders extends Component
     {
         return view('livewire.driver.orders');
     }
+
+    public function test()
+    {
+        dd("hehu");
+    }
 }
