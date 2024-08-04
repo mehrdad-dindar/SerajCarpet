@@ -5,6 +5,7 @@ module.exports = {
     mode: "jit",
     content: [
         "./resources/views/components/**/*.blade.php",
+        "./resources/views/customer/**/*.blade.php",
         "./resources/views/layouts/**/*.blade.php",
         "./resources/views/livewire/**/*.blade.php",
         "./resources/**/*.js",

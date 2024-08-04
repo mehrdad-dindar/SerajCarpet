@@ -4,6 +4,7 @@ namespace App\Livewire\Auth;
 
 use App\Http\Requests\AuthRequest;
 use App\Models\Customer;
+use App\Models\Driver;
 use App\Models\Token;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use function Symfony\Component\String\u;
 
 class Login extends Component
 {
@@ -37,27 +39,42 @@ class Login extends Component
         }
         return null;
     }
+
     public function sendCode()
     {
-        $customer = Customer::firstOrCreate([
+        $user = $this->getUser($this->phone);
+        /*$customer = Customer::firstOrCreate([
             'phone' => $this->phone
-        ]);
-
+        ]);*/
+//dd(get_class($user));
         $token = Token::create([
-            'customer_id' => $customer->id
+            'tokenable_type' => get_class($user),
+            'tokenable_id' => $user->id
         ]);
 
         if ($token->sendCode()) {
             session()->put("code_id", $token->id);
-            session()->put("customer_id", $customer->id);
+            session()->put("auth_id", $token->tokenable_id);
+            session()->put("auth_type", $token->tokenable_type);
             session()->put("remember", $this->remember_me);
-//            $this->code = session("code");
+            $this->code = session("code");
             $this->codeSent = true;
             $this->startTimer();
         } else {
             $token->delete();
             $this->errors = "Unable to send verification code";
         }
+    }
+
+    private function getUser($phone)
+    {
+        $user = Driver::where('phone', $phone)->first();
+        if (!$user) {
+            $user = Customer::firstOrCreate([
+                'phone' => $phone
+            ]);
+        }
+        return $user;
     }
 
     public function startTimer()
@@ -80,13 +97,14 @@ class Login extends Component
         }
     }
 
-
     public function login()
     {
+        $token = null;
 
         if (!session()->has('code_id') || !session()->has('customer_id'))
             redirect()->route('login');
-        $token = Token::where('customer_id', session()->get('customer_id'))->find(session()->get('code_id'));
+
+        $token = Token::find(session()->get('code_id'));
 
         if (!$token || empty($token->id))
             redirect()->route('login');
@@ -103,9 +121,20 @@ class Login extends Component
             'used' => true
         ]);
 
-        $customer = Customer::find(session()->get('customer_id'));
-        Auth::guard('customer')->login($customer, $this->remember_me);
-        return redirect()->route('customer.panel.index');
+        if (session()->get('auth_type') == "App\Models\Driver") {
+
+            $driver = Driver::find(session()->get('auth_id'));
+            Auth::guard('driver')->login($driver, $this->remember_me);
+            return redirect()->route('driver.panel.index');
+
+        } elseif (session()->get('auth_type') == "App\Models\Customer") {
+
+            $customer = Customer::find(session()->get('auth_id'));
+            Auth::guard('customer')->login($customer, $this->remember_me);
+            return redirect()->route('customer.panel.index');
+
+        }
+        return redirect()->route('login');
     }
 
     #[Layout('customer.layouts.app')]

@@ -4721,9 +4721,6 @@ select {
 .border-l-4 {
   border-left-width: 4px;
 }
-.border-r {
-  border-right-width: 1px;
-}
 .border-s {
   border-inline-start-width: 1px;
 }
@@ -4766,10 +4763,6 @@ select {
 .border-gray-300 {
   --tw-border-opacity: 1;
   border-color: rgb(193 208 213 / var(--tw-border-opacity));
-}
-.border-gray-400 {
-  --tw-border-opacity: 1;
-  border-color: rgb(153 168 175 / var(--tw-border-opacity));
 }
 .border-gray-500\/10 {
   border-color: rgb(110 125 132 / 0.1);
@@ -4854,6 +4847,10 @@ select {
 }
 .bg-black\/50 {
   background-color: rgb(0 0 0 / 0.5);
+}
+.bg-blue-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(239 246 255 / var(--tw-bg-opacity));
 }
 .bg-blue-950 {
   --tw-bg-opacity: 1;
@@ -4963,10 +4960,6 @@ select {
   --tw-bg-opacity: 1;
   background-color: rgb(185 28 28 / var(--tw-bg-opacity));
 }
-.bg-secondary-400 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(52 211 153 / var(--tw-bg-opacity));
-}
 .bg-slate-500 {
   --tw-bg-opacity: 1;
   background-color: rgb(100 116 139 / var(--tw-bg-opacity));
@@ -5000,9 +4993,6 @@ select {
 }
 .bg-opacity-25 {
   --tw-bg-opacity: 0.25;
-}
-.bg-opacity-60 {
-  --tw-bg-opacity: 0.6;
 }
 .\!bg-none {
   background-image: none !important;
@@ -5432,9 +5422,6 @@ select {
 .pt-6 {
   padding-top: 1.5rem;
 }
-.pt-8 {
-  padding-top: 2rem;
-}
 .text-left {
   text-align: left;
 }
@@ -5583,9 +5570,6 @@ select {
 .tracking-wide {
   letter-spacing: 0.025em;
 }
-.tracking-wider {
-  letter-spacing: 0.05em;
-}
 .tracking-widest {
   letter-spacing: 0.1em;
 }
@@ -5611,6 +5595,10 @@ select {
 }
 .text-black\/50 {
   color: rgb(0 0 0 / 0.5);
+}
+.text-blue-700 {
+  --tw-text-opacity: 1;
+  color: rgb(29 78 216 / var(--tw-text-opacity));
 }
 .text-blue-800 {
   --tw-text-opacity: 1;
@@ -5914,6 +5902,9 @@ select {
 .ring-black {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(0 0 0 / var(--tw-ring-opacity));
+}
+.ring-blue-700\/10 {
+  --tw-ring-color: rgb(29 78 216 / 0.1);
 }
 .ring-custom-600 {
   --tw-ring-opacity: 1;
@@ -6659,6 +6650,11 @@ select {
   border-inline-end-width: 0px;
 }
 
+.last\:text-gray-400:last-child {
+  --tw-text-opacity: 1;
+  color: rgb(153 168 175 / var(--tw-text-opacity));
+}
+
 .first-of-type\:ps-1:first-of-type {
   padding-inline-start: 0.25rem;
 }
@@ -6891,12 +6887,6 @@ select {
 .hover\:shadow-none:hover {
   --tw-shadow: 0 0 #0000;
   --tw-shadow-colored: 0 0 #0000;
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-}
-
-.hover\:shadow-sm:hover {
-  --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
@@ -7306,10 +7296,6 @@ select {
   pointer-events: none;
 }
 
-.disabled\:cursor-not-allowed:disabled {
-  cursor: not-allowed;
-}
-
 .disabled\:border:disabled {
   border-width: 1px;
 }
@@ -7378,10 +7364,6 @@ select {
 
 .disabled\:opacity-70:disabled {
   opacity: 0.7;
-}
-
-.disabled\:opacity-80:disabled {
-  opacity: 0.8;
 }
 
 .disabled\:shadow-none:disabled {
@@ -7776,11 +7758,6 @@ select {
   background-color: rgb(22 163 74 / var(--tw-bg-opacity));
 }
 
-.dark\:bg-secondary-700:is(.dark *) {
-  --tw-bg-opacity: 1;
-  background-color: rgb(4 120 87 / var(--tw-bg-opacity));
-}
-
 .dark\:bg-transparent:is(.dark *) {
   background-color: transparent;
 }
@@ -7801,10 +7778,6 @@ select {
 .dark\:bg-zinc-900:is(.dark *) {
   --tw-bg-opacity: 1;
   background-color: rgb(24 24 27 / var(--tw-bg-opacity));
-}
-
-.dark\:bg-opacity-60:is(.dark *) {
-  --tw-bg-opacity: 0.6;
 }
 
 .dark\:bg-\[radial-gradient\(circle_at_right\2c hsl\(0_0\%_100\%\/0\.75\)\2c transparent_50\%\)\2c radial-gradient\(circle_at_right\2c hsl\(var\(--hue\)_var\(--saturation\)_var\(--lightness\2c 50\%\)\/1\)_50\%\2c transparent\)\]:is(.dark *) {
@@ -9084,10 +9057,6 @@ select {
     align-items: center;
   }
 
-  .sm\:justify-start {
-    justify-content: flex-start;
-  }
-
   .sm\:justify-center {
     justify-content: center;
   }
@@ -9856,14 +9825,6 @@ select {
 
 @media (min-width: 1280px) {
 
-  .xl\:left-0 {
-    left: 0px;
-  }
-
-  .xl\:left-\[18\%\] {
-    left: 18%;
-  }
-
   .xl\:right-0 {
     right: 0px;
   }
@@ -9878,10 +9839,6 @@ select {
 
   .xl\:mb-0 {
     margin-bottom: 0px;
-  }
-
-  .xl\:ml-4 {
-    margin-left: 1rem;
   }
 
   .xl\:ml-auto {

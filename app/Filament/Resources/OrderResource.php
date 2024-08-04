@@ -97,26 +97,39 @@ class OrderResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Action::make('set_driver')
-                        ->label(__('Set Driver'))
-                        ->icon('heroicon-o-arrows-right-left')
+                    Tables\Actions\Action::make('assignDriver')
+                        ->label('Assign Driver')
+                        ->action(function (Order $record, array $data): void {
+                            $record->update([
+                                'driver_id' => $data['driver_id'],
+                            ]);
+                        })
                         ->form([
-                            Forms\Components\Select::make('status')
-                                ->label(__('Order Status'))
-                                ->hiddenLabel()
-                                ->options(OrderStatus::class)
-                                ->default(OrderStatus::RESERVED)
-                                ->live()
+                            Forms\Components\Select::make('driver_id')
+                                ->label('Driver')
+                                ->relationship('driver', 'name') // رابطه صحیح باید استفاده شود
                                 ->required(),
-                        ])
-                        ->action(function (Order $record, array $data) {
-                            $record->driver_id = $data['driver_id'];
-                            $record->save();
-                            Notification::make()
-                                ->title($record->driver_id ? __('Driver Assigned') : __('Driver Unassigned'))
-                                ->body('yesss')
-                                ->success();
-                        }),
+                        ]),
+//                    Action::make('set_driver')
+//                        ->label(__('Set Driver'))
+//                        ->icon('heroicon-o-arrows-right-left')
+//                        ->form([
+//                            Forms\Components\Select::make('status')
+//                                ->label(__('Order Status'))
+//                                ->hiddenLabel()
+//                                ->options(OrderStatus::class)
+//                                ->default(OrderStatus::RESERVED)
+//                                ->live()
+//                                ->required(),
+//                        ])
+//                        ->action(function (Order $record, array $data) {
+//                            $record->driver_id = $data['driver_id'];
+//                            $record->save();
+//                            Notification::make()
+//                                ->title($record->driver_id ? __('Driver Assigned') : __('Driver Unassigned'))
+//                                ->body('yesss')
+//                                ->success();
+//                        }),
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
@@ -125,26 +138,26 @@ class OrderResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    Action::make('set_driver')
-                        ->label(__('Set Driver'))
-                        ->icon('heroicon-o-arrows-right-left')
-                        ->form([
-                            Forms\Components\Select::make('status')
-                                ->label(__('Order Status'))
-                                ->hiddenLabel()
-                                ->options(OrderStatus::class)
-                                ->default(OrderStatus::RESERVED)
-                                ->live()
-                                ->required(),
-                        ])
-                        ->action(function ($record, array $data) {
-                            $record->driver_id = $data['driver_id'];
-                            $record->save();
-                            Notification::make()
-                                ->title($record->driver_id ? __('Driver Assigned') : __('Driver Unassigned'))
-                                ->body('yesss')
-                                ->success();
-                        })
+//                    Action::make('set_driver')
+//                        ->label(__('Set Driver'))
+//                        ->icon('heroicon-o-arrows-right-left')
+//                        ->form([
+//                            Forms\Components\Select::make('status')
+//                                ->label(__('Order Status'))
+//                                ->hiddenLabel()
+//                                ->options(OrderStatus::class)
+//                                ->default(OrderStatus::RESERVED)
+//                                ->live()
+//                                ->required(),
+//                        ])
+//                        ->action(function ($record, array $data) {
+//                            $record->driver_id = $data['driver_id'];
+//                            $record->save();
+//                            Notification::make()
+//                                ->title($record->driver_id ? __('Driver Assigned') : __('Driver Unassigned'))
+//                                ->body('yesss')
+//                                ->success();
+//                        })
                 ]),
             ]);
     }

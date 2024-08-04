@@ -3,7 +3,9 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Livewire\Auth\Login;
-use App\Livewire\Customer\Panel;
+use App\Livewire\Customer\Panel as CustomerPanel;
+use App\Livewire\Driver\Orders as DriverOrders;
+use App\Livewire\Driver\Panel as DriverPanel;
 use App\Livewire\Customer\Profile;
 use App\Models\Address;
 use App\Models\Customer;
@@ -46,20 +48,24 @@ Route::post('create_address', [CustomerController::class, 'createAddress'])->nam
 
 
 Route::middleware(['guest'])->group(function () {
-    Route::get('login-phone', [AuthController::class, 'loginPhone'])->name('login-phone');
-    Route::post('login-phone', [AuthController::class, 'doLoginPhone'])->name('doLoginPhone');
-    Route::get('verify', [AuthController::class, 'verify'])->name('verify');
-    Route::post('doVerify', [AuthController::class, 'doVerify'])->name('doVerify');
+//    Route::get('login-phone', [AuthController::class, 'loginPhone'])->name('login-phone');
+//    Route::post('login-phone', [AuthController::class, 'doLoginPhone'])->name('doLoginPhone');
+//    Route::get('verify', [AuthController::class, 'verify'])->name('verify');
+//    Route::post('doVerify', [AuthController::class, 'doVerify'])->name('doVerify');
 });
 Route::middleware('guest')->group(function () {
     Route::get('/login', Login::class)->name('login');
 });
 Route::middleware(['auth:customer'])->prefix('panel')->group(function () {
-    Route::get('/', Panel::class)->name('customer.panel.index');
+    Route::get('/', CustomerPanel::class)->name('customer.panel.index');
     Route::get('/profile', Profile::class)->name('customer.panel.profile');
     Route::get('/test/{address}', function (Address $address){
         $lat = $address->latitude;
         $lng = $address->longitude;
         return redirect("");
     })->name("admin.users.edit");
+});
+Route::middleware(['auth:driver'])->prefix('panel')->group(function () {
+    Route::get('/', DriverPanel::class)->name('driver.panel.index');
+    Route::get('/orders', DriverOrders::class)->name('driver.panel.orders');
 });

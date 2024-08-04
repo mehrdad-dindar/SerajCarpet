@@ -5,7 +5,7 @@
         "dev": "vite",
         "build": "vite build",
         "preview": "vite preview",
-        "build:customer": "TAILWIND_CONFIG=./tailwind.config.customer.js postcss resources/css/customer.css -o public/panel/css/customer.css"
+        "build:customer": "TAILWIND_CONFIG=./tailwind.client.config.js postcss resources/css/client.css -o public/panel/css/client.css"
     },
     "main": "resources/js/main.js",
     "devDependencies": {

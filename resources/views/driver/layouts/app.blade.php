@@ -21,14 +21,14 @@
             @include('customer.layouts.footers.guest.footer')
         @else
             @if (true) {{--Request::is('rtl')--}}
-                @include('customer.layouts.navbars.auth.sidebar')
-                <main class="ease-soft-in-out xl:mr-68.5 relative h-full max-h-screen rounded-xl transition-all duration-200">
-                    @include('customer.layouts.navbars.auth.nav')
-                    <div class="w-full px-6 py-6 mx-auto">
-                        {{ $slot }}
-                        @include('customer.layouts.footers.auth.footer')
-                    </div>
-                </main>
+            @include('customer.layouts.navbars.auth.sidebar')
+            <main class="ease-soft-in-out xl:mr-68.5 relative h-full max-h-screen rounded-xl transition-all duration-200">
+                @include('customer.layouts.navbars.auth.nav')
+                <div class="w-full px-6 py-6 mx-auto">
+                    {{ $slot }}
+                    @include('customer.layouts.footers.auth.footer')
+                </div>
+            </main>
 
             @elseif (Request::is('virtual-reality'))
                 @include('customer.layouts.navbars.auth.nav')
