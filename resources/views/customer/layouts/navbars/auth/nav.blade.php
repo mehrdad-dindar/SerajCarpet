@@ -7,7 +7,7 @@
       <!-- breadcrumb -->
       <ol class="flex flex-wrap pt-1 bg-transparent rounded-lg">
         <li class="{{ (true ? 'pl-2' : '') }}{{--Request::is('rtl')--}} leading-normal text-size-sm">
-          <a class="opacity-50 text-slate-700" href="{{ route("customer.panel.index") }}">{{__("Dashboard")}}</a>
+          <a class="opacity-50 text-slate-700" href="{{ auth('customer')->check() ? route("customer.panel.index") : route("driver.panel.index") }}">{{__("Dashboard")}}</a>
         </li>
         <li
           class="{{ (Request::is("panel") ? 'hidden' : '') }} text-size-sm capitalize leading-normal text-slate-700 {{ (true ? 'before:float-right before:pl-2' : 'before:float-left before:pr-2') }}{{--Request::is('rtl')--}} before:text-gray-600 before:content-['/']"

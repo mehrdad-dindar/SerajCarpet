@@ -16,19 +16,18 @@ use function Laravel\Prompts\warning;
 class Token extends Model
 {
     use Sms;
+
     const EXPIRATION_TIME = 2; // minutes
-    protected $fillable = [
-        'code',
-        'customer_id',
-        'used'
-    ];
+    protected $guarded;
+
     public function __construct(array $attributes = [])
     {
-        if (! isset($attributes['code'])) {
+        if (!isset($attributes['code'])) {
             $attributes['code'] = $this->generateCode();
         }
         parent::__construct($attributes);
     }
+
     /**
      * Generate a six digits code
      *
@@ -41,6 +40,12 @@ class Token extends Model
         $min = $max / 10 - 1;
         return mt_rand($min, $max);
     }
+
+    public function tokenable()
+    {
+        return $this->morphTo();
+    }
+
     /**
      * User tokens relation
      *
@@ -50,6 +55,7 @@ class Token extends Model
     {
         return $this->belongsTo(Customer::class);
     }
+
     /**
      * True if the token is not used nor expired
      *
@@ -57,8 +63,9 @@ class Token extends Model
      */
     public function isValid(): bool
     {
-        return ! $this->isUsed() && ! $this->isExpired();
+        return !$this->isUsed() && !$this->isExpired();
     }
+
     /**
      * Is the current token used
      *
@@ -68,6 +75,7 @@ class Token extends Model
     {
         return $this->used;
     }
+
     /**
      * Is the current token expired
      *
@@ -83,15 +91,15 @@ class Token extends Model
      */
     public function sendCode(): bool
     {
-        if (! $this->customer) {
+        if (!$this->tokenable) {
             throw new Exception("No user attached to this token.");
         }
-        if (! $this->code) {
+        if (!$this->code) {
             $this->code = $this->generateCode();
         }
         try {
             if (app()->isProduction()) {
-                $this->sendPattern($this->customer->phone, SmsPattern::LOGIN, [strval($this->code)]);
+                $this->sendPattern($this->tokenable->phone, SmsPattern::LOGIN, [strval($this->code)]);
             } else {
                 session()->put('code', strval($this->code));
             }
@@ -99,8 +107,8 @@ class Token extends Model
             // Log the exception with detailed information
             Log::warning('Failed to send SMS', [
                 'exception' => $ex,
-                'customer' => $this->customer,
-                'phone' => $this->customer->phone ?? 'N/A',
+                'customer' => $this->tokenable,
+                'phone' => $this->tokenable->phone ?? 'N/A',
                 'code' => $this->code,
                 'decryptedCode' => $decryptedCode ?? 'N/A',
             ]);

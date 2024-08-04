@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -14,7 +15,7 @@ class Customer extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $guarded = [];
+    protected $guarded;
 
     protected $hidden = [
         'password', 'remember_token',
@@ -40,10 +41,10 @@ class Customer extends Authenticatable
     /**
      * Retrieve the tokens associated with this instance.
      *
-     * @return HasMany
+     * @return MorphMany
      */
-    public function tokens(): HasMany
+    public function tokens(): MorphMany
     {
-        return $this->hasMany(Token::class);
+        return $this->morphMany(Token::class, 'tokenable');
     }
 }
