@@ -27,6 +27,15 @@
       <ul
         class="flex flex-row justify-end pl-0 mb-0 list-none md-max:w-full {{ (true ? 'pr-10 ml-0 mr-auto' : '') }}{{--Request::is('rtl')--}}">
           <!-- notifications -->
+          @if(auth('driver')->check())
+          <li class="pe-4 flex items-center animate-pulse">
+              <span class="flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                  <x-phosphor.icons::light.truck class="w-5 h-5 me-1" />
+
+                  <span>{{ __("Driver") }}</span>
+              </span>
+          </li>
+          @endif
           <li class="relative flex items-center {{ (true ? 'pe-4' : 'ps-2') }}{{--Request::is('rtl')--}}">
               <p class="hidden transform-dropdown-show"></p>
               <a href="javascript:;" class="block p-0 transition-all text-size-sm ease-nav-brand text-slate-500"
