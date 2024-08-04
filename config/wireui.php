@@ -116,7 +116,10 @@ return [
 
     'components' => Config::defaultComponents([
          'button' => [
-             'alias' => 'new-button',
+             'alias' => 'sbtn',
+         ],
+         'alert' => [
+             'alias' => 'alrt',
          ],
         // 'mini-button' => [
         //     'class' => Components\Button\Mini::class,
