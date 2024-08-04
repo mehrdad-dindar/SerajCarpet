@@ -17,6 +17,20 @@ class Customer extends Authenticatable
 
     protected $guarded;
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($model) {
+            $model->id_name = $model->generateIdName($model->phone, $model->name);
+        });
+    }
+
+    private function generateIdName($phone, $name)
+    {
+        return trim($phone . ' ' . ($name ?? ''));
+    }
+
     protected $hidden = [
         'password', 'remember_token',
     ];
