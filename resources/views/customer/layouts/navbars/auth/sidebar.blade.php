@@ -226,15 +226,14 @@
                             class="mr-1 duration-300 opacity-100 pointer-events-none ease-soft">{{ __("User Profile") }}</span>
                     </a>
                 </li>
-
                 <li class="mt-0.5 w-full">
-                    <a class="py-2.7 text-size-sm ease-nav-brand my-0 mx-4 flex items-center whitespace-nowrap px-4 transition-colors {{ (Request::is('orders') ? 'shadow-soft-xl rounded-lg bg-white font-semibold text-slate-700' : '') }}"
-                       href="{{ url('user-management') }}">
+                    <a class="py-2.7 text-size-sm ease-nav-brand my-0 mx-4 flex items-center whitespace-nowrap px-4 transition-colors {{ (Request::is('panel/orders') ? 'shadow-soft-xl rounded-lg bg-white font-semibold text-slate-700' : '') }}"
+                       href="{{ route("driver.panel.orders") }}">
 
                         <div
-                            class="{{ (Request::is('user-management') ? ' bg-gradient-fuchsia' : '') }} shadow-soft-2xl me-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white bg-center stroke-0 text-center xl:p-2.5">
+                            class="{{ (Request::is('panel/orders') ? ' bg-gradient-fuchsia fill-white' : 'fill-slate-800') }} shadow-soft-2xl me-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white bg-center stroke-0 text-center xl:p-2.5">
 
-                            <svg class="fill-slate-800" xmlns="http://www.w3.org/2000/svg" width="12px"
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12px"
                                  height="12px" viewBox="0 0 576 512">
                                 <!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
                                 <path
