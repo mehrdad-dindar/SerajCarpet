@@ -9,8 +9,14 @@ module.exports = {
         "./resources/views/livewire/**/*.blade.php",
         "./resources/**/*.js",
         "./resources/**/*.vue",
+        "./vendor/wireui/wireui/src/*.php",
+        "./vendor/wireui/wireui/ts/**/*.ts",
+        "./vendor/wireui/wireui/src/WireUi/**/*.php",
+        "./vendor/wireui/wireui/src/Components/**/*.php",
     ],
-    presets: [],
+    presets: [
+        require("./vendor/wireui/wireui/tailwind.config.js")
+    ],
     darkMode: "class",
     theme: {
         extend: {
@@ -290,6 +296,20 @@ module.exports = {
             },
 
             purple: {
+                DEFAULT: colors.purple,
+                50: "#faf5ff",
+                100: "#f3e8ff",
+                200: "#e9d5ff",
+                300: "#d8b4fe",
+                400: "#c084fc",
+                500: "#a855f7",
+                600: "#9333ea",
+                700: "#7928ca",
+                800: "#6b21a8",
+                900: "#581c87",
+            },
+
+            secondary: {
                 DEFAULT: colors.purple,
                 50: "#faf5ff",
                 100: "#f3e8ff",
