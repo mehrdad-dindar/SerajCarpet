@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Driver extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes,HasFactory;
     protected $guarded;
 
     // order relationship
