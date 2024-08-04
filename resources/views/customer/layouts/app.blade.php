@@ -1,4 +1,4 @@
-@extends('customer.layouts.master')
+@extends('layouts.panel.master')
 @section("content")
     @auth
         @if (Request::is('static-sign-up'))

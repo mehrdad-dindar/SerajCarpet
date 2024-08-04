@@ -61,4 +61,9 @@ class Order extends Model
     {
         return OrderStatus::make($this->status);
     }
+
+    public function driver(): BelongsTo
+    {
+        return $this->belongsTo(Driver::class,"driver_id");
+    }
 }

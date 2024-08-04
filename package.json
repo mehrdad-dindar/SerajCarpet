@@ -5,7 +5,7 @@
         "dev": "vite",
         "build": "vite build",
         "preview": "vite preview",
-        "build:customer": "TAILWIND_CONFIG=./tailwind.config.customer.js postcss resources/css/customer.css -o public/panel/css/customer.css"
+        "build:customer": "TAILWIND_CONFIG=./tailwind.client.config.js postcss resources/css/client.css -o public/panel/css/client.css"
     },
     "main": "resources/js/main.js",
     "devDependencies": {
@@ -23,6 +23,7 @@
     },
     "dependencies": {
         "@tailus/themer": "^0.0.5",
+        "alpinejs": "^3.14.1",
         "mapbox-gl": "^3.4.0",
         "swiper": "^11.0.6"
     }

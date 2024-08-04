@@ -21,6 +21,11 @@ trait Neshan
         } catch (Exception $e) {
             return response()->json(['error'. $e->getCode() => $e->getMessage()]);
         }
+    }
 
+    public function showMap()
+    {
+        $apiKey = env('NESHAN_API_KEY','service.df64f13754cc4cde9c69362bed1a62c4');
+        $url = "https://api.neshan.org/v4/static?key=$apiKey&type=neshan&width=500&height=500&zoom=12&center=32.657307%2C51.677579&markerToken=101139.nRmybq5";
     }
 }
