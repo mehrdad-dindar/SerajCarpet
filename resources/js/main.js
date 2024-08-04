@@ -1,9 +1,9 @@
 import "../css/customer.css";
-import Alpine from 'alpinejs'
-
-window.Alpine = Alpine
-
-Alpine.start()
+// import Alpine from 'alpinejs'
+//
+// window.Alpine = Alpine
+//
+// Alpine.start()
 
 let switchers = document.querySelectorAll(".switcher");
 if (
