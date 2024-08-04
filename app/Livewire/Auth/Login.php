@@ -72,6 +72,8 @@ class Login extends Component
         if (!$user) {
             $user = Customer::firstOrCreate([
                 'phone' => $phone
+            ],[
+                "id_name" => $phone
             ]);
         }
         return $user;
