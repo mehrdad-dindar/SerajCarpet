@@ -65,7 +65,7 @@ Route::middleware(['auth:customer'])->prefix('panel')->group(function () {
         return redirect("");
     })->name("admin.users.edit");
 });
-Route::middleware(['auth:driver'])->prefix('panel')->group(function () {
+Route::middleware(['auth:driver'])->prefix('dashboard')->group(function () {
     Route::get('/', DriverPanel::class)->name('driver.panel.index');
     Route::get('/orders', DriverOrders::class)->name('driver.panel.orders');
 });
