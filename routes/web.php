@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Livewire\Auth\Login;
 use App\Livewire\Customer\Panel as CustomerPanel;
+use App\Livewire\Driver\Orders as DriverOrders;
 use App\Livewire\Driver\Panel as DriverPanel;
 use App\Livewire\Customer\Profile;
 use App\Models\Address;
@@ -66,4 +67,5 @@ Route::middleware(['auth:customer'])->prefix('panel')->group(function () {
 });
 Route::middleware(['auth:driver'])->prefix('panel')->group(function () {
     Route::get('/', DriverPanel::class)->name('driver.panel.index');
+    Route::get('/orders', DriverOrders::class)->name('driver.panel.orders');
 });
