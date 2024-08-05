@@ -99,6 +99,7 @@ class OrderResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('assignDriver')
                         ->label('Assign Driver')
+                        ->translateLabel()
                         ->action(function (Order $record, array $data): void {
                             $record->update([
                                 'driver_id' => $data['driver_id'],
