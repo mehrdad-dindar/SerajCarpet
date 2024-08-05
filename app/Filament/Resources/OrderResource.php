@@ -88,7 +88,11 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('reserved_for')
                     ->translateLabel()
                     ->sortable()
-                    ->toggleable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('driver.name')
+                    ->translateLabel()
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
@@ -99,6 +103,7 @@ class OrderResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('assignDriver')
                         ->label('Assign Driver')
+                        ->icon("heroicon-o-truck")
                         ->translateLabel()
                         ->action(function (Order $record, array $data): void {
                             $record->update([
@@ -138,6 +143,21 @@ class OrderResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('assignDriver')
+                        ->label('Assign Driver')
+                        ->icon("heroicon-o-truck")
+                        ->translateLabel()
+                        ->action(function (Collection $records, array $data): void {
+                            $ids = $records->pluck('id');
+                            Order::whereIn('id', $ids)->update(['driver_id' => $data['driver_id']]);
+                        })
+                        ->form([
+                            Forms\Components\Select::make('driver_id')
+                                ->label("Driver")
+                                ->translateLabel()
+                                ->relationship('driver', 'name') // رابطه صحیح باید استفاده شود
+                                ->required(),
+                        ]),
                     Tables\Actions\DeleteBulkAction::make(),
 //                    Action::make('set_driver')
 //                        ->label(__('Set Driver'))
