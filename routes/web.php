@@ -28,9 +28,15 @@ Route::middleware([
 
 // TODO: Hashed link for submitting location
 Route::get('test', function (){
-    $hashids = new Hashids('',6);
-    $hashedID = $hashids->encode(51);
-    return '<a href="'.\route("set-location",$hashedID).'">hi</a>';
+    $recipient = auth()->user();
+
+    \Filament\Notifications\Notification::make()
+        ->title('Saved successfully')
+        ->sendToDatabase($recipient);
+    dd("sent");
+//    $hashids = new Hashids('',6);
+//    $hashedID = $hashids->encode(51);
+//    return '<a href="'.\route("set-location",$hashedID).'">hi</a>';
 });
 Route::get('/set-location/{id}', function ($id) {
     $hashid = new Hashids('',6);

@@ -25,8 +25,10 @@
     },
     "dependencies": {
         "@tailus/themer": "^0.0.5",
+        "@tailwindcss/nesting": "^0.0.0-insiders.565cd3e",
         "alpinejs": "^3.14.1",
         "mapbox-gl": "^3.4.0",
+        "postcss-nesting": "^13.0.0",
         "swiper": "^11.0.6"
     }
 }
