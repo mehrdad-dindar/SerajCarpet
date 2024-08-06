@@ -96,6 +96,8 @@ class AddressResource extends Resource
                                             $set('address', $neshan->formatted_address);
                                             $set('state', $neshan->state);
                                             $set('city', $neshan->city);
+                                            $set('municipality_zone', $neshan->municipality_zone);
+                                            $set('neighbourhood', $neshan->neighbourhood);
                                         }
                                     }
                                 }),
@@ -116,6 +118,8 @@ class AddressResource extends Resource
                             Forms\Components\Hidden::make('longitude')
                                 ->required()
                                 ->label(__('longitude')),
+                            Forms\Components\Hidden::make('municipality_zone'),
+                            Forms\Components\Hidden::make('neighbourhood'),
                         ])->columns(12),
 
                         Forms\Components\Checkbox::make('is_active')
@@ -133,9 +137,14 @@ class AddressResource extends Resource
                                 $set('latitude', $state['lat']);
                                 $set('longitude', $state['lng']);
                                 if ($get('is_suggested')) {
-                                    $set('state', self::getHint('state', $get));
-                                    $set('city', self::getHint('city', $get));
-                                    $set('address', self::getHint('address', $get));
+                                    $data = self::getHint(field: null,get: $get, all: true);
+                                    if ($data->status == "OK") {
+                                        $set('state', $data->state);
+                                        $set('city', $data->city);
+                                        $set('address', $data->address);
+                                        $set('municipality_zone', $data->municipality_zone);
+                                        $set('neighbourhood', $data->neighbourhood);
+                                    }
                                 }
                             })
                             ->afterStateHydrated(function ($state, $record, Set $set): void {
@@ -159,22 +168,32 @@ class AddressResource extends Resource
             ]);
     }
 
-    public static function getHint(string $field, Get $get)
+    public static function getHint(?string $field, Get $get, bool $all = false)
     {
         $latitude = $get('latitude');
         $longitude = $get('longitude');
 
-        if ($latitude && $longitude) {
-            $neshan = self::reverseGeocoding($latitude, $longitude)->getData();
-            return match ($field) {
-                'address' => $neshan->formatted_address ?? '',
-                'state' => $neshan->state ?? '',
-                'city' => $neshan->city ?? '',
-                default => '',
-            };
+        if (!$latitude || !$longitude) {
+            return '';
         }
 
-        return '';
+        $neshan = self::reverseGeocoding($latitude, $longitude)->getData();
+        if ($all) {
+            return $neshan;
+        }
+        return self::getFieldValue($field, $neshan);
+    }
+
+    private static function getFieldValue(string $field, $neshan): string
+    {
+        return match ($field) {
+            'address' => $neshan->formatted_address ?? '',
+            'state' => $neshan->state ?? '',
+            'city' => $neshan->city ?? '',
+            'municipality_zone' => $neshan->municipality_zone ?? '',
+            'neighbourhood' => $neshan->neighbourhood ?? '',
+            default => '',
+        };
     }
 
     public static function table(Table $table): Table
@@ -232,21 +251,5 @@ class AddressResource extends Resource
             'create' => Pages\CreateAddress::route('/create'),
             'edit' => Pages\EditAddress::route('/{record}/edit'),
         ];
-    }
-
-    public function getFullAddress(mixed $latitude, mixed $longitude, Set $set, Get $get)
-    {
-        $neshan = $this->reverseGeocoding($latitude, $longitude)->getData();
-
-//        dd($neshan);
-        if ($get('is_suggested')) {
-            $set('address', $neshan->formatted_address);
-            $set('state', $neshan->state);
-            $set('city', $neshan->city);
-        } else {
-            $set('address', 'address')->hint('$neshan->formatted_address');
-            $set('state', 'state')->hint('$neshan->state');
-            $set('city', 'city')->hint('$neshan->city');
-        }
     }
 }
