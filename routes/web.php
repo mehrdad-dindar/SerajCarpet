@@ -28,6 +28,7 @@ Route::middleware([
 
 // TODO: Hashed link for submitting location
 Route::get('test', function (){
+//    return view('welcome');
     $recipient = auth()->user();
 
     \Filament\Notifications\Notification::make()
