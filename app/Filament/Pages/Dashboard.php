@@ -21,12 +21,11 @@ class Dashboard extends \Filament\Pages\Dashboard
                 ])
                 ->action(function (array $data){
                     $recipient = User::find(1);
-                    $res = Notification::make()
+                    Notification::make()
                         ->title('Saved successfully'.implode(', ', $data))
                         ->success()
                         ->sendToDatabase($recipient)
                         ->broadcast($recipient);
-dd($res);
                 }),
         ];
     }
