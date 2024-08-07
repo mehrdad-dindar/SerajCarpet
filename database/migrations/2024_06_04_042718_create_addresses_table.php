@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('no')->nullable();
             $table->string('floor')->nullable();
             $table->string('unit')->nullable();
+            $table->string('municipality_zone')->nullable();
+            $table->string('neighbourhood')->nullable();
             $table->text('note')->nullable();
             $table->double('latitude')->nullable();
             $table->double('longitude')->nullable();
