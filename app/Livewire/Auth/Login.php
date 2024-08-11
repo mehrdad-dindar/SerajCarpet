@@ -11,9 +11,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use function Symfony\Component\String\u;
 
+#[Title("ورود / عضویت")]
 class Login extends Component
 {
     public $phone = '';
