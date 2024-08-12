@@ -1,4 +1,8 @@
-@config "tailwind.client.config.js";
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@config "./tailwind.client.config.js";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.ltr {
+    direction: ltr;
+}
