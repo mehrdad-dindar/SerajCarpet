@@ -23,7 +23,7 @@
             @if (true) {{--Request::is('rtl')--}}
             @include('driver.layouts.navbars.auth.sidebar')
             <main class="ease-soft-in-out xl:mr-68.5 relative h-full max-h-screen rounded-xl transition-all duration-200">
-                @include('customer.layouts.navbars.auth.nav')
+                @include('driver.layouts.navbars.auth.nav')
                 <div class="w-full px-6 py-6 mx-auto">
                     {{ $slot }}
                     @include('customer.layouts.footers.auth.footer')
@@ -31,14 +31,14 @@
             </main>
 
             @elseif (Request::is('virtual-reality'))
-                @include('customer.layouts.navbars.auth.nav')
+                @include('driver.layouts.navbars.auth.nav')
                 @include('driver.layouts.navbars.auth.sidebar')
                 {{ $slot }}
                 @include('customer.layouts.footers.auth.footer')
             @else
                 @include('driver.layouts.navbars.auth.sidebar')
                 <main class="ease-soft-in-out xl:ml-68.5 relative h-full max-h-screen rounded-xl transition-all duration-200">
-                    @include('customer.layouts.navbars.auth.nav')
+                    @include('driver.layouts.navbars.auth.nav')
                     <div class="w-full px-6 py-6 mx-auto">
                         {{ $slot }}
                         @include('customer.layouts.footers.auth.footer')
