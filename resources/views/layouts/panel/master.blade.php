@@ -54,8 +54,6 @@
 
     @livewireStyles
     <wireui:scripts />
-{{--    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>--}}
-
 </head>
 
 <body class="m-0 font-iranSans antialiased font-normal text-size-base leading-default bg-gray-50 text-slate-500">
