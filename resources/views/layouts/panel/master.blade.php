@@ -50,11 +50,11 @@
     <!-- Main Styling -->
     <link href="{{ asset('panel/css/styles.css') }}?v=1.0.3" rel="stylesheet"/>
 
-    @vite('resources/css/client.css')
+    @vite('resources/css/client/client.css')
 
     @livewireStyles
     <wireui:scripts />
-    <script src="//unpkg.com/alpinejs" defer></script>
+{{--    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>--}}
 
 </head>
 
