@@ -79,4 +79,5 @@ Route::middleware(['auth:driver'])->prefix('dashboard')->group(function () {
     Route::get('/orders', DriverOrders::class)->name('driver.panel.orders');
     Route::get('/profile', DriverProfile::class)->name('driver.panel.profile');
     Route::get('/order/wizard', CreateWizard::class)->name('driver.order.wizard');
+    Route::get('/customers', CustomerController::class)->name('customer.index');
 });

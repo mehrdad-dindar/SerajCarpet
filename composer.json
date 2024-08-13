@@ -25,6 +25,7 @@
         "laravel/telescope": "^5.0",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.0",
+        "spatie/laravel-livewire-wizard": "^2.3",
         "wireui/breadcrumbs": "^3.1",
         "wireui/phosphoricons": "^2.3",
         "wireui/wireui": "^2.0"

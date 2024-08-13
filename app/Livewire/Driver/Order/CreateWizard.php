@@ -2,16 +2,32 @@
 
 namespace App\Livewire\Driver\Order;
 
+use App\Livewire\Driver\Order\Steps\AddItemsStepComponent;
+use App\Livewire\Driver\Order\Steps\SelectCustomerStepComponent;
+use App\Support\CreateOrderWizardState;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
-use Livewire\Component;
+use Spatie\LivewireWizard\Components\StepComponent;
+use Spatie\LivewireWizard\Components\WizardComponent;
 
 #[Title("ثبت سفارش")]
-class CreateWizard extends Component
+#[Layout("driver.layouts.app")]
+class CreateWizard extends WizardComponent
 {
-    #[Layout("driver.layouts.app")]
-    public function render()
+
+    /**
+     * @return array
+     */
+    public function steps(): array
     {
-        return view('livewire.driver.order.create-wizard');
+        return [
+            SelectCustomerStepComponent::class,
+            AddItemsStepComponent::class
+        ];
+    }
+
+    public function stateClass(): string
+    {
+        return CreateOrderWizardState::class;
     }
 }

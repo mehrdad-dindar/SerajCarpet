@@ -2,8 +2,12 @@
 
 namespace App\Providers;
 
+use App\Livewire\Driver\Order\CreateWizard;
+use App\Livewire\Driver\Order\Steps\AddItemsStepComponent;
+use App\Livewire\Driver\Order\Steps\SelectCustomerStepComponent;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,5 +25,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+
+        Livewire::component('create-order-wizard', CreateWizard::class);
+
+        Livewire::component('select-customer',SelectCustomerStepComponent::class);
+        Livewire::component('select-items',AddItemsStepComponent::class);
     }
 }

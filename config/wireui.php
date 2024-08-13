@@ -121,6 +121,9 @@ return [
          'alert' => [
              'alias' => 'alrt',
          ],
+         'select' => [
+             'alias' => 'srj-select',
+         ],
         // 'mini-button' => [
         //     'class' => Components\Button\Mini::class,
         //     'alias' => 'new-mini-button',
