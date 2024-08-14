@@ -43,7 +43,7 @@ return [
     'declined' => 'The :attribute field must be declined.',
     'declined_if' => 'The :attribute field must be declined when :other is :value.',
     'different' => 'The :attribute field and :other must be different.',
-    'digits' => 'The :attribute field must be :digits digits.',
+    'digits' => 'فیلد :attribute باید :digits رقم باشد.',
     'digits_between' => 'The :attribute field must be between :min and :max digits.',
     'dimensions' => 'The :attribute field has invalid image dimensions.',
     'distinct' => 'The :attribute field has a duplicate value.',
@@ -189,6 +189,14 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        "name" => "نام",
+        "email" => "ایمیل",
+        "password" => "کلمه عبور",
+        "password_confirmation" => "تایید کلمه عبور",
+        "phone" => "شماره تماس",
+        "address" => "آدرس",
+        "description" => "توضیحات",
+    ],
 
 ];

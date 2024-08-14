@@ -24,6 +24,7 @@ class AddItemsStepComponent extends StepComponent
     {
         return [
             'label' => __("Order Items"),
+            'icon' => 'list-bullet',
         ];
     }
 }

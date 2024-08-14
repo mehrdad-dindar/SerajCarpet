@@ -17,6 +17,7 @@
     "Customer Name" : "نام مشتری",
     "Customer Phone" : "شماره تماس",
     "Phone" : "موبایل",
+    "phone" : "موبایل",
     "License" : "مجوز",
     "Image" : "تصویر",
     "Car tag" : "پلاک خودرو",
@@ -86,5 +87,11 @@
     "Edit" : "ویرایش",
     "Driver" : "راننده",
     "Assign Driver" : "تخصیص راننده",
+    "Select Or Create Customer" : "انتخاب یا ایجاد مشتری",
+    "Select Customer" : "انتخاب مشتری",
+    "Create Customer" : "ایجاد مشتری",
+    "Select some customer..." : "انتخاب یک مشتری...",
+    "Submit" : "ثبت",
+    "Note that the customer's name and mobile number are required !" : "توجه داشته باشید که نام و شماره موبایل مشتری الزامیست !",
     "Customer" : "مشتری"
 }

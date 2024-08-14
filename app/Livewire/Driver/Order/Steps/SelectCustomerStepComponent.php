@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Driver\Order\Steps;
 
+use App\Models\Customer;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -13,10 +14,20 @@ use Spatie\LivewireWizard\Components\StepComponent;
 class SelectCustomerStepComponent extends StepComponent
 {
     public $customer_id;
-    public $customers = [
-        1 => "Mehrdad",
-        2 => "Hadi"
-    ];
+    public $icon = "home";
+
+    protected $listeners = ['customerCreated' => 'addCustomer'];
+
+    public function addCustomer($customerId)
+    {
+        $customer = Customer::find($customerId);
+        if ($customer) {
+            //
+            /*$this->customers->push($customer);*/
+            $this->customer_id = $customerId;
+        }
+    }
+
     public function render()
     {
         return view('livewire.driver.order.steps.select-customer-step-component');
@@ -28,7 +39,6 @@ class SelectCustomerStepComponent extends StepComponent
 
     public function submit()
     {
-        dd($this->customer_id);
         $this->validate();
 
         $this->nextStep();
@@ -38,6 +48,7 @@ class SelectCustomerStepComponent extends StepComponent
     {
         return [
             'label' => __("Customer"),
+            'icon' => 'user-plus',
         ];
     }
 }

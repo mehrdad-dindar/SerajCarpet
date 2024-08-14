@@ -1,5 +1,6 @@
 <?php
 
+use App\View\Components\SerajButton;
 use WireUi\Components;
 use WireUi\Enum\Packs;
 use WireUi\WireUiConfig as Config;
@@ -116,13 +117,31 @@ return [
 
     'components' => Config::defaultComponents([
          'button' => [
-             'alias' => 'sbtn',
+             'alias' => 'srj-button',
+         ],
+         'input' => [
+             'alias' => 'srj-input',
          ],
          'alert' => [
-             'alias' => 'alrt',
+             'alias' => 'srj-alert',
          ],
          'select' => [
              'alias' => 'srj-select',
+         ],
+         'modal' => [
+             'alias' => 'srj-modal',
+         ],
+         'card' => [
+             'alias' => 'srj-card',
+         ],
+         'maskable' => [
+             'alias' => 'srj-maskable',
+         ],
+         'phone' => [
+             'alias' => 'srj-phone',
+         ],
+         'icon' => [
+             'alias' => 'srj-icon',
          ],
         // 'mini-button' => [
         //     'class' => Components\Button\Mini::class,

@@ -6,3 +6,7 @@
 .ltr {
     direction: ltr;
 }
+
+.icon-margin svg{
+    @apply mr-0 me-3;
+}
