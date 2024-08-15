@@ -3,6 +3,7 @@
 namespace App\Livewire\Driver\Order;
 
 use App\Livewire\Driver\Order\Steps\AddItemsStepComponent;
+use App\Livewire\Driver\Order\Steps\ConfirmStepComponent;
 use App\Livewire\Driver\Order\Steps\SelectCustomerStepComponent;
 use App\Support\CreateOrderWizardState;
 use Livewire\Attributes\Layout;
@@ -22,7 +23,8 @@ class CreateWizard extends WizardComponent
     {
         return [
             SelectCustomerStepComponent::class,
-            AddItemsStepComponent::class
+            AddItemsStepComponent::class,
+            ConfirmStepComponent::class,
         ];
     }
 

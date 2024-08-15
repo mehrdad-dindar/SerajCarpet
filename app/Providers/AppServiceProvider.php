@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Livewire\Driver\Order\CreateWizard;
 use App\Livewire\Driver\Order\Steps\AddItemsStepComponent;
+use App\Livewire\Driver\Order\Steps\ConfirmStepComponent;
 use App\Livewire\Driver\Order\Steps\SelectCustomerStepComponent;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -30,5 +31,6 @@ class AppServiceProvider extends ServiceProvider
 
         Livewire::component('select-customer',SelectCustomerStepComponent::class);
         Livewire::component('select-items',AddItemsStepComponent::class);
+        Livewire::component('confirm-order',ConfirmStepComponent::class);
     }
 }
