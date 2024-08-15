@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\PropertyController;
 use App\Livewire\Auth\Login;
 use App\Livewire\Customer\Panel as CustomerPanel;
 use App\Livewire\Driver\Order\CreateWizard;
@@ -80,4 +81,6 @@ Route::middleware(['auth:driver'])->prefix('dashboard')->group(function () {
     Route::get('/profile', DriverProfile::class)->name('driver.panel.profile');
     Route::get('/order/wizard', CreateWizard::class)->name('driver.order.wizard');
     Route::get('/customers', CustomerController::class)->name('customer.index');
+    Route::get('/properties', PropertyController::class)->name('property.index');
+    Route::get('/properties/dimensions/{property}', [PropertyController::class,'getDimensions'])->name('property.dimensions');
 });

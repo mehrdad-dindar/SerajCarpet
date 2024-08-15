@@ -197,6 +197,7 @@ return [
         "phone" => "شماره تماس",
         "address" => "آدرس",
         "description" => "توضیحات",
+        "customer_id" => "شناسه مشتری",
     ],
 
 ];

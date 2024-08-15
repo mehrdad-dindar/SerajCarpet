@@ -54,6 +54,7 @@
     "takhte" : "تخته",
     "reserved" : "رزرو شده",
     "Dimensions" : "ابعاد",
+    "Select some Dimensions..." : "ابعاد را انتخاب کنید...",
     "Set Driver" : "تنظیم راننده",
     "Log out" : "خروج",
     "New Order" : "سفارش جدید",
@@ -93,5 +94,9 @@
     "Select some customer..." : "انتخاب یک مشتری...",
     "Submit" : "ثبت",
     "Note that the customer's name and mobile number are required !" : "توجه داشته باشید که نام و شماره موبایل مشتری الزامیست !",
+    "Add Order Items" : "افزودن آیتم های سفارش",
+    "Add Item" : "افزودن آیتم",
+    "Select Item" : "انتخاب آیتم",
+    "Select some Item..." : "",
     "Customer" : "مشتری"
 }

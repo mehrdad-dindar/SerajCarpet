@@ -15,7 +15,7 @@ class CustomerController extends Controller
 
     public function __invoke(Request $request): Collection
     {
-        return Customer::query()
+        $data = Customer::query()
             ->select('id', 'id_name')
             ->when(
                 $request->search,
@@ -28,12 +28,13 @@ class CustomerController extends Controller
                 fn (Builder $query) => $query->limit(10)
             )
             ->orderBy('id_name')
-            ->get()
+            ->get();
+        return $data;
             /*->map(function (Customer $customer) {
                 $customer->profile_image = "https://picsum.photos/300?id={$customer->id}";
 
                 return $customer;
-            })*/;
+            })*/
     }
     public function getFullAddress(Request $request)
     {
