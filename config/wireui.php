@@ -143,6 +143,9 @@ return [
          'icon' => [
              'alias' => 'srj-icon',
          ],
+         'badge' => [
+             'alias' => 'srj-badge',
+         ],
         // 'mini-button' => [
         //     'class' => Components\Button\Mini::class,
         //     'alias' => 'new-mini-button',

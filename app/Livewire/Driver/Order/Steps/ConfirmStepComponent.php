@@ -11,11 +11,12 @@ class ConfirmStepComponent extends StepComponent
 {
     protected Customer $customer;
     protected $orderItems = [];
+    protected $totalPrice;
 
     public function confirm()
     {
         $customer_id = $this->state()->customer();
-        $address = $this->state()->orderItems();
+        $orderItems = $this->state()->orderItems();
 
         // here you should store the amount and address somehow
 
@@ -26,6 +27,7 @@ class ConfirmStepComponent extends StepComponent
     {
         $this->customer = Customer::find((int)$this->state()->customer());
         $this->orderItems = $this->state()->orderItems();
+        $this->totalPrice = $this->calculateTotal();
     }
 
     public function render()
@@ -34,6 +36,8 @@ class ConfirmStepComponent extends StepComponent
         return view('livewire.driver.order.steps.confirm-step-component', [
             'customer' => $this->customer,
             'orderItems' => $orderItems,
+            'details' => $this->getDetails(),
+            'totalPrice' => $this->totalPrice,
         ]);
     }
 
@@ -48,7 +52,6 @@ class ConfirmStepComponent extends StepComponent
     private function getOrderItems()
     {
         $items = [];
-
         foreach ($this->orderItems as $item) {
             if ($item['property_id']) {
                 $items[] = Property::find($item['property_id']);
@@ -56,5 +59,39 @@ class ConfirmStepComponent extends StepComponent
         }
 
         return $items;
+    }
+
+    private function getDetails()
+    {
+        $details = [];
+        foreach ($this->orderItems as $item) {
+            if ($item['property_id']) {
+                $details[$item['property_id']] = [
+                    'quantity' => $item['count'],
+                    'dimensions' => $item['dimensions']
+                ];
+            }
+        }
+        return $details;
+    }
+
+    private function calculateTotal()
+    {
+        $detail = $this->getDetails();
+        $total = 0;
+        foreach ($this->getOrderItems() as $item) {
+            $dimensions = 1;
+            if (isset($detail[$item->id]['dimensions'])) {
+                $dimensions = (int)$detail[$item->id]['dimensions'] ?? 1;
+            }
+            $quantity = (int)$detail[$item->id]['quantity'] ?? 0;
+            $unitPrice = (int)$item['price'];
+            $total += $dimensions * $quantity * $unitPrice;
+        }
+        if ($total) {
+            return $total;
+        } else {
+            return 1;
+        }
     }
 }

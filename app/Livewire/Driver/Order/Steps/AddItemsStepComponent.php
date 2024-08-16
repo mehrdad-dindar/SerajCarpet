@@ -9,15 +9,22 @@ use Spatie\LivewireWizard\Components\StepComponent;
 class AddItemsStepComponent extends StepComponent
 {
     public $order_items = [];
-
     public function mount()
     {
-        $this->order_items[] = ['property_id' => null];
+        $this->order_items[] = [
+            'property_id' => null,
+            'dimensions' => null,
+            'count' => 1
+        ];
     }
 
     public function addItem()
     {
-        $this->order_items[] = ['property_id' => null];
+        $this->order_items[] = [
+            'property_id' => null,
+            'dimensions' => null,
+            'count' => 1
+        ];
     }
 
     public function removeItem($index)
