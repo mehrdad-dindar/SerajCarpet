@@ -9,12 +9,20 @@ use Spatie\LivewireWizard\Components\StepComponent;
 class AddItemsStepComponent extends StepComponent
 {
     public $order_items = [];
+    public $washing_type = [];
+
     public function mount()
     {
         $this->order_items[] = [
             'property_id' => null,
             'dimensions' => null,
             'count' => 1
+        ];
+
+        $this->washing_type = [
+            "آبشور",
+            "اعلاء‌شوئی",
+            "کاور",
         ];
     }
 

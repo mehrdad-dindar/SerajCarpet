@@ -13,6 +13,8 @@ class ConfirmStepComponent extends StepComponent
     protected $orderItems = [];
     protected $totalPrice;
 
+    protected $washing_type;
+
     public function confirm()
     {
         $customer_id = $this->state()->customer();
@@ -28,6 +30,7 @@ class ConfirmStepComponent extends StepComponent
         $this->customer = Customer::find((int)$this->state()->customer());
         $this->orderItems = $this->state()->orderItems();
         $this->totalPrice = $this->calculateTotal();
+        $this->washing_type = $this->state()->whashingType();
     }
 
     public function render()
@@ -38,6 +41,7 @@ class ConfirmStepComponent extends StepComponent
             'orderItems' => $orderItems,
             'details' => $this->getDetails(),
             'totalPrice' => $this->totalPrice,
+            'washing_type' => $this->washing_type,
         ]);
     }
 

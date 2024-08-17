@@ -10,3 +10,9 @@
 .icon-margin svg{
     @apply mr-0 me-3;
 }
+
+.select-css > label,
+.select-css ul
+{
+    @apply pr-3;
+}

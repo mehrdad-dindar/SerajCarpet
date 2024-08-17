@@ -10,6 +10,10 @@ class CreateOrderWizardState extends State
     {
         return $this->forStep('select-items')['order_items'];
     }
+    public function whashingType(): array
+    {
+        return $this->forStep('select-items')['washing_type'];
+    }
 
     public function customer(): int
     {

@@ -58,6 +58,13 @@
                         </div>
                     </div>
                 </div>
+                @if($washing_type)
+                <div class="mb-4">
+                    @foreach($washing_type as $type)
+                        <x-srj-badge icon-size="md" lg icon="check" lime label="Lime" :label="$type"/>
+                    @endforeach
+                </div>
+                @endif
                 <div class="relative flex flex-col w-full min-w-0 mb-4 break-words bg-white border-0 border-transparent border-solid shadow-soft-xl rounded-2xl bg-clip-border">
                     <div class="p-6 pb-0 mb-0 bg-white rounded-t-2xl">
                         <h6>{{ __("Order Items") }}</h6>

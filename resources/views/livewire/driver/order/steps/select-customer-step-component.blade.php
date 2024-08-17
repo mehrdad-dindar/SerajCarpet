@@ -9,7 +9,7 @@
                                 wire:model="customer_id"
                                 :label="__('Select Customer')"
                                 name="customer_id"
-                                class="mb-12 [&>label]:pr-3 [&:ul]:pr-3"
+                                class="mb-12 select-css"
                                 :placeholder="__('Select some customer...')"
                                 :async-data="route('customer.index')"
                                 option-label="id_name"

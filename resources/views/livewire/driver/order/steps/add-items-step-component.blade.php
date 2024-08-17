@@ -11,7 +11,7 @@
                             wire:model.live="order_items.{{ $index }}.property_id"
                             :label="__('Select Item')"
                             name="order_items[{{ $index }}][property_id]"
-                            class="mb-2 [&>label]:pr-3"
+                            class="mb-2 select-css"
                             :placeholder="__('Select some Item...')"
                             :async-data="route('property.index')"
                             option-label="fullTitle"
@@ -23,7 +23,7 @@
                                 wire:model.live="order_items.{{ $index }}.dimensions"
                                 :label="__('Dimensions')"
                                 name="order_items[{{ $index }}][dimensions]"
-                                class="mb-2 [&>label]:pr-3"
+                                class="mb-2 select-css"
                                 :placeholder="__('Select some Dimensions...')"
                                 :async-data="route('property.dimensions', $order_items[$index]['property_id'])"
                                 option-label="title"
@@ -46,6 +46,16 @@
                     <div class="col-3 py-4">
 {{--                        <button class="btn btn-warning form-control" wire:click.prevent="addItem">+ Add More</button>--}}
                         <x-srj-button icon="plus" wire:click.prevent="addItem" :label="__('Add Item')" class="bg-gradient-cyan"/>
+                    </div>
+                    <div>
+                        <x-srj-select
+                            wire:model.live="washing_type"
+                            :label="__('Washing type')"
+                            placeholder="Select many statuses"
+                            class="mb-2 md:w-1/4 select-css"
+                            multiselect
+                            :options="['آبشور', 'اعلاء‌شوئی', 'براق‌شویی', 'رنگ‌برداری', 'رفوگری', 'پرداخت', 'کاور']"
+                        />
                     </div>
                     <div class="mt-auto mb-0 font-semibold leading-normal text-sm group text-slate-500 flex justify-between flex-row">
                         <x-srj-button :label="__('Submit')" icon="rocket-launch" wire:click="submit" class="bg-gradient-fuchsia"/>
