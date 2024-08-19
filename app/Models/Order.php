@@ -66,4 +66,22 @@ class Order extends Model
     {
         return $this->belongsTo(Driver::class,"driver_id");
     }
+    public function getStatusLabel(): ?string
+    {
+        return OrderStatus::from($this->status)->getLabel();
+    }
+
+    public function getStatusColor(): string
+    {
+        return match ($this->status) {
+            OrderStatus::RESERVED->value => 'bg-blue-500',
+            OrderStatus::IN_WAITING_LIST->value => 'bg-yellow-500',
+            OrderStatus::CARPETS_RECEIVED->value => 'bg-teal-500',
+            OrderStatus::PRE_WASH_REPAIR_SERVICE->value => 'bg-orange-500',
+            OrderStatus::SENT_TO_FACTORY_FOR_WASHING->value => 'bg-green-500',
+            OrderStatus::POST_WASH_REPAIR_SERVICE->value => 'bg-red-500',
+            OrderStatus::READY_FOR_DELIVERY_TO_CUSTOMER->value => 'bg-purple-500',
+            OrderStatus::DELIVERED_AND_PAID->value => 'bg-green-700',
+        };
+    }
 }
