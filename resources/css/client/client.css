@@ -1,0 +1,18 @@
+@config "./tailwind.client.config.js";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.ltr {
+    direction: ltr;
+}
+
+.icon-margin svg{
+    @apply mr-0 me-3;
+}
+
+.select-css > label,
+.select-css ul
+{
+    @apply pr-3;
+}

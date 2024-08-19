@@ -2,11 +2,14 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\PropertyController;
 use App\Livewire\Auth\Login;
 use App\Livewire\Customer\Panel as CustomerPanel;
+use App\Livewire\Driver\Order\CreateWizard;
 use App\Livewire\Driver\Orders as DriverOrders;
 use App\Livewire\Driver\Panel as DriverPanel;
-use App\Livewire\Customer\Profile;
+use App\Livewire\Customer\Profile as CustomerProfile;
+use App\Livewire\Driver\Profile as DriverProfile;
 use App\Models\Address;
 use App\Models\Customer;
 use Hashids\Hashids;
@@ -65,7 +68,7 @@ Route::middleware('guest')->group(function () {
 });
 Route::middleware(['auth:customer'])->prefix('panel')->group(function () {
     Route::get('/', CustomerPanel::class)->name('customer.panel.index');
-    Route::get('/profile', Profile::class)->name('customer.panel.profile');
+    Route::get('/profile', CustomerProfile::class)->name('customer.panel.profile');
     Route::get('/test/{address}', function (Address $address){
         $lat = $address->latitude;
         $lng = $address->longitude;
@@ -75,4 +78,9 @@ Route::middleware(['auth:customer'])->prefix('panel')->group(function () {
 Route::middleware(['auth:driver'])->prefix('dashboard')->group(function () {
     Route::get('/', DriverPanel::class)->name('driver.panel.index');
     Route::get('/orders', DriverOrders::class)->name('driver.panel.orders');
+    Route::get('/profile', DriverProfile::class)->name('driver.panel.profile');
+    Route::get('/order/wizard', CreateWizard::class)->name('driver.order.wizard');
+    Route::get('/customers', CustomerController::class)->name('customer.index');
+    Route::get('/properties', PropertyController::class)->name('property.index');
+    Route::get('/properties/dimensions/{property}', [PropertyController::class,'getDimensions'])->name('property.dimensions');
 });

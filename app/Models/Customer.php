@@ -44,13 +44,13 @@ class Customer extends Authenticatable
         return $this->hasMany(Address::class, 'customer_id');
     }
 
-    protected function createdAt(): Attribute
+    /*protected function createdAt(): Attribute
     {
         return Attribute::make(
             get: fn (string $value) => verta($value)->format('d F Y - H:i'),
         );
 
-    }
+    }*/
 
     /**
      * Retrieve the tokens associated with this instance.
