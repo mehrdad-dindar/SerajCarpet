@@ -2,19 +2,22 @@
 
 namespace App\Livewire\Driver;
 
+use App\Models\Order;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithPagination;
 
+#[Title("سفارشات")]
 class Orders extends Component
 {
+    use WithPagination;
     #[Layout('driver.layouts.app')]
     public function render()
     {
-        return view('livewire.driver.orders');
-    }
-
-    public function test()
-    {
-        dd("hehu");
+        $orders = Order::where('driver_id',auth('driver')->user()->id)->latest()->paginate(10);;
+        return view('livewire.driver.orders')->with([
+            "orders" => $orders
+        ]);
     }
 }

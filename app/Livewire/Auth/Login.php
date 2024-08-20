@@ -11,9 +11,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use function Symfony\Component\String\u;
 
+#[Title("ورود / عضویت")]
 class Login extends Component
 {
     public $phone = '';
@@ -57,7 +59,7 @@ class Login extends Component
             session()->put("auth_id", $token->tokenable_id);
             session()->put("auth_type", $token->tokenable_type);
             session()->put("remember", $this->remember_me);
-            $this->code = session("code");
+//            $this->code = session("code");
             $this->codeSent = true;
             $this->startTimer();
         } else {

@@ -141,7 +141,7 @@ class AddressResource extends Resource
                                     if ($data->status == "OK") {
                                         $set('state', $data->state);
                                         $set('city', $data->city);
-                                        $set('address', $data->address);
+                                        $set('address', $data->formatted_address);
                                         $set('municipality_zone', $data->municipality_zone);
                                         $set('neighbourhood', $data->neighbourhood);
                                     }

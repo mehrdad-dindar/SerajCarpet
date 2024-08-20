@@ -87,6 +87,7 @@ class OrderResource extends Resource
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('reserved_for')
                     ->translateLabel()
+                    ->jalaliDateTime()
                     ->sortable()
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('driver.name')
@@ -504,10 +505,9 @@ class OrderResource extends Resource
                                             ->prefixIcon('heroicon-o-calendar-days')
                                             ->label('Reservation Time')
                                             ->translateLabel()
+                                            ->reactive()
                                             ->displayFormat('H:i Y-m-d')
                                             ->seconds(false)
-                                            ->firstDayOfWeek(4)
-                                            ->default(null)
                                             ->columnSpanFull()
                                             ->jalali(),
                                     ]),

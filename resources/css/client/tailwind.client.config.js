@@ -1,5 +1,5 @@
 const plugin = require("tailwindcss/plugin");
-const defaultTheme = require("tailwindcss/defaultTheme.js");
+const defaultTheme = require("tailwindcss/defaultTheme");
 
 module.exports = {
     mode: "jit",
@@ -10,13 +10,14 @@ module.exports = {
         "./resources/views/livewire/**/*.blade.php",
         "./resources/**/*.js",
         "./resources/**/*.vue",
+        "./vendor/livewire/**/*.php",
         "./vendor/wireui/wireui/src/*.php",
         "./vendor/wireui/wireui/ts/**/*.ts",
         "./vendor/wireui/wireui/src/WireUi/**/*.php",
         "./vendor/wireui/wireui/src/Components/**/*.php",
     ],
     presets: [
-        require("./vendor/wireui/wireui/tailwind.config.js")
+        require("./../../../vendor/wireui/wireui/tailwind.config.js")
     ],
     darkMode: "class",
     theme: {
