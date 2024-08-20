@@ -64,6 +64,8 @@ class SetLocation extends Component
                 'address' => $addressData->formatted_address,
                 'municipality_zone' => $addressData->municipality_zone,
                 'neighbourhood' => $addressData->neighbourhood,
+                'latitude' => $this->latitude,
+                'longitude' => $this->longitude,
                 'is_active' => true,
                 'is_suggested' => true,
             ]);

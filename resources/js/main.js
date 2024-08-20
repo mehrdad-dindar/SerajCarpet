@@ -46,9 +46,10 @@ document.querySelector('[wire\\:click="submit"]').addEventListener('click', func
     marker.setLngLat(center);
 
     const centerCoordinates = {
-        lng: center.lng.toFixed(4),
-        lat: center.lat.toFixed(4)
+        lng: center.lng.toFixed(12),
+        lat: center.lat.toFixed(12)
     };
+    console.log(centerCoordinates.lat)
     Livewire.dispatch('updateLocation', {latitude: centerCoordinates.lat,longitude: centerCoordinates.lng});
 });
 
