@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Customer;
 use App\Traits\Neshan;
 use Hashids\Hashids;
+use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -13,6 +14,7 @@ use Livewire\Component;
 class SetLocation extends Component
 {
     use Neshan;
+    use LivewireAlert;
 
     public $id;
     public $latitude;
@@ -64,6 +66,10 @@ class SetLocation extends Component
                 'neighbourhood' => $addressData->neighbourhood,
                 'is_active' => true,
                 'is_suggested' => true,
+            ]);
+            $this->alert('success', __("Your location has been successfully registered \nThe next steps will be informed via SMS"),[
+                'position' => 'center',
+                'timer' => 5000,
             ]);
         }
     }
