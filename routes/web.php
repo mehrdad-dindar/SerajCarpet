@@ -10,6 +10,7 @@ use App\Livewire\Driver\Orders as DriverOrders;
 use App\Livewire\Driver\Panel as DriverPanel;
 use App\Livewire\Customer\Profile as CustomerProfile;
 use App\Livewire\Driver\Profile as DriverProfile;
+use App\Livewire\SetLocation;
 use App\Models\Address;
 use App\Models\Customer;
 use Hashids\Hashids;
@@ -31,27 +32,18 @@ Route::middleware([
 
 // TODO: Hashed link for submitting location
 Route::get('test', function (){
-//    return view('welcome');
-    $recipient = auth()->user();
-
-    \Filament\Notifications\Notification::make()
-        ->title('Saved successfully')
-        ->sendToDatabase($recipient);
-    dd("sent");
-//    $hashids = new Hashids('',6);
-//    $hashedID = $hashids->encode(51);
-//    return '<a href="'.\route("set-location",$hashedID).'">hi</a>';
+////    return view('welcome');
+//    $recipient = auth()->user();
+//
+//    \Filament\Notifications\Notification::make()
+//        ->title('Saved successfully')
+//        ->sendToDatabase($recipient);
+//    dd("sent");
+    $hashids = new Hashids('',6);
+    $hashedID = $hashids->encode(28);
+    return '<a href="'.\route("set-location",$hashedID).'">hi</a>';
 });
-Route::get('/set-location/{id}', function ($id) {
-    $hashid = new Hashids('',6);
-    $customerID = $hashid->decode($id)[0];
-    $customer = Customer::findOrFail($customerID);
-    return view('set-location')
-        ->with([
-            'customer' => $customer,
-            'hashid' => $id,
-        ]);
-})->name('set-location');
+Route::get('/set-location/{id}', SetLocation::class)->name('set-location');
 
 Route::post('neshan', [CustomerController::class, 'getFullAddress'])->name('getFullAddress');
 Route::post('create_address', [CustomerController::class, 'createAddress'])->name('create.address');

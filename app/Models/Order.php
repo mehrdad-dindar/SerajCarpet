@@ -42,12 +42,12 @@ class Order extends Model
             get: fn (string $value) => verta($value)->format('d F Y - H:i'),
         );
     }
-    protected function reservedFor(): Attribute
+    /*protected function reservedFor(): Attribute
     {
         return Attribute::make(
             get: fn (?string $value) => !is_null($value) ? verta($value)->format('d F Y - H:i') : '',
         );
-    }
+    }*/
 
     protected function options(): Attribute
     {

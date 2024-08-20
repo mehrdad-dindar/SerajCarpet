@@ -10,6 +10,7 @@ module.exports = {
         "./resources/views/livewire/**/*.blade.php",
         "./resources/**/*.js",
         "./resources/**/*.vue",
+        "./vendor/livewire/**/*.php",
         "./vendor/wireui/wireui/src/*.php",
         "./vendor/wireui/wireui/ts/**/*.ts",
         "./vendor/wireui/wireui/src/WireUi/**/*.php",
