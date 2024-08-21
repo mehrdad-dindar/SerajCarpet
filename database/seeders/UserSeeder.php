@@ -19,5 +19,6 @@ class UserSeeder extends Seeder
             'email' => 'mehrdad.dindar@live.com',
             'password' => Hash::make("123456789"),
         ]);
+        $user->assignRole('panel_user');
     }
 }
