@@ -58,7 +58,7 @@ class SetLocation extends Component
         if ($addressData->status == 'OK') {
             $customer->addresses()->update(['is_active' => false]);
 
-            $customer->addresses()->create([
+            $address = $customer->addresses()->create([
                 'state' => $addressData->state,
                 'city' => $addressData->city,
                 'address' => $addressData->formatted_address,
@@ -69,6 +69,14 @@ class SetLocation extends Component
                 'is_active' => true,
                 'is_suggested' => true,
             ]);
+            // get latest order of this customer
+            $order = $customer->orders()->latest()->firstOrFail();
+            if ($order){
+                $order->address()->associate($address);
+                $order->save();
+
+            }
+
             $this->alert('success', __("Your location has been successfully registered \nThe next steps will be informed via SMS"),[
                 'position' => 'center',
                 'timer' => 5000,
