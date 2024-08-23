@@ -18,8 +18,8 @@ trait Sms
 
             $sms_client = new SoapClient('http://api.payamak-panel.com/post/send.asmx?wsdl');
 
-            $parameters['username'] = "9363432406";
-            $parameters['password'] = "d5c81d78-1a21-4aa7-ac42-e1bdbe5a144c";
+            $parameters['username'] = settings()->sms_panel_username;
+            $parameters['password'] = settings()->sms_panel_password;
 
             $parameters['to'] = $phone_num;
             $parameters['bodyId'] = (string)$patternCode;
