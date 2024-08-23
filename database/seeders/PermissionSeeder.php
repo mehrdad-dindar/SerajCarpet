@@ -128,7 +128,8 @@ class PermissionSeeder extends Seeder
             'delete_any_user',
             'force_delete_user',
             'force_delete_any_user',
-            'widget_OverlookWidget'
+            'widget_OverlookWidget',
+            'page_SystemManager',
         ];
 
         foreach ($permissions as $value) {
