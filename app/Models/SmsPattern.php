@@ -9,4 +9,8 @@ class SmsPattern extends Model
 {
     use HasFactory;
     protected $guarded;
+
+    protected $casts = [
+        'params' => 'array',
+    ];
 }
