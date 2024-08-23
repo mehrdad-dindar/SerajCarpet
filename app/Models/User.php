@@ -6,6 +6,7 @@ namespace App\Models;
 use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -77,5 +78,10 @@ class User extends Authenticatable implements FilamentUser
             get: fn (string $value) => verta($value)->format('d F Y - H:i'),
         );
 
+    }
+
+    public function sms(): MorphMany
+    {
+        return $this->morphMany(Sms::class, 'smsable');
     }
 }
