@@ -15,6 +15,7 @@
         "dotswan/filament-map-picker": "^1.2",
         "filament/filament": "^3.2",
         "filament/notifications": "^3.2",
+        "filament/spatie-laravel-settings-plugin": "^3.2",
         "hashids/hashids": "^5.0",
         "hekmatinasser/verta": "^8.4",
         "jantinnerezo/livewire-alert": "^3.0",
