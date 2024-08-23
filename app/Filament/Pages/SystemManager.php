@@ -13,6 +13,7 @@ use Filament\Pages\SettingsPage;
 class SystemManager extends SettingsPage
 {
     use HasPageShield;
+
     protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
 
     protected static string $settings = SystemSettings::class;
@@ -23,8 +24,15 @@ class SystemManager extends SettingsPage
             ->schema([
                 Forms\Components\Section::make(__('Sms Panel'))
                     ->schema([
-                        TextInput::make('username'),
-                        ])->columns()
-                ]);
+                        TextInput::make('sms_panel_username')
+                            ->label(__("User Name"))
+                            ->hint("Sms Panel User Name")
+                            ->required(),
+                        TextInput::make('sms_panel_password')
+                            ->label(__("Password"))
+                            ->hint("Sms Panel Password")
+                            ->required(),
+                    ])->columns()
+            ]);
     }
 }

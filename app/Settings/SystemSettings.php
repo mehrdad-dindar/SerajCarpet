@@ -6,7 +6,8 @@ use Spatie\LaravelSettings\Settings;
 
 class SystemSettings extends Settings
 {
-    public string $username;
+    public string $sms_panel_username;
+    public string $sms_panel_password;
 
     public static function group(): string
     {
