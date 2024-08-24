@@ -1,5 +1,5 @@
 /*
-! tailwindcss v3.4.9 | MIT License | https://tailwindcss.com
+! tailwindcss v3.4.10 | MIT License | https://tailwindcss.com
 *//*
 1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
 2. Allow adding a border to an element by just adding a border-width. (https://github.com/tailwindcss/tailwindcss/pull/116)
@@ -753,6 +753,9 @@ h6 {
 .bottom-1 {
   bottom: 0.25rem;
 }
+.bottom-16 {
+  bottom: 4rem;
+}
 .end-0 {
   inset-inline-end: 0px;
 }
@@ -761,6 +764,9 @@ h6 {
 }
 .left-0\.5 {
   left: 0.125rem;
+}
+.left-1\.5 {
+  left: 0.375rem;
 }
 .right-0 {
   right: 0px;
@@ -773,6 +779,9 @@ h6 {
 }
 .top-0 {
   top: 0px;
+}
+.top-1\.5 {
+  top: 0.375rem;
 }
 .top-3\.5 {
   top: 0.875rem;
@@ -1129,6 +1138,9 @@ h6 {
 .h-\[1\.25em\] {
   height: 1.25em;
 }
+.h-\[100vh\] {
+  height: 100vh;
+}
 .h-auto {
   height: auto;
 }
@@ -1290,6 +1302,9 @@ h6 {
 }
 .w-96 {
   width: 24rem;
+}
+.w-\[100vw\] {
+  width: 100vw;
 }
 .w-auto {
   width: auto;

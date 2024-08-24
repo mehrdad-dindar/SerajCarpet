@@ -9,6 +9,7 @@ import '@neshan-maps-platform/mapbox-gl/dist/NeshanMapboxGl.css';
 import nmp_mapboxgl from '@neshan-maps-platform/mapbox-gl';
 
 const map = new nmp_mapboxgl.Map({
+    attributionControl: true,
     mapType: nmp_mapboxgl.Map.mapTypes.neshanVector,
     container: "map",
     zoom: 11,
@@ -25,7 +26,15 @@ const map = new nmp_mapboxgl.Map({
         position: 'bottom-left'
     }
 });
-
+map.addControl(new nmp_mapboxgl.GeolocateControl({
+    positionOptions: {
+        enableHighAccuracy: true
+    },
+    // When active the map will receive updates to the device's location as it changes.
+    trackUserLocation: true,
+    // Draw an arrow next to the location dot to indicate which direction the device is heading.
+    showUserHeading: true
+}));
 const marker = new nmp_mapboxgl.Marker()
     .setLngLat(map.getCenter())
     .addTo(map);
@@ -52,6 +61,23 @@ document.querySelector('[wire\\:click="submit"]').addEventListener('click', func
     console.log(centerCoordinates.lat)
     Livewire.dispatch('updateLocation', {latitude: centerCoordinates.lat,longitude: centerCoordinates.lng});
 });
+
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
+
+const driverObj = driver({
+    nextBtnText: 'بعدی',
+    prevBtnText: 'قبلی',
+    doneBtnText: 'حله',
+    showProgress: true,
+    steps: [
+        { popover: { title: 'سلام 😃👋', description: 'به صفحه ثبت لوکیشن قالی‌شویی سراج خوش آمدید' } },
+        { element: 'button.mapboxgl-ctrl-geolocate', popover: { title: 'مکان شما', description: 'با استفاده از این دکمه میتوانید مکان خود را روی نقشه پیدا کنید' } },
+        { element: '#button1', popover: { title: 'ثبت موقعیت مکانی', description: 'پس از اطمینان از صحیح بودن موقعیت با استفاده از این دکمه نسبت به ثبت اقدام کنید' } },
+    ]
+});
+
+driverObj.drive();
 
 let switchers = document.querySelectorAll(".switcher");
 if (
