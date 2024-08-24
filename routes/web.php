@@ -13,6 +13,7 @@ use App\Livewire\Driver\Profile as DriverProfile;
 use App\Livewire\SetLocation;
 use App\Models\Address;
 use App\Models\Customer;
+use App\Livewire\Customer\Order as CustomerOrder;
 use Hashids\Hashids;
 use Illuminate\Support\Facades\Route;
 
@@ -66,6 +67,7 @@ Route::middleware(['auth:customer'])->prefix('panel')->group(function () {
         $lng = $address->longitude;
         return redirect("");
     })->name("admin.users.edit");
+    Route::get('/orders', CustomerOrder::class)->name('customer.panel.orders');
 });
 Route::middleware(['auth:driver'])->prefix('dashboard')->group(function () {
     Route::get('/', DriverPanel::class)->name('driver.panel.index');
