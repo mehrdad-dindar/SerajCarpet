@@ -940,6 +940,9 @@ h6 {
 .me-2 {
   margin-inline-end: 0.5rem;
 }
+.me-4 {
+  margin-inline-end: 1rem;
+}
 .ml-0 {
   margin-left: 0px;
 }
@@ -1123,6 +1126,9 @@ h6 {
 .h-6 {
   height: 1.5rem;
 }
+.h-6\.35 {
+  height: 1.5875rem;
+}
 .h-7 {
   height: 1.75rem;
 }
@@ -1275,6 +1281,9 @@ h6 {
 }
 .w-6 {
   width: 1.5rem;
+}
+.w-6\.35 {
+  width: 1.5875rem;
 }
 .w-60 {
   width: 15rem;
@@ -1701,6 +1710,10 @@ h6 {
   border-bottom-right-radius: 1.5rem;
   border-bottom-left-radius: 1.5rem;
 }
+.rounded-b-inherit {
+  border-bottom-right-radius: inherit;
+  border-bottom-left-radius: inherit;
+}
 .rounded-b-lg {
   border-bottom-right-radius: 0.5rem;
   border-bottom-left-radius: 0.5rem;
@@ -1796,6 +1809,10 @@ h6 {
 .rounded-t-3xl {
   border-top-left-radius: 1.5rem;
   border-top-right-radius: 1.5rem;
+}
+.rounded-t-inherit {
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
 }
 .rounded-t-lg {
   border-top-left-radius: 0.5rem;
@@ -2087,6 +2104,10 @@ h6 {
 .border-slate-600 {
   --tw-border-opacity: 1;
   border-color: rgb(98 117 148 / var(--tw-border-opacity));
+}
+.border-slate-700 {
+  --tw-border-opacity: 1;
+  border-color: rgb(52 71 103 / var(--tw-border-opacity));
 }
 .border-stone-500 {
   --tw-border-opacity: 1;
@@ -2647,6 +2668,9 @@ h6 {
 .bg-gradient-horizontal-light {
   background-image: linear-gradient(90deg,transparent,rgba(0,0,0,.1),transparent);
 }
+.bg-gradient-lime {
+  background-image: linear-gradient(310deg,#17ad37,#98ec2d);
+}
 .bg-gradient-red {
   background-image: linear-gradient(310deg,#ea0606,#ff667c);
 }
@@ -2759,6 +2783,9 @@ h6 {
 }
 .p-1 {
   padding: 0.25rem;
+}
+.p-1\.2 {
+  padding: 0.3rem;
 }
 .p-2 {
   padding: 0.5rem;
@@ -2940,6 +2967,9 @@ h6 {
 }
 .pr-6 {
   padding-right: 1.5rem;
+}
+.ps-0 {
+  padding-inline-start: 0px;
 }
 .ps-2 {
   padding-inline-start: 0.5rem;
@@ -13828,6 +13858,10 @@ label[name="form.wrapper.container"]:has(input:focus) .invalidated\:input-focus\
     margin-right: 1.5rem;
   }
 
+  .sm\:ms-2 {
+    margin-inline-start: 0.5rem;
+  }
+
   .sm\:ms-3 {
     margin-inline-start: 0.75rem;
   }
@@ -14209,8 +14243,16 @@ label[name="form.wrapper.container"]:has(input:focus) .invalidated\:input-focus\
     width: 33.333333%;
   }
 
+  .md\:w-5\/12 {
+    width: 41.666667%;
+  }
+
   .md\:w-6\/12 {
     width: 50%;
+  }
+
+  .md\:w-7\/12 {
+    width: 58.333333%;
   }
 
   .md\:w-8\/12 {
