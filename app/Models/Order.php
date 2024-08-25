@@ -91,9 +91,9 @@ class Order extends Model
         );
     }
 
-    // تعریف رابطه برای دریافت مدل‌های Option مرتبط با این Order
-    public function optionModels()
+    public function getOptionModelsAttribute()
     {
-        return $this->belongsToMany(Option::class, 'order_option', 'order_id', 'option_id');
+        $optionIds = $this->options ?? [];
+        return Option::whereIn('id', $optionIds)->get();
     }
 }

@@ -28,11 +28,11 @@
                         @endforeach
                     </ul>
                 </div>
-                <div class="p-6 px-4 pb-0 mb-0 bg-white border-b-0 rounded-t-2xl">
-                    <h6 class="mb-0">{{ __("Services") }}</h6>
-                    <div class="mt-6">
-                        @foreach($order->options as $option)
-                            <x-srj-badge :label="$option" outline orange/>
+                <div class="p-6 px-4 pb-4 mb-0 bg-white border-b-0 rounded-t-2xl">
+                    <h6 class="mb-3">{{ __("Services") }}</h6>
+                    <div>
+                        @foreach($order->option_models as $option)
+                            <x-srj-badge :label="$option->name" outline orange/>
                         @endforeach
                     </div>
                 </div>
