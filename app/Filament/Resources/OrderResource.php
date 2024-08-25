@@ -9,6 +9,7 @@ use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Models\Address;
 use App\Models\Customer;
 use App\Models\Driver;
+use App\Models\Option;
 use App\Models\Order;
 use App\Models\Property;
 use Dotswan\MapPicker\Fields\Map;
@@ -472,16 +473,8 @@ class OrderResource extends Resource
 //                                    ->label(__('Order Options'))
                                     ->hiddenLabel()
                                     ->multiple()
-                                    ->options([
-                                        "1" => "آبشور",
-                                        "2" => "اعلاء‌شوئی",
-                                        "3" => "براق‌شویی",
-                                        "4" => "رنگ‌برداری",
-                                        "5" => "رفوگری",
-                                        "6" => "پرداخت",
-                                        "7" => "کاور",
-                                    ])
-                                    ->default(['1', '2', '7'])
+                                    ->options(Option::pluck('name', 'id'))
+                                    ->default(Option::where('is_default', true)->pluck('id')->toArray())
                                     ->native()
                                     ->required(),
                             ]),

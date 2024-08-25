@@ -9,6 +9,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -17,7 +18,12 @@ class OptionResource extends Resource
 {
     protected static ?string $model = Option::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Services Setting';
+    protected static ?string $navigationLabel = 'خدمات جانبی';
+    protected static ?string $pluralModelLabel = "خدمات جانبی";
+    protected static ?string $modelLabel = 'خدمت';
+
+    protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {
@@ -35,7 +41,10 @@ class OptionResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->translateLabel()
                     ->searchable(),
+                ToggleColumn::make('is_default')
+                ->label(__("Default")),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
