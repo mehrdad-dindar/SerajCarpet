@@ -55,14 +55,6 @@ class Order extends Model
         );
     }*/
 
-    protected function options(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => explode(',', $value),
-            set: fn ($value) => implode(',', $value),
-        );
-    }
-
     public function status()
     {
         return OrderStatus::make($this->status);
@@ -89,5 +81,19 @@ class Order extends Model
             OrderStatus::READY_FOR_DELIVERY_TO_CUSTOMER->value => 'bg-purple-500',
             OrderStatus::DELIVERED_AND_PAID->value => 'bg-green-700',
         };
+    }
+
+    protected function options(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => json_decode($value, true),
+            set: fn($value) => json_encode($value),
+        );
+    }
+
+    // تعریف رابطه برای دریافت مدل‌های Option مرتبط با این Order
+    public function optionModels()
+    {
+        return $this->belongsToMany(Option::class, 'order_option', 'order_id', 'option_id');
     }
 }
