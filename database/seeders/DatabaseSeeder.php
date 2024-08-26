@@ -21,7 +21,8 @@ class DatabaseSeeder extends Seeder
             ServiceItemSeeder::class,
             PropertySeeder::class,
             CustomerSeeder::class,
-            DriverSeeder::class
+            DriverSeeder::class,
+            OptionSeeder::class
         ]);
     }
 }

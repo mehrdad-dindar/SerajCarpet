@@ -42,20 +42,18 @@ class Order extends Model
             get: fn (string $value) => verta($value)->format('d F Y - H:i'),
         );
     }
+    protected function updatedAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => verta($value)->format('d F Y - H:i'),
+        );
+    }
     /*protected function reservedFor(): Attribute
     {
         return Attribute::make(
             get: fn (?string $value) => !is_null($value) ? verta($value)->format('d F Y - H:i') : '',
         );
     }*/
-
-    protected function options(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => explode(',', $value),
-            set: fn ($value) => implode(',', $value),
-        );
-    }
 
     public function status()
     {
@@ -83,5 +81,19 @@ class Order extends Model
             OrderStatus::READY_FOR_DELIVERY_TO_CUSTOMER->value => 'bg-purple-500',
             OrderStatus::DELIVERED_AND_PAID->value => 'bg-green-700',
         };
+    }
+
+    protected function options(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => json_decode($value, true),
+            set: fn($value) => json_encode($value),
+        );
+    }
+
+    public function getOptionModelsAttribute()
+    {
+        $optionIds = $this->options ?? [];
+        return Option::whereIn('id', $optionIds)->get();
     }
 }
