@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -24,6 +25,7 @@ return new class extends Migration
             $table->dateTime('reserved_for')->nullable();
             $table->timestamps();
         });
+        DB::statement('ALTER TABLE orders AUTO_INCREMENT = 10001;');
     }
 
     /**
