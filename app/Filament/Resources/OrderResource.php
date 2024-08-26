@@ -74,6 +74,15 @@ class OrderResource extends Resource
                     ->toggleable()
                     ->alignCenter()
                     ->counts('items'),
+                Tables\Columns\TextColumn::make('area')
+                    ->badge()->color("info")
+                    ->getStateUsing(fn ($record) => $record->address ? 'منطقه ' . $record->address->municipality_zone: null)
+                    ->description(fn ($record) => $record->address ? 'محله ' . $record->address->neighbourhood : null)
+                    ->sortable()
+                    ->translateLabel()
+                    ->toggleable()
+                    ->alignCenter()
+                    ->counts('items'),
                 Tables\Columns\TextColumn::make('total')
                     ->formatStateUsing(function ($state) {
                         return number_format($state, 0) . ' تومان';
@@ -259,6 +268,8 @@ class OrderResource extends Resource
                                                             $set('address', $neshan->formatted_address);
                                                             $set('state', $neshan->state);
                                                             $set('city', $neshan->city);
+                                                            $set('municipality_zone', $neshan->municipality_zone);
+                                                            $set('neighbourhood', $neshan->neighbourhood);
                                                         }
                                                     }
                                                 }),
@@ -279,6 +290,8 @@ class OrderResource extends Resource
                                             Forms\Components\Hidden::make('longitude')
                                                 ->required()
                                                 ->label(__('longitude')),
+                                            Forms\Components\Hidden::make('neighbourhood'),
+                                            Forms\Components\Hidden::make('municipality_zone'),
                                         ])->columns(12),
 
                                         Forms\Components\Checkbox::make('is_active')
