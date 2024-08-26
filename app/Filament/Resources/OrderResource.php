@@ -91,7 +91,8 @@ class OrderResource extends Resource
                     ->jalaliDateTime()
                     ->sortable()
                     ->toggleable(),
-                Tables\Columns\TextColumn::make('driver.name')
+                Tables\Columns\SelectColumn::make('driver_id')
+                    ->options(Driver::all()->pluck('name', 'id')->toArray())
                     ->translateLabel()
                     ->sortable()
                     ->toggleable(),

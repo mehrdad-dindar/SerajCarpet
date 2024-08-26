@@ -27,7 +27,7 @@ class OrderFactory extends Factory
             'driver_id' => 1,
 //            'address_id',
 //            'discount',
-            'options' => [1,3,4,5,6],
+            'options' => $this->faker->randomElements([1, 2, 3, 4, 5, 6, 7], rand(3, 4)),
 //            'sub_total',
             'total' => $this->faker->randomFloat(0, 1000000, 9900000),
             'status' => $this->faker->randomElement(['in_waiting_list', 'carpets_received', 'pre_wash_repair_service', 'sent_to_factory_for_washing']),
