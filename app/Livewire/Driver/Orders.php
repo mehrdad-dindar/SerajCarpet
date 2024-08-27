@@ -15,7 +15,7 @@ class Orders extends Component
     #[Layout('driver.layouts.app')]
     public function render()
     {
-        $orders = Order::where('driver_id',auth('driver')->user()->id)->latest()->paginate(10);;
+        $orders = auth()->user()->orders()->latest()->paginate(10);
         return view('livewire.driver.orders')->with([
             "orders" => $orders
         ]);

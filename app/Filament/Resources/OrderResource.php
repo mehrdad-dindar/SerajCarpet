@@ -74,6 +74,15 @@ class OrderResource extends Resource
                     ->toggleable()
                     ->alignCenter()
                     ->counts('items'),
+                Tables\Columns\TextColumn::make('area')
+                    ->badge()->color(fn($state,$record): string => $record->address ? "info" : "danger")
+                    ->getStateUsing(fn ($record) => $record->address ? 'منطقه ' . $record->address->municipality_zone: 'X')
+                    ->description(fn ($record) => $record->address ? 'محله ' . $record->address->neighbourhood : 'فاقد آدرس')
+                    ->sortable()
+                    ->translateLabel()
+                    ->toggleable()
+                    ->alignCenter()
+                    ->counts('items'),
                 Tables\Columns\TextColumn::make('total')
                     ->formatStateUsing(function ($state) {
                         return number_format($state, 0) . ' تومان';
@@ -91,7 +100,8 @@ class OrderResource extends Resource
                     ->jalaliDateTime()
                     ->sortable()
                     ->toggleable(),
-                Tables\Columns\TextColumn::make('driver.name')
+                Tables\Columns\SelectColumn::make('driver_id')
+                    ->options(Driver::all()->pluck('name', 'id')->toArray())
                     ->translateLabel()
                     ->sortable()
                     ->toggleable(),
@@ -258,6 +268,8 @@ class OrderResource extends Resource
                                                             $set('address', $neshan->formatted_address);
                                                             $set('state', $neshan->state);
                                                             $set('city', $neshan->city);
+                                                            $set('municipality_zone', $neshan->municipality_zone);
+                                                            $set('neighbourhood', $neshan->neighbourhood);
                                                         }
                                                     }
                                                 }),
@@ -278,6 +290,8 @@ class OrderResource extends Resource
                                             Forms\Components\Hidden::make('longitude')
                                                 ->required()
                                                 ->label(__('longitude')),
+                                            Forms\Components\Hidden::make('neighbourhood'),
+                                            Forms\Components\Hidden::make('municipality_zone'),
                                         ])->columns(12),
 
                                         Forms\Components\Checkbox::make('is_active')

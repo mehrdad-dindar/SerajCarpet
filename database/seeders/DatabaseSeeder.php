@@ -22,7 +22,8 @@ class DatabaseSeeder extends Seeder
             PropertySeeder::class,
             CustomerSeeder::class,
             DriverSeeder::class,
-            OptionSeeder::class
+            OptionSeeder::class,
+            OrderSeeder::class
         ]);
     }
 }
