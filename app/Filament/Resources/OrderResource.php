@@ -75,9 +75,9 @@ class OrderResource extends Resource
                     ->alignCenter()
                     ->counts('items'),
                 Tables\Columns\TextColumn::make('area')
-                    ->badge()->color("info")
-                    ->getStateUsing(fn ($record) => $record->address ? 'منطقه ' . $record->address->municipality_zone: null)
-                    ->description(fn ($record) => $record->address ? 'محله ' . $record->address->neighbourhood : null)
+                    ->badge()->color(fn($state,$record): string => $record->address ? "info" : "danger")
+                    ->getStateUsing(fn ($record) => $record->address ? 'منطقه ' . $record->address->municipality_zone: 'X')
+                    ->description(fn ($record) => $record->address ? 'محله ' . $record->address->neighbourhood : 'فاقد آدرس')
                     ->sortable()
                     ->translateLabel()
                     ->toggleable()

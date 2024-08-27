@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->foreignId('driver_id')->nullable()->constrained();
-            $table->foreignId('address_id')->nullable()->constrained();
+            $table->foreignId('address_id')->nullable()->constrained()->onDelete("SET NULL");
             $table->string('discount')->nullable();
             $table->json('options')->nullable();
             $table->string('sub_total')->nullable();
