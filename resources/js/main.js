@@ -8,8 +8,14 @@ import "../css/client/client.css";
 import '@neshan-maps-platform/mapbox-gl/dist/NeshanMapboxGl.css';
 import nmp_mapboxgl from '@neshan-maps-platform/mapbox-gl';
 
+import mapboxgl from 'mapbox-gl';
+window.mapboxgl = mapboxgl;
+
 import L from "leaflet";
 import 'leaflet/dist/leaflet.css';
+
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
+import 'leaflet-routing-machine'
 
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
