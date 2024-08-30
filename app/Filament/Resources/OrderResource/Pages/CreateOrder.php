@@ -32,4 +32,15 @@ class CreateOrder extends CreateRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        if (isset($data['reservation_date'], $data['reservation_time'])) {
+            $data['time_apply_status'] = \Carbon\Carbon::parse($data['reservation_date'] . ' ' . $data['reservation_time']);
+        }
+
+        unset($data['reservation_date'], $data['reservation_time']);
+
+        return $data;
+    }
 }

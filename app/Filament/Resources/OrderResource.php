@@ -15,6 +15,7 @@ use App\Models\Property;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Actions\Action;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -500,23 +501,32 @@ class OrderResource extends Resource
                                     ->options(OrderStatus::class)
                                     ->default(OrderStatus::RESERVED)
                                     ->live()
-//                                    ->before(fn($record, $get) => dd($record))
                                     ->required(),
                                 Forms\Components\Fieldset::make('تنظیم تاریخ رزرو')
-//                                    ->hidden(fn(Get $get): bool => $get('status') != OrderStatus::RESERVED)
                                     ->visible(
                                         fn(Get $get): bool => (is_object($get('status')) ? $get('status')->value : $get('status')) == OrderStatus::RESERVED->value
                                     )
                                     ->schema([
-                                        Forms\Components\DateTimePicker::make('reserved_for')
+                                        Forms\Components\DatePicker::make('reservation_date')
                                             ->prefixIcon('heroicon-o-calendar-days')
-                                            ->label('Reservation Time')
+                                            ->label('Reservation Date')
                                             ->translateLabel()
                                             ->reactive()
-                                            ->displayFormat('H:i Y-m-d')
-                                            ->seconds(false)
+                                            ->displayFormat('Y-m-d')
                                             ->columnSpanFull()
                                             ->jalali(),
+                                        Select::make('reservation_time')
+                                            ->label('Reservation Time')
+                                            ->options([
+                                                '08:00:00' => '08:00 - 10:00',
+                                                '10:00:00' => '10:00 - 12:00',
+                                                '12:00:00' => '12:00 - 14:00',
+                                                '14:00:00' => '14:00 - 16:00',
+                                                '16:00:00' => '16:00 - 18:00',
+                                                '18:00:00' => '18:00 - 20:00',
+                                            ])
+                                            ->reactive()
+                                            ->required(),
                                     ]),
 
                             ]),

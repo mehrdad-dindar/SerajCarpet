@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('sub_total')->nullable();
             $table->string('total')->nullable();
             $table->string('status')->nullable();
-            $table->dateTime('reserved_for')->nullable();
+            $table->dateTime('time_apply_status')->nullable();
             $table->timestamps();
         });
         DB::statement('ALTER TABLE orders AUTO_INCREMENT = 10001;');
