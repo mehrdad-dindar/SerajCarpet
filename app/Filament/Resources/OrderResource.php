@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Enums\OrderStatus;
+use App\Models\OrderStatus as OrderStatusModel;
 use App\Filament\Resources\CustomerResource\RelationManagers\AddressRelationManager;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers;
@@ -65,9 +66,9 @@ class OrderResource extends Resource
                     ->translateLabel()
                     ->sortable()
                     ->badge()
-                    ->color(fn(string $state): string => OrderStatus::from($state)->getColor())
+                    ->color(fn(OrderStatusModel $state): string => $state->color)
                     ->toggleable()
-                    ->formatStateUsing(fn(string $state): string => OrderStatus::from($state)->getLabel()),
+                    ->formatStateUsing(fn(OrderStatusModel $state): string => $state->label),
                 Tables\Columns\TextColumn::make('items_count')
                     ->sortable()
                     ->translateLabel()
@@ -494,16 +495,16 @@ class OrderResource extends Resource
                             ]),
                         Forms\Components\Section::make('وضعیت سفارش')
                             ->schema([
-                                Forms\Components\Select::make('status')
+                                Forms\Components\Select::make('status_id')
                                     ->label(__('Order Status'))
                                     ->hiddenLabel()
-                                    ->options(OrderStatus::class)
-                                    ->default(OrderStatus::RESERVED)
+                                    ->options(OrderStatusModel::all()->pluck('label', 'id'))
+//                                    ->default(OrderStatusModel::RESERVED)
                                     ->live()
                                     ->required(),
-                                Forms\Components\Fieldset::make('تنظیم تاریخ رزرو')
+                                Forms\Components\Fieldset::make('تنظیم ')
                                     ->visible(
-                                        fn(Get $get): bool => (is_object($get('status')) ? $get('status')->value : $get('status')) == OrderStatus::RESERVED->value
+                                        fn(Get $get): bool => OrderStatusModel::where('id', intval($get('status_id')))->value('has_time') == true
                                     )
                                     ->schema([
                                         Forms\Components\DatePicker::make('reservation_date')

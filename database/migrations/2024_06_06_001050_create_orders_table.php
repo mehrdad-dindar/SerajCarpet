@@ -21,7 +21,7 @@ return new class extends Migration
             $table->json('options')->nullable();
             $table->string('sub_total')->nullable();
             $table->string('total')->nullable();
-            $table->string('status')->nullable();
+            $table->foreignId('status_id')->constrained("order_statuses")->nullable();
             $table->dateTime('time_apply_status')->nullable();
             $table->timestamps();
         });
