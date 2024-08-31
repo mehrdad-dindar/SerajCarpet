@@ -7,10 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Order extends Model
 {
     use HasFactory;
+    use LogsActivity;
     protected $guarded;
 
     public function customer(): BelongsTo
@@ -95,5 +98,19 @@ class Order extends Model
     {
         $optionIds = $this->options ?? [];
         return Option::whereIn('id', $optionIds)->get();
+    }
+
+    public function getDescriptionForEvent(string $eventName): string
+    {
+        return "Order status has been {$eventName}";
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['status_id','time_apply_status'])
+            ->setDescriptionForEvent(fn(string $eventName) => "Order status has been {$eventName}")
+            ->useLogName('order')
+            ->logOnlyDirty();
     }
 }
