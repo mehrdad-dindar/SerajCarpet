@@ -35,6 +35,9 @@ class EditOrder extends EditRecord
         if (isset($data['reservation_date'], $data['reservation_time'])) {
             $data['time_apply_status'] = \Carbon\Carbon::parse($data['reservation_date'] . ' ' . $data['reservation_time']);
         }
+        if (isset($data['options'])) {
+            $data['options'] = array_map('intval', $data['options']);
+        }
 
         unset($data['reservation_date'], $data['reservation_time']);
 

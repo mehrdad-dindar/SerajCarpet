@@ -485,7 +485,6 @@ class OrderResource extends Resource
                         Forms\Components\Section::make('سایر خدمات')
                             ->schema([
                                 Forms\Components\Select::make('options')
-//                                    ->label(__('Order Options'))
                                     ->hiddenLabel()
                                     ->multiple()
                                     ->options(Option::pluck('name', 'id'))
