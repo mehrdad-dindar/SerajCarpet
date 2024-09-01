@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Enums\OrderStatus;
+use App\Filament\Resources\OrderResource\Widgets\OrderStatusHistoryWidget;
 use App\Models\OrderStatus as OrderStatusModel;
 use App\Filament\Resources\CustomerResource\RelationManagers\AddressRelationManager;
 use App\Filament\Resources\OrderResource\Pages;
@@ -576,6 +577,12 @@ class OrderResource extends Resource
             'index' => Pages\ListOrders::route('/'),
             'create' => Pages\CreateOrder::route('/create'),
             'edit' => Pages\EditOrder::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getWidgets(): array {
+        return [
+            OrderStatusHistoryWidget::class,
         ];
     }
 }

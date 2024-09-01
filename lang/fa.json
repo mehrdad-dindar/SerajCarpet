@@ -123,5 +123,10 @@
     "Add Item" : "افزودن آیتم",
     "Select Item" : "انتخاب آیتم",
     "Select some Item..." : "",
+    "Order Status History" : "تاریخچه وضعیت سفارش",
+    "Status changed from:" : "تغییر وضعیت از:",
+    "To:" : "به:",
+    "Changed by:" : "توسط:",
+    "At:" : "در:",
     "Customer" : "مشتری"
 }

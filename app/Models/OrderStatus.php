@@ -19,14 +19,23 @@ class OrderStatus extends Model
     const DELIVERED_AND_PAID = 'delivered_and_paid';
     protected $guarded;
 
+    public static function getColor(string $state): string
+    {
+        return self::where('label', $state)->value('color') ?? "info";
+    }
+
+    public static function getLabel($state): string
+    {
+        if ($state !== null) {
+            return self::find($state)->label ?? "--";
+        } else {
+            return 'N/A';
+        }
+    }
+
     public function orders()
     {
         return $this->hasMany(Order::class);
-    }
-
-    public static function getColor(string $state): string
-    {
-            return self::where('label', $state)->value('color') ?? "info";
     }
 
 }

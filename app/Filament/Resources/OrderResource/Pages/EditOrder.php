@@ -10,6 +10,12 @@ class EditOrder extends EditRecord
 {
     protected static string $resource = OrderResource::class;
 
+    protected function getFooterWidgets(): array {
+        $order = $this->record;
+        return [
+            OrderResource\Widgets\OrderStatusHistoryWidget::make(['order' => $order]),
+        ];
+    }
     protected function getHeaderActions(): array
     {
         return [
