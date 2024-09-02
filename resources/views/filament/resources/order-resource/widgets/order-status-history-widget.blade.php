@@ -5,10 +5,24 @@
             @foreach ($activities as $activity)
                 @if($activity->properties['attributes'])
                     <li class="mb-2">
-                        <div>
-                            <strong>{{ __("Status changed from:") }}</strong> <x-srj-badge :label="\App\Models\OrderStatus::getLabel($activity->properties['old']['status_id'] ?? null)" />
-                            <strong>{{ __("To:") }}</strong> <x-srj-badge :label="\App\Models\OrderStatus::getLabel($activity->properties['attributes']['status_id'])" />
-                        </div>
+                        @if($activity->event !== "created")
+                            @if(isset($activity->properties['old']['status_id']))
+                            <div>
+                                <strong>{{ __("Status changed from:") }}</strong> <x-srj-badge :label="\App\Models\OrderStatus::getLabel($activity->properties['old']['status_id'] ?? null)" />
+                                <strong>{{ __("To:") }}</strong> <x-srj-badge :label="\App\Models\OrderStatus::getLabel($activity->properties['attributes']['status_id'])" />
+                            </div>
+                            @endif
+                            @if(isset($activity->properties['old']['driver_id']))
+                                <div>
+                                    <strong>{{ __("Driver changed from:") }}</strong> <x-srj-badge :label="\App\Models\Order::getDriver($activity->properties['old']['driver_id'] ?? null)" />
+                                    <strong>{{ __("To:") }}</strong> <x-srj-badge :label="\App\Models\OrderStatus::getLabel($activity->properties['attributes']['driver_id'])" />
+                                </div>
+                            @endif
+                        @else
+                            <div>
+                                <strong> {{ $activity->description }} </strong>
+                            </div>
+                        @endif
                         <div>
                             <strong>{{ __("Changed by:") }}</strong> {{ $activity->causer->name ?? 'System' }}
                             <strong>{{ __("At:") }}</strong> {{ $activity->created_at->format('Y-m-d H:i:s') }}

@@ -18,6 +18,10 @@ class OrderStatusHistoryWidget extends Widget
 
     public function mount()
     {
-        $this->activities = Activity::forSubject($this->order)->orderBy('created_at', 'desc')->get();
+        $this->activities = Activity::forSubject($this->order)
+            ->latest()
+            ->take(20)
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 }

@@ -102,14 +102,13 @@ class Order extends Model
 
     public function getDescriptionForEvent(string $eventName): string
     {
-        return "Order status has been {$eventName}";
+        return __('order.' . $eventName);
     }
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['status_id','time_apply_status'])
-            ->setDescriptionForEvent(fn(string $eventName) => "Order status has been {$eventName}")
+            ->logOnly(['status_id','time_apply_status','address_id','driver_id'])
             ->useLogName('order')
             ->logOnlyDirty();
     }
