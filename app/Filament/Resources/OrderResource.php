@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Enums\OrderStatus;
+use App\Events\BulkOrderUpdated;
 use App\Filament\Resources\OrderResource\Widgets\OrderStatusHistoryWidget;
 use App\Models\OrderStatus as OrderStatusModel;
 use App\Filament\Resources\CustomerResource\RelationManagers\AddressRelationManager;
@@ -164,7 +165,10 @@ class OrderResource extends Resource
                         ->translateLabel()
                         ->action(function (Collection $records, array $data): void {
                             $ids = $records->pluck('id');
-                            Order::whereIn('id', $ids)->update(['driver_id' => $data['driver_id']]);
+                            $orders = Order::whereIn('id', $ids)->update(['driver_id' => $data['driver_id']]);
+                            if ($orders) {
+                                event(new BulkOrderUpdated($records));
+                            }
                         })
                         ->form([
                             Forms\Components\Select::make('driver_id')

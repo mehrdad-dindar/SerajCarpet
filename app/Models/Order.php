@@ -2,19 +2,36 @@
 
 namespace App\Models;
 
+use App\Events\BulkOrderUpdated;
+use App\Events\OrderLogCreated;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Order extends Model
 {
     use HasFactory;
     use LogsActivity;
+
     protected $guarded;
+    protected static bool $isBulkUpdate = false;
+
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::updated(function ($order) {
+            $activity = Activity::forSubject($order)->latest()->first();
+            event(new OrderLogCreated($activity));
+
+        });
+    }
 
     public function customer(): BelongsTo
     {
