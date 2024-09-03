@@ -405,9 +405,11 @@ class OrderResource extends Resource
                                             ->minValue(1)
                                             ->reactive()
                                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                                $price = Property::find($get("property_id"))->price;
-                                                $set('sub_total', ((int)$get('dimensions') ?? 1) * $state * $price);
-                                                $set('unit_price', $price);
+                                                if ($get("property_id") !== null) {
+                                                    $price = Property::find($get("property_id"))->price;
+                                                    $set('sub_total', ((int)$get('dimensions') ?? 1) * $state * $price);
+                                                    $set('unit_price', $price);
+                                                }
                                             })
                                             ->columnSpan(2)
                                             ->required(),
