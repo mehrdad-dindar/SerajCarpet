@@ -13,9 +13,8 @@ return new class extends Migration
     {
         Schema::create('optimized_routes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrained();
             $table->foreignId('driver_id')->constrained();
-            $table->json('waypoints');
+            $table->json('orders');
             $table->timestamps();
         });
     }

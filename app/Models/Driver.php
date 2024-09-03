@@ -31,4 +31,9 @@ class Driver extends Authenticatable
         return $this->morphMany(Token::class, 'tokenable');
     }
 
+    public function optimizedRoutes(): HasMany
+    {
+        return $this->hasMany(OptimizedRoute::class);
+    }
+
 }

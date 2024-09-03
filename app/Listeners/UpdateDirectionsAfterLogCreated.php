@@ -21,20 +21,19 @@ class UpdateDirectionsAfterLogCreated
      */
     public function handle(OrderLogCreated $event): void
     {
-        $response = Http::get('https://external-api.com/endpoint', [
-            'data' => $event->activity->properties, // یا هر اطلاعات دیگری که نیاز دارید
-        ]);
-
-        // بررسی پاسخ و به‌روزرسانی جدول دیتابیس
-        if ($response->successful()) {
-            $data = $response->json();
-
-            // به‌روزرسانی مدل مربوطه در دیتابیس
-            YourModel::updateOrCreate(
-                ['id' => $data['id']], // شرط برای بروزرسانی یا ایجاد
-                ['column_name' => $data['value']] // داده‌های مورد نیاز
-            );
-        }
-
+//        $response = Http::get('https://external-api.com/endpoint', [
+//            'data' => $event->activity->properties, // یا هر اطلاعات دیگری که نیاز دارید
+//        ]);
+//
+//        // بررسی پاسخ و به‌روزرسانی جدول دیتابیس
+//        if ($response->successful()) {
+//            $data = $response->json();
+//
+//            // به‌روزرسانی مدل مربوطه در دیتابیس
+//            YourModel::updateOrCreate(
+//                ['id' => $data['id']], // شرط برای بروزرسانی یا ایجاد
+//                ['column_name' => $data['value']] // داده‌های مورد نیاز
+//            );
+//        }
     }
 }

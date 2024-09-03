@@ -16,13 +16,15 @@ class BulkOrderUpdated
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public Collection $oldOrders;
     public Collection $orders;
     /**
      * Create a new event instance.
      */
-    public function __construct($orders)
+    public function __construct(Collection $orders)
     {
-        $this->orders = $orders;
+        $this->oldOrders = $orders;
+        $this->orders = Order::whereIn('id', $orders->pluck('id'))->get();
     }
 
     /**
