@@ -18,9 +18,8 @@ class Order extends Model
     use HasFactory;
     use LogsActivity;
 
-    protected $guarded;
     protected static bool $isBulkUpdate = false;
-
+    protected $guarded;
 
     protected static function boot()
     {
@@ -29,7 +28,6 @@ class Order extends Model
         static::updated(function ($order) {
             $activity = Activity::forSubject($order)->latest()->first();
             event(new OrderLogCreated($activity));
-
         });
     }
 
@@ -47,6 +45,7 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class)->nonCustom();
     }
+
     public function other_items(): HasMany
     {
         return $this->hasMany(OrderItem::class)->custom();
@@ -56,18 +55,17 @@ class Order extends Model
     {
         return 200;
     }
-    protected function createdAt(): Attribute
+
+    public function status()
     {
-        return Attribute::make(
-            get: fn (string $value) => verta($value)->format('d F Y - H:i'),
-        );
+        return $this->belongsTo(OrderStatus::class, "status_id");
     }
-    protected function updatedAt(): Attribute
+
+    public function driver(): BelongsTo
     {
-        return Attribute::make(
-            get: fn (string $value) => verta($value)->format('d F Y - H:i'),
-        );
+        return $this->belongsTo(Driver::class, "driver_id");
     }
+
     /*protected function reservedFor(): Attribute
     {
         return Attribute::make(
@@ -75,15 +73,6 @@ class Order extends Model
         );
     }*/
 
-    public function status()
-    {
-        return $this->belongsTo(OrderStatus::class,"status_id");
-    }
-
-    public function driver(): BelongsTo
-    {
-        return $this->belongsTo(Driver::class,"driver_id");
-    }
     public function getStatusLabel(): ?string
     {
         return OrderStatus::from($this->status)->getLabel();
@@ -103,14 +92,6 @@ class Order extends Model
         };
     }
 
-    protected function options(): Attribute
-    {
-        return Attribute::make(
-            get: fn($value) => json_decode($value, true),
-            set: fn($value) => json_encode($value),
-        );
-    }
-
     public function getOptionModelsAttribute()
     {
         $optionIds = $this->options ?? [];
@@ -125,8 +106,30 @@ class Order extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['status_id','time_apply_status','address_id','driver_id'])
+            ->logOnly(['status_id', 'time_apply_status', 'address_id', 'driver_id'])
             ->useLogName('order')
             ->logOnlyDirty();
+    }
+
+    protected function createdAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn(string $value) => verta($value)->format('d F Y - H:i'),
+        );
+    }
+
+    protected function updatedAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn(string $value) => verta($value)->format('d F Y - H:i'),
+        );
+    }
+
+    protected function options(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => json_decode($value, true),
+            set: fn($value) => json_encode($value),
+        );
     }
 }

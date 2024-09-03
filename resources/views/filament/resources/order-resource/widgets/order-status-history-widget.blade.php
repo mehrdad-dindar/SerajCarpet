@@ -7,15 +7,23 @@
                     <li class="mb-2">
                         @if($activity->event !== "created")
                             @if(isset($activity->properties['old']['status_id']))
-                            <div>
-                                <strong>{{ __("Status changed from:") }}</strong> <x-srj-badge :label="\App\Models\OrderStatus::getLabel($activity->properties['old']['status_id'] ?? null)" />
-                                <strong>{{ __("To:") }}</strong> <x-srj-badge :label="\App\Models\OrderStatus::getLabel($activity->properties['attributes']['status_id'])" />
-                            </div>
-                            @endif
-                            @if(isset($activity->properties['old']['driver_id']))
                                 <div>
-                                    <strong>{{ __("Driver changed from:") }}</strong> <x-srj-badge :label="\App\Models\Order::getDriver($activity->properties['old']['driver_id'] ?? null)" />
-                                    <strong>{{ __("To:") }}</strong> <x-srj-badge :label="\App\Models\OrderStatus::getLabel($activity->properties['attributes']['driver_id'])" />
+                                    <strong>{{ __("Status changed from:") }}</strong>
+                                    <x-srj-badge
+                                        :label="\App\Models\OrderStatus::getLabel($activity->properties['old']['status_id'] ?? null)"/>
+                                    <strong>{{ __("To:") }}</strong>
+                                    <x-srj-badge
+                                        :label="\App\Models\OrderStatus::getLabel($activity->properties['attributes']['status_id'])"/>
+                                </div>
+                            @elseif(isset($activity->properties['old']['driver_id']))
+                                <div>
+                                    {{--                                    @dd($activity->properties)--}}
+                                    <strong>{{ __("Driver changed from:") }}</strong>
+                                    <x-srj-badge
+                                        :label="\App\Models\Driver::getName($activity->properties['old']['driver_id'] ?? null)"/>
+                                    <strong>{{ __("To:") }}</strong>
+                                    <x-srj-badge
+                                        :label="\App\Models\Driver::getName($activity->properties['attributes']['driver_id'])"/>
                                 </div>
                             @endif
                         @else
@@ -25,7 +33,7 @@
                         @endif
                         <div>
                             <strong>{{ __("Changed by:") }}</strong> {{ $activity->causer->name ?? 'System' }}
-                            <strong>{{ __("At:") }}</strong> {{ $activity->created_at->format('Y-m-d H:i:s') }}
+                            <strong>{{ __("At:") }}</strong> {{ verta($activity->created_at)->format('d F Y - H:i') }}
                         </div>
                     </li>
                 @endif

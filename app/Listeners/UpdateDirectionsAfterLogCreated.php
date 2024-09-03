@@ -21,6 +21,7 @@ class UpdateDirectionsAfterLogCreated
      */
     public function handle(OrderLogCreated $event): void
     {
+        dd($event->activity->properties);
 //        $response = Http::get('https://external-api.com/endpoint', [
 //            'data' => $event->activity->properties, // یا هر اطلاعات دیگری که نیاز دارید
 //        ]);

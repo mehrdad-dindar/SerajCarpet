@@ -32,6 +32,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Schema;
 
 class OrderResource extends Resource
@@ -78,9 +79,9 @@ class OrderResource extends Resource
                     ->alignCenter()
                     ->counts('items'),
                 Tables\Columns\TextColumn::make('area')
-                    ->badge()->color(fn($state,$record): string => $record->address ? "info" : "danger")
-                    ->getStateUsing(fn ($record) => $record->address ? 'منطقه ' . $record->address->municipality_zone: 'X')
-                    ->description(fn ($record) => $record->address ? 'محله ' . $record->address->neighbourhood : 'فاقد آدرس')
+                    ->badge()->color(fn($state, $record): string => $record->address ? "info" : "danger")
+                    ->getStateUsing(fn($record) => $record->address ? 'منطقه ' . $record->address->municipality_zone : 'X')
+                    ->description(fn($record) => $record->address ? 'محله ' . $record->address->neighbourhood : 'فاقد آدرس')
                     ->sortable()
                     ->translateLabel()
                     ->toggleable()
@@ -237,7 +238,7 @@ class OrderResource extends Resource
                                     ->prefixIcon('heroicon-o-map-pin')
                                     ->label(__("Customer's Address"))
                                     ->translateLabel()
-                                    ->options(fn(Get $get): Collection => Address::query()
+                                    ->options(fn(Get $get): SupportCollection => Address::query()
                                         ->where('customer_id', $get('customer_id'))
                                         ->pluck('address', 'id'))
                                     ->createOptionForm([
@@ -583,7 +584,8 @@ class OrderResource extends Resource
         ];
     }
 
-    public static function getWidgets(): array {
+    public static function getWidgets(): array
+    {
         return [
             OrderStatusHistoryWidget::class,
         ];

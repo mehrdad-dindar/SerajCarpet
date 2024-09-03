@@ -35,5 +35,12 @@ class Driver extends Authenticatable
     {
         return $this->hasMany(OptimizedRoute::class);
     }
-
+    public static function getName($state): string
+    {
+        if ($state !== null) {
+            return self::find($state)->name ?? "راننده #" . $state;
+        } else {
+            return 'N/A';
+        }
+    }
 }
