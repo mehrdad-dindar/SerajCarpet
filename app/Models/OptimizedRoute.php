@@ -22,12 +22,15 @@ class OptimizedRoute extends Model
             $driver = Driver::find($driverId);
             if ($driver->orders->count()) {
                 $orderLocations = $driver->orders->map(function ($order) {
+                    if (!isset($order->address->latitude)) {
+                        return null;
+                    }
                     return [
                         'id' => $order->id,
                         'latitude' => $order->address->latitude,
                         'longitude' => $order->address->longitude,
                     ];
-                });
+                })->filter();
 
                 $waypoints = $this->salesman($orderLocations);
                 if (isset($waypoints->getData()->points)) {
@@ -35,7 +38,7 @@ class OptimizedRoute extends Model
                     $sortedOrders = $this->sortOrdersByIndex($driver->orders, $points);
                     $orderIds = $sortedOrders->pluck('id')->toArray();
                     $driver->optimizedRoutes()->create([
-                       "orders" => $orderIds
+                        "orders" => $orderIds
                     ]);
                 }
             }
@@ -47,16 +50,23 @@ class OptimizedRoute extends Model
         // تبدیل پاسخ API به یک مجموعه و مرتب کردن بر اساس index
         $sortedOrders = collect($apiResponse)->map(function ($point) use ($orders) {
             $orderIndex = $point->index;
-            if ($orders[$orderIndex]->address->latitude !== $point->location[0]) {
-                $this->updateOrderAddressGeo($orders[$orderIndex]->address,$point->location);
+            $order = $orders[$orderIndex];
+
+            if ($order->address && isset($order->address->latitude)) {
+
+                if ($order->address->latitude !== $point->location[0]) {
+                    $this->updateOrderAddressGeo($order->address, $point->location);
+                }
+                return $order;
+            } else {
+                return null;
             }
-            return $orders[$orderIndex];
         });
 
-        return $sortedOrders;
+        return $sortedOrders->filter();
     }
 
-    public function updateOrderAddressGeo(Address $address,array $points)
+    public function updateOrderAddressGeo(Address $address, array $points)
     {
         $address->latitude = $points[0];
         $address->longitude = $points[1];
