@@ -16,7 +16,7 @@ class OptimizedRoute extends Model
         'orders' => 'array',
     ];
 
-    public function calculateRoute($allUniqueDriverIds)
+    public function calculateRoute($allUniqueDriverIds): void
     {
         foreach ($allUniqueDriverIds as $driverId) {
             $driver = Driver::find($driverId);
