@@ -8,9 +8,6 @@ import "../css/client/client.css";
 import '@neshan-maps-platform/mapbox-gl/dist/NeshanMapboxGl.css';
 import nmp_mapboxgl from '@neshan-maps-platform/mapbox-gl';
 
-import mapboxgl from 'mapbox-gl';
-window.mapboxgl = mapboxgl;
-
 import L from "leaflet";
 import 'leaflet/dist/leaflet.css';
 

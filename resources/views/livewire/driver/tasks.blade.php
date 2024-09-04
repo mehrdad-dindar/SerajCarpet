@@ -1,15 +1,12 @@
 <div class="font-iranSans">
     @section('head')
-        <link
-            rel="stylesheet"
-            href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.css"
-            type="text/css"
-        />
+        <link rel="stylesheet" href="https://static.neshan.org/sdk/leaflet/v1.9.4/neshan-sdk/v1.0.8/index.css"/>
+        <script src="https://static.neshan.org/sdk/leaflet/v1.9.4/neshan-sdk/v1.0.8/index.js"></script>
     @endsection
     <div id="driver-map" class="absolute inset-0 z-0"></div>
     <x-srj-mini-button icon="arrow-left" rounded fuchsia class="absolute left-5 top-5 z-10 bg-gradient-fuchsia"
                        wire:click="goToIndex"/>
-    <x-srj-button id="getLocationButton" fuchsia class="absolute left-1/2 top-5 z-10 bg-gradient-fuchsia"/>
+    <x-srj-button id="getLocationButton" label="Salam" fuchsia class="absolute left-1/2 top-5 z-10 bg-gradient-fuchsia"/>
     <div class="absolute bottom-16 inset-x-0 z-10 flex justify-center">
         <ul class="max-h-60 overflow-y-scroll w-4/5">
             @foreach($orders as $order)
@@ -25,72 +22,48 @@
                                            wire:click="makeCall('{{ $order->customer->phone }}')"/>
                     </div>
                     <span class="text-muted text-xs">{{$order->address->address}}</span>
-                    <x-srj-badge :label="$order->getStatusLabel()"
-                                 :class="$order->getStatusColor() . ' text-xxs absolute top-0 left-0'"/>
+                    <x-srj-badge :label="$order->status->getLabel($order->status_id)"
+                                 :class="$order->status->getColor($order->status_id) . ' text-xxs absolute top-0 left-0'"/>
                 </li>
             @endforeach
         </ul>
     </div>
-    <script>
+    <script type="module">
         document.addEventListener('livewire:init', function () {
             Livewire.on('callInitiated', function (data) {
                 console.log('tel:+98' + data.number);
                 window.location.href = 'tel:+98' + data.number;
             });
         });
-    </script>
 
+        // const map = new L.Map("driver-map", {
+        //     key: "web.9b720353743c4534a41a4a22df831720",
+        //     maptype: "neshan",
+        //     poi: false,
+        //     traffic: false,
+        //     center: [35.699756, 51.338076],
+        //     zoom: 14,
+        //     zoomControl: false
+        // })
 
-    <script type="module">
-        let lat = 35.7219;
-        let lng = 51.3347;
-        let circle;
-        document.getElementById('getLocationButton').addEventListener('click', function() {
-            navigator.geolocation.watchPosition(success, error);
-        });
+        var map = L.map('driver-map').setView([35.6892, 51.3890], 13); // مرکز نقشه روی تهران
 
-        function success(pos){
-            lat = pos.coords.latitude;
-            lng = pos.coords.longitude;
-            const accuracy = pos.coords.accuracy;
-            console.log(lat,lng)
-
-            if (circle)
-                map.removeLayer(circle)
-
-            circle = L.circle([lat,lng],{radius: accuracy}).addTo(map)
-            map.fitBounds(circle.getBounds())
-        }
-        function error(err){
-            if (err.code === 1){
-                alert("لطفا برای مسیریابی بهتر لوکیشن خود را روشن کنید")
-            }
-        }
-
-        var map = L.map('driver-map', {
-            attributionControl: false,
-            zoomControl: false
-        }).setView([lat, lng], 12);
-        L.control.zoom({
-            position: 'topright'
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        var myAttrControl = L.control.attribution({position: 'bottomleft'}).addTo(map);
-        myAttrControl.setPrefix('<a href="https://serajcarpet.com/">سراج</a>');
 
-        L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', { //style URL
-            tileSize: 512,
-            zoomOffset: -1,
-            minZoom: 1,
-            crossOrigin: true
+        L.control.zoom({
+            position: 'topright'
         }).addTo(map);
 
 
         L.Routing.control({
             waypoints: [
-                L.latLng(lat, lng),
+                L.latLng(35.6892, 51.3890),
                 @php foreach($points as $point){
-             echo "L.latLng(".$point->location[0].", ".$point->location[1]."),\n";
+             echo "L.latLng(".$point['latitude'].", ".$point['longitude']."),\n";
             }
                 @endphp],
             lineOptions: {
@@ -107,28 +80,50 @@
             addWaypoints: false,
             collapsible: false,
         }).addTo(map);
+    </script>
 
 
-        // map.locate({setView: true, maxZoom: 16});
-        //
-        // function onLocationFound(e) {
-        //     var radius = e.accuracy;
-        //
-        //     if (circle)
-        //         map.removeLayer(circle)
-        //     // L.marker(e.latlng).addTo(map);
-        //     L.circle(e.latlng, radius).addTo(map);
-        //     map.fitBounds(circle.getBounds())
-        //
-        // }
-        //
-        // map.on('locationfound', onLocationFound);
-        //
-        //
-        // function onLocationError(e) {
-        //     alert(e.message);
-        // }
-        //
-        // map.on('locationerror', onLocationError);
+    <script type="module">
+        /*var map = L.map('driver-map', {
+            attributionControl: false,
+            zoomControl: false
+        }).setView([35.6892, 51.3890], 13);
+
+        L.control.zoom({
+            position: 'topright'
+        }).addTo(map);
+
+        var myAttrControl = L.control.attribution({position: 'bottomleft'}).addTo(map);
+        myAttrControl.setPrefix('<a href="https://serajcarpet.com/">سراج</a>');
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            tileSize: 512,
+            zoomOffset: -1,
+            minZoom: 1,
+            crossOrigin: true
+        }).addTo(map);
+
+
+        L.Routing.control({
+            waypoints: [
+                L.latLng(lat, lng),
+                @php /*foreach($points as $point){
+             echo "L.latLng(".$point->location[0].", ".$point->location[1]."),\n";
+            }*/
+                @endphp],
+            lineOptions: {
+                styles: [
+                    {
+                        color: "blue",
+                        opacity: 0.6,
+                        weight: 4
+                    }
+                ]
+            },
+            routeWhileDragging: false,
+            draggableWaypoints: false,
+            addWaypoints: false,
+            collapsible: false,
+        }).addTo(map);*/
     </script>
 </div>

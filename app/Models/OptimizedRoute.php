@@ -16,6 +16,11 @@ class OptimizedRoute extends Model
         'orders' => 'array',
     ];
 
+    public function orders()
+    {
+        return Order::whereIn('id', $this->orders)->get();
+    }
+
     public function calculateRoute($allUniqueDriverIds): void
     {
         foreach ($allUniqueDriverIds as $driverId) {
