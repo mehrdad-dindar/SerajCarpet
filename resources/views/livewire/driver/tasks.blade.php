@@ -46,10 +46,11 @@
         //     zoomControl: false
         // })
 
-        var map = L.map('driver-map').setView([35.6892, 51.3890], 13); // مرکز نقشه روی تهران
+        var map = L.map('driver-map').setView([35.6892, 51.3890], 12); // مرکز نقشه روی تهران
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 18,
+        L.tileLayer('http://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
+            zoomControl: false,
+            traffic: true,
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
