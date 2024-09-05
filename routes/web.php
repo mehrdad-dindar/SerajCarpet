@@ -10,9 +10,12 @@ use App\Livewire\Driver\Orders as DriverOrders;
 use App\Livewire\Driver\Panel as DriverPanel;
 use App\Livewire\Customer\Profile as CustomerProfile;
 use App\Livewire\Driver\Profile as DriverProfile;
+use App\Livewire\Driver\Tasks;
 use App\Livewire\SetLocation;
 use App\Models\Address;
 use App\Models\Customer;
+use App\Livewire\Customer\Order as CustomerOrder;
+use App\Livewire\Customer\Order\Show as CustomerOrderShow;
 use Hashids\Hashids;
 use Illuminate\Support\Facades\Route;
 
@@ -40,7 +43,7 @@ Route::get('test', function (){
 //        ->sendToDatabase($recipient);
 //    dd("sent");
     $hashids = new Hashids('',6);
-    $hashedID = $hashids->encode(28);
+    $hashedID = $hashids->encode(51);
     return '<a href="'.\route("set-location",$hashedID).'">hi</a>';
 });
 Route::get('/set-location/{id}', SetLocation::class)->name('set-location');
@@ -66,6 +69,8 @@ Route::middleware(['auth:customer'])->prefix('panel')->group(function () {
         $lng = $address->longitude;
         return redirect("");
     })->name("admin.users.edit");
+    Route::get('/orders', CustomerOrder::class)->name('customer.panel.orders');
+    Route::get('/orders/{order}', CustomerOrderShow::class)->name('customer.panel.orders.show');
 });
 Route::middleware(['auth:driver'])->prefix('dashboard')->group(function () {
     Route::get('/', DriverPanel::class)->name('driver.panel.index');
@@ -75,4 +80,5 @@ Route::middleware(['auth:driver'])->prefix('dashboard')->group(function () {
     Route::get('/customers', CustomerController::class)->name('customer.index');
     Route::get('/properties', PropertyController::class)->name('property.index');
     Route::get('/properties/dimensions/{property}', [PropertyController::class,'getDimensions'])->name('property.dimensions');
+    Route::get('/tasks', Tasks::class)->name('driver.tasks');
 });

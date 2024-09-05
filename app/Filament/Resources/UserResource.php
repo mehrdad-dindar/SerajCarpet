@@ -5,7 +5,10 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
+use Filament\Actions\ViewAction;
 use Filament\Forms;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Infolists\Components\TextEntry;
@@ -15,6 +18,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
 {
@@ -32,9 +36,22 @@ class UserResource extends Resource
         return $form
             ->schema([
                 TextInput::make('name'),
-                TextInput::make('email')->required(),
-                TextInput::make('password')->password()->minLength(8)->same('password_confirmation'),
-                TextInput::make('password_confirmation')->password()->minLength(8),
+                TextInput::make('email')
+                    ->required(),
+                TextInput::make('password')
+                    ->password()
+                    ->minLength(8)
+                    ->dehydrateStateUsing(fn($state) => filled($state) ? Hash::make($state) : null)
+                    ->dehydrated(fn($state) => filled($state))
+                    ->same('password_confirmation'),
+                TextInput::make('password_confirmation')
+                    ->password()
+                    ->minLength(8),
+                Select::make('roles')
+                    ->relationship('roles', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->searchable(),
             ]);
     }
 
@@ -51,6 +68,8 @@ class UserResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -61,4 +61,9 @@ class Customer extends Authenticatable
     {
         return $this->morphMany(Token::class, 'tokenable');
     }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
 }

@@ -13,6 +13,12 @@ class DriverSeeder extends Seeder
      */
     public function run(): void
     {
+        Driver::create([
+            'name' => 'رضا راننده',
+            'phone' => '09121111111',
+            'license' => 98456789,
+            'car_tag' => "36الف45678"
+        ]);
         Driver::factory()->count(50)->create();
 
     }

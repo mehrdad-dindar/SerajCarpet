@@ -146,9 +146,8 @@ return [
          'badge' => [
              'alias' => 'srj-badge',
          ],
-        // 'mini-button' => [
-        //     'class' => Components\Button\Mini::class,
-        //     'alias' => 'new-mini-button',
-        // ],
+         'mini-button' => [
+             'alias' => 'srj-mini-button',
+         ],
     ]),
 ];

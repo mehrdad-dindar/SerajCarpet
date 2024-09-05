@@ -2,23 +2,41 @@
 
 namespace App\Models;
 
-use App\Enums\OrderStatus;
+use App\Events\BulkOrderUpdated;
+use App\Events\OrderLogCreated;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Order extends Model
 {
+    use HasFactory;
+    use LogsActivity;
+
+    protected static bool $isBulkUpdate = false;
     protected $guarded;
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::updated(function ($order) {
+            $activity = Activity::forSubject($order)->latest()->first();
+            event(new OrderLogCreated($activity));
+        });
+    }
 
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
-    public function addresses(): BelongsTo
+    public function address()
     {
         return $this->belongsTo(Address::class);
     }
@@ -27,6 +45,7 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class)->nonCustom();
     }
+
     public function other_items(): HasMany
     {
         return $this->hasMany(OrderItem::class)->custom();
@@ -36,12 +55,17 @@ class Order extends Model
     {
         return 200;
     }
-    protected function createdAt(): Attribute
+
+    public function status()
     {
-        return Attribute::make(
-            get: fn (string $value) => verta($value)->format('d F Y - H:i'),
-        );
+        return $this->belongsTo(OrderStatus::class, "status_id");
     }
+
+    public function driver(): BelongsTo
+    {
+        return $this->belongsTo(Driver::class);
+    }
+
     /*protected function reservedFor(): Attribute
     {
         return Attribute::make(
@@ -49,23 +73,6 @@ class Order extends Model
         );
     }*/
 
-    protected function options(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => explode(',', $value),
-            set: fn ($value) => implode(',', $value),
-        );
-    }
-
-    public function status()
-    {
-        return OrderStatus::make($this->status);
-    }
-
-    public function driver(): BelongsTo
-    {
-        return $this->belongsTo(Driver::class,"driver_id");
-    }
     public function getStatusLabel(): ?string
     {
         return OrderStatus::from($this->status)->getLabel();
@@ -83,5 +90,46 @@ class Order extends Model
             OrderStatus::READY_FOR_DELIVERY_TO_CUSTOMER->value => 'bg-purple-500',
             OrderStatus::DELIVERED_AND_PAID->value => 'bg-green-700',
         };
+    }
+
+    public function getOptionModelsAttribute()
+    {
+        $optionIds = $this->options ?? [];
+        return Option::whereIn('id', $optionIds)->get();
+    }
+
+    public function getDescriptionForEvent(string $eventName): string
+    {
+        return __('order.' . $eventName);
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['status_id', 'time_apply_status', 'address_id', 'driver_id'])
+            ->useLogName('order')
+            ->logOnlyDirty();
+    }
+
+    protected function createdAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn(string $value) => verta($value)->format('d F Y - H:i'),
+        );
+    }
+
+    protected function updatedAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn(string $value) => verta($value)->format('d F Y - H:i'),
+        );
+    }
+
+    protected function options(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => json_decode($value, true),
+            set: fn($value) => json_encode($value),
+        );
     }
 }

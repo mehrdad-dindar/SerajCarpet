@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -15,15 +16,16 @@ return new class extends Migration
             $table->id();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->foreignId('driver_id')->nullable()->constrained();
-            $table->foreignId('address_id')->nullable()->constrained();
+            $table->foreignId('address_id')->nullable()->constrained()->onDelete("SET NULL");
             $table->string('discount')->nullable();
-            $table->string('options')->nullable();
+            $table->json('options')->nullable();
             $table->string('sub_total')->nullable();
             $table->string('total')->nullable();
-            $table->string('status')->nullable();
-            $table->dateTime('reserved_for')->nullable();
+            $table->foreignId('status_id')->constrained("order_statuses")->nullable();
+            $table->dateTime('time_apply_status')->nullable();
             $table->timestamps();
         });
+        DB::statement('ALTER TABLE orders AUTO_INCREMENT = 10001;');
     }
 
     /**

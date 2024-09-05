@@ -102,6 +102,11 @@ class AdminPanelProvider extends PanelProvider
                         return __("User Settings");
                     })
                     ->icon("heroicon-o-users"),
+                'System Setting' => NavigationGroup::make()
+                    ->label(function () {
+                        return __("System Setting");
+                    })
+                    ->icon("heroicon-o-swatch"),
             ])
             ->brandName(function () {
                 return __('Seraj');
