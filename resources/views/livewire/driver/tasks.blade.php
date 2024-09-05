@@ -46,13 +46,26 @@
         //     zoomControl: false
         // })
 
-        var map = L.map('driver-map').setView([35.6892, 51.3890], 12); // مرکز نقشه روی تهران
+        var map = L.map('driver-map',{
+            zoomControl: false
+        }).setView([35.6892, 51.3890], 12); // مرکز نقشه روی تهران
 
-        L.tileLayer('http://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
-            zoomControl: false,
-            traffic: true,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=KLoLXEB9eFv60ELGhKUn	', {
+            maxZoom: 18,
+            tileSize: 512,
+            zoomOffset: -1,
+            attributionControl: false
         }).addTo(map);
+
+        var myAttrControl = L.control.attribution({position: 'bottomleft'}).addTo(map);
+        myAttrControl.setPrefix('<a href="https://serajcarpet.com/">سراج</a>');
+
+
+        // L.tileLayer('http://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
+        //     zoomControl: false,
+        //     traffic: true,
+        //     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        // }).addTo(map);
 
 
         L.control.zoom({
@@ -60,7 +73,7 @@
         }).addTo(map);
 
 
-        L.Routing.control({
+        var control = L.Routing.control({
             waypoints: [
                 L.latLng({{settings()->location_latitude}}, {{settings()->location_longitude}}),
                 @php foreach($points as $point){
@@ -68,7 +81,16 @@
             }
                 @endphp
                 L.latLng({{settings()->location_latitude}}, {{settings()->location_longitude}})],
+            routeWhileDragging: true,
+            draggableWaypoints: false,
+            addWaypoints: false,
+            createMarker: function(i, wp, nWps) {
+                return L.marker(wp.latLng, { draggable: false });
+            },
+            // غیرفعال کردن توضیحات مسیر
+            show: false,
             lineOptions: {
+                addWaypoints: false,
                 styles: [
                     {
                         color: "blue",
@@ -77,11 +99,45 @@
                     }
                 ]
             },
-            routeWhileDragging: false,
-            draggableWaypoints: false,
-            addWaypoints: false,
-            collapsible: false,
+            router: new L.Routing.OSRMv1({
+                serviceUrl: `https://router.project-osrm.org/route/v1`
+            }),
+            fitSelectedRoutes: false, // جلوگیری از زوم خودکار به مسیر انتخاب شده
+            showAlternatives: false, // غیرفعال کردن نمایش مسیرهای جایگزین
+            altLineOptions: { styles: [{ opacity: 0 }]}
         }).addTo(map);
+
+        const driverMarker = L.marker([35.6892, 51.3890]).addTo(map);
+
+        function updateDriverLocation(position) {
+            var lat = position.coords.latitude;
+            var lng = position.coords.longitude;
+
+            // به روز رسانی موقعیت مارکر راننده
+            driverMarker.setLatLng([lat, lng]);
+            // به روز رسانی مسیر با موقعیت جدید راننده
+
+            map.panTo(new L.LatLng(lat, lng), {
+                animate: true, // فعال کردن انیمیشن
+                duration: 1.0 // مدت زمان انیمیشن (به ثانیه)
+            });
+            var waypoints = control.getWaypoints();
+            waypoints[0].latLng = L.latLng(lat, lng); // بروز رسانی نقطه شروع به موقعیت جدید
+            control.setWaypoints(waypoints);
+        }
+
+        // بررسی پشتیبانی از Geolocation API و مشاهده موقعیت زنده راننده
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(updateDriverLocation, function(error) {
+                console.error("Geolocation error: " + error.message);
+            }, {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 30000
+            });
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
     </script>
 
 
