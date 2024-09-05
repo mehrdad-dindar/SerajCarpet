@@ -10,6 +10,7 @@ use App\Livewire\Driver\Orders as DriverOrders;
 use App\Livewire\Driver\Panel as DriverPanel;
 use App\Livewire\Customer\Profile as CustomerProfile;
 use App\Livewire\Driver\Profile as DriverProfile;
+use App\Livewire\Driver\Tasks;
 use App\Livewire\SetLocation;
 use App\Models\Address;
 use App\Models\Customer;
@@ -79,4 +80,5 @@ Route::middleware(['auth:driver'])->prefix('dashboard')->group(function () {
     Route::get('/customers', CustomerController::class)->name('customer.index');
     Route::get('/properties', PropertyController::class)->name('property.index');
     Route::get('/properties/dimensions/{property}', [PropertyController::class,'getDimensions'])->name('property.dimensions');
+    Route::get('/tasks', Tasks::class)->name('driver.tasks');
 });

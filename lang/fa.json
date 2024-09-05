@@ -57,6 +57,7 @@
     "Unit" : "واحد",
     "Active" : "فعال",
     "Location" : "لوکیشن",
+    "Factory Location" : "لوکیشن کارخانه",
     "Service Item" : "آیتم خدمت",
     "Parent" : "والد",
     "name" : "نام",
@@ -123,5 +124,11 @@
     "Add Item" : "افزودن آیتم",
     "Select Item" : "انتخاب آیتم",
     "Select some Item..." : "",
+    "Order Status History" : "تاریخچه وضعیت سفارش",
+    "Status changed from:" : "تغییر وضعیت از:",
+    "To:" : "به:",
+    "Changed by:" : "توسط:",
+    "At:" : "در:",
+    "Driver changed from:" : "تغییر راننده از:",
     "Customer" : "مشتری"
 }

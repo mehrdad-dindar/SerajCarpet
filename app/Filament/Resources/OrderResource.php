@@ -3,6 +3,9 @@
 namespace App\Filament\Resources;
 
 use App\Enums\OrderStatus;
+use App\Events\BulkOrderUpdated;
+use App\Filament\Resources\OrderResource\Widgets\OrderStatusHistoryWidget;
+use App\Models\OrderStatus as OrderStatusModel;
 use App\Filament\Resources\CustomerResource\RelationManagers\AddressRelationManager;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers;
@@ -15,6 +18,7 @@ use App\Models\Property;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Actions\Action;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -27,8 +31,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Schema;
 
 class OrderResource extends Resource
@@ -64,9 +68,9 @@ class OrderResource extends Resource
                     ->translateLabel()
                     ->sortable()
                     ->badge()
-                    ->color(fn(string $state): string => OrderStatus::from($state)->getColor())
+                    ->color(fn(OrderStatusModel $state): string => $state->color)
                     ->toggleable()
-                    ->formatStateUsing(fn(string $state): string => OrderStatus::from($state)->getLabel()),
+                    ->formatStateUsing(fn(OrderStatusModel $state): string => $state->label),
                 Tables\Columns\TextColumn::make('items_count')
                     ->sortable()
                     ->translateLabel()
@@ -75,9 +79,9 @@ class OrderResource extends Resource
                     ->alignCenter()
                     ->counts('items'),
                 Tables\Columns\TextColumn::make('area')
-                    ->badge()->color(fn($state,$record): string => $record->address ? "info" : "danger")
-                    ->getStateUsing(fn ($record) => $record->address ? 'منطقه ' . $record->address->municipality_zone: 'X')
-                    ->description(fn ($record) => $record->address ? 'محله ' . $record->address->neighbourhood : 'فاقد آدرس')
+                    ->badge()->color(fn($state, $record): string => $record->address ? "info" : "danger")
+                    ->getStateUsing(fn($record) => $record->address ? 'منطقه ' . $record->address->municipality_zone : 'X')
+                    ->description(fn($record) => $record->address ? 'محله ' . $record->address->neighbourhood : 'فاقد آدرس')
                     ->sortable()
                     ->translateLabel()
                     ->toggleable()
@@ -161,7 +165,10 @@ class OrderResource extends Resource
                         ->translateLabel()
                         ->action(function (Collection $records, array $data): void {
                             $ids = $records->pluck('id');
-                            Order::whereIn('id', $ids)->update(['driver_id' => $data['driver_id']]);
+                            $orders = Order::whereIn('id', $ids)->update(['driver_id' => $data['driver_id']]);
+                            if ($orders) {
+                                event(new BulkOrderUpdated($records));
+                            }
                         })
                         ->form([
                             Forms\Components\Select::make('driver_id')
@@ -231,7 +238,7 @@ class OrderResource extends Resource
                                     ->prefixIcon('heroicon-o-map-pin')
                                     ->label(__("Customer's Address"))
                                     ->translateLabel()
-                                    ->options(fn(Get $get): Collection => Address::query()
+                                    ->options(fn(Get $get): SupportCollection => Address::query()
                                         ->where('customer_id', $get('customer_id'))
                                         ->pluck('address', 'id'))
                                     ->createOptionForm([
@@ -398,9 +405,11 @@ class OrderResource extends Resource
                                             ->minValue(1)
                                             ->reactive()
                                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                                $price = Property::find($get("property_id"))->price;
-                                                $set('sub_total', ((int)$get('dimensions') ?? 1) * $state * $price);
-                                                $set('unit_price', $price);
+                                                if ($get("property_id") !== null) {
+                                                    $price = Property::find($get("property_id"))->price;
+                                                    $set('sub_total', ((int)$get('dimensions') ?? 1) * $state * $price);
+                                                    $set('unit_price', $price);
+                                                }
                                             })
                                             ->columnSpan(2)
                                             ->required(),
@@ -484,7 +493,6 @@ class OrderResource extends Resource
                         Forms\Components\Section::make('سایر خدمات')
                             ->schema([
                                 Forms\Components\Select::make('options')
-//                                    ->label(__('Order Options'))
                                     ->hiddenLabel()
                                     ->multiple()
                                     ->options(Option::pluck('name', 'id'))
@@ -494,29 +502,38 @@ class OrderResource extends Resource
                             ]),
                         Forms\Components\Section::make('وضعیت سفارش')
                             ->schema([
-                                Forms\Components\Select::make('status')
+                                Forms\Components\Select::make('status_id')
                                     ->label(__('Order Status'))
                                     ->hiddenLabel()
-                                    ->options(OrderStatus::class)
-                                    ->default(OrderStatus::RESERVED)
+                                    ->options(OrderStatusModel::all()->pluck('label', 'id'))
+//                                    ->default(OrderStatusModel::RESERVED)
                                     ->live()
-//                                    ->before(fn($record, $get) => dd($record))
                                     ->required(),
-                                Forms\Components\Fieldset::make('تنظیم تاریخ رزرو')
-//                                    ->hidden(fn(Get $get): bool => $get('status') != OrderStatus::RESERVED)
+                                Forms\Components\Fieldset::make('تنظیم ')
                                     ->visible(
-                                        fn(Get $get): bool => (is_object($get('status')) ? $get('status')->value : $get('status')) == OrderStatus::RESERVED->value
+                                        fn(Get $get): bool => OrderStatusModel::where('id', intval($get('status_id')))->value('has_time') == true
                                     )
                                     ->schema([
-                                        Forms\Components\DateTimePicker::make('reserved_for')
+                                        Forms\Components\DatePicker::make('reservation_date')
                                             ->prefixIcon('heroicon-o-calendar-days')
-                                            ->label('Reservation Time')
+                                            ->label('Reservation Date')
                                             ->translateLabel()
                                             ->reactive()
-                                            ->displayFormat('H:i Y-m-d')
-                                            ->seconds(false)
+                                            ->displayFormat('Y-m-d')
                                             ->columnSpanFull()
                                             ->jalali(),
+                                        Select::make('reservation_time')
+                                            ->label('Reservation Time')
+                                            ->options([
+                                                '08:00:00' => '08:00 - 10:00',
+                                                '10:00:00' => '10:00 - 12:00',
+                                                '12:00:00' => '12:00 - 14:00',
+                                                '14:00:00' => '14:00 - 16:00',
+                                                '16:00:00' => '16:00 - 18:00',
+                                                '18:00:00' => '18:00 - 20:00',
+                                            ])
+                                            ->reactive()
+                                            ->required(),
                                     ]),
 
                             ]),
@@ -566,6 +583,13 @@ class OrderResource extends Resource
             'index' => Pages\ListOrders::route('/'),
             'create' => Pages\CreateOrder::route('/create'),
             'edit' => Pages\EditOrder::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            OrderStatusHistoryWidget::class,
         ];
     }
 }

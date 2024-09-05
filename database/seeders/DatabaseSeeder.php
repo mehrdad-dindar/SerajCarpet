@@ -23,7 +23,8 @@ class DatabaseSeeder extends Seeder
             CustomerSeeder::class,
             DriverSeeder::class,
             OptionSeeder::class,
-            OrderSeeder::class
+            OrderStatusSeeder::class,
+            OrderSeeder::class,
         ]);
     }
 }
