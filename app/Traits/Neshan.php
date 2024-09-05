@@ -26,7 +26,7 @@ trait Neshan
     public function salesman($points)
     {
         $apiKey = env('NESHAN_API_KEY','service.df64f13754cc4cde9c69362bed1a62c4');
-        $url = "https://api.neshan.org/v3/trip?waypoints=". urlencode($this->getFormattedCoordinates($points));
+        $url = "https://api.neshan.org/v3/trip?waypoints=". urlencode($this->getFormattedCoordinates($points)) . "&sourceIsAnyPoint=false";
         try {
             $response = Http::withHeaders([
                 'Api-Key' => $apiKey,
@@ -41,10 +41,15 @@ trait Neshan
 
     protected function getFormattedCoordinates($points)
     {
+        $factoryLocation = "";
+        if (isset(settings()->location_latitude) && isset(settings()->location_longitude)) {
+            $factoryLocation = settings()->location_latitude . ',' . settings()->location_longitude . '|';
+        }
         $formattedCoordinates = $points->map(function($point) {
             return "{$point['latitude']},{$point['longitude']}";
         })->implode('|');
-        return $formattedCoordinates;
+
+        return $factoryLocation . $formattedCoordinates;
     }
     public function showMap()
     {

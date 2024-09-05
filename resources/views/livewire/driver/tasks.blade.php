@@ -62,11 +62,12 @@
 
         L.Routing.control({
             waypoints: [
-                L.latLng(35.6892, 51.3890),
+                L.latLng({{settings()->location_latitude}}, {{settings()->location_longitude}}),
                 @php foreach($points as $point){
              echo "L.latLng(".$point['latitude'].", ".$point['longitude']."),\n";
             }
-                @endphp],
+                @endphp
+                L.latLng({{settings()->location_latitude}}, {{settings()->location_longitude}})],
             lineOptions: {
                 styles: [
                     {

@@ -23,11 +23,20 @@ class OptimizedRoute extends Model
 
     public function calculateRoute($allUniqueDriverIds): void
     {
+        $statuses = [
+            OrderStatus::IN_COLLECTIVE_LIST,
+            OrderStatus::IN_DISTRIBUTION_LIST,
+            OrderStatus::REVISITING_DRIVER
+        ];
+        $test = [];
+
         foreach ($allUniqueDriverIds as $driverId) {
             $driver = Driver::find($driverId);
             if ($driver->orders->count()) {
-                $orderLocations = $driver->orders->map(function ($order) {
-                    if (!isset($order->address->latitude)) {
+                $orderLocations = $driver->orders->map(function ($order) use ($statuses,$test) {
+
+                    info($order->id. ' - ' .$order->status->name);
+                    if (!isset($order->address->latitude) || !in_array($order->status->name,$statuses)) {
                         return null;
                     }
                     return [
@@ -36,7 +45,6 @@ class OptimizedRoute extends Model
                         'longitude' => $order->address->longitude,
                     ];
                 })->filter();
-
                 $waypoints = $this->salesman($orderLocations);
                 if (isset($waypoints->getData()->points)) {
                     $points = $waypoints->getData()->points;
@@ -52,10 +60,10 @@ class OptimizedRoute extends Model
 
     public function sortOrdersByIndex($orders, $apiResponse)
     {
-        // تبدیل پاسخ API به یک مجموعه و مرتب کردن بر اساس index
+        array_shift($apiResponse);
         $sortedOrders = collect($apiResponse)->map(function ($point) use ($orders) {
             $orderIndex = $point->index;
-            $order = $orders[$orderIndex];
+            $order = $orders[$orderIndex - 1];
 
             if ($order->address && isset($order->address->latitude)) {
 
