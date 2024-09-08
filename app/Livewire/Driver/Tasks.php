@@ -5,6 +5,7 @@ namespace App\Livewire\Driver;
 use App\Models\Order;
 use App\Traits\Neshan;
 use Exception;
+use Illuminate\Http\RedirectResponse;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use function Laravel\Prompts\error;
@@ -19,16 +20,9 @@ class Tasks extends Component
 
     public function mount()
     {
-        $this->opRoute = auth()->user()->optimizedRoutes()->orderBy('created_at','desc')->first();
-        $this->orders = $this->opRoute->orders();
-
-        $this->points = $this->orders->map(function($order) {
-            return [
-                'id' => $order->id,
-                'latitude' => $order->address->latitude,
-                'longitude' => $order->address->longitude,
-            ];
-        });
+        $this->_getOptimizedRoute();
+        $this->_getOrders();
+        $this->_getPoints();
 
         $this->dispatch('pointsUpdated', $this->points);
     }
@@ -38,14 +32,37 @@ class Tasks extends Component
     {
         return view('livewire.driver.tasks');
     }
-    public function goToIndex()
+    public function goToIndex(): RedirectResponse
     {
         return redirect()->route("driver.panel.index");
     }
 
-    public function makeCall($phoneNumber)
+    public function makeCall($phoneNumber): void
     {
         $this->dispatch('callInitiated', number: intval($phoneNumber));
     }
 
+    private function _getOptimizedRoute(): void
+    {
+        $this->opRoute = auth()->user()->optimizedRoutes()
+            ->orderBy('created_at', 'desc')->first();
+    }
+
+    private function _getOrders(): void
+    {
+        $this->orders = $this->opRoute->orders();
+    }
+
+    private function _getPoints(): void
+    {
+        $this->points = $this->orders->map(
+            function ($order) {
+                return [
+                    'id' => $order->id,
+                    'latitude' => $order->address->latitude,
+                    'longitude' => $order->address->longitude,
+                ];
+            }
+        );
+    }
 }
