@@ -33,4 +33,9 @@ class Address extends Model
     {
         return $this->addressService->location();
     }
+
+    public function getFullAddress(): string
+    {
+        return $this->addressService->getFullAddress($this);
+    }
 }

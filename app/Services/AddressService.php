@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Address;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class AddressService
@@ -10,7 +11,7 @@ class AddressService
     {
         return Attribute::make(
             get: fn (mixed $value, array $attributes) => [
-                'mark' => 'نمایش'
+                'mark' => 'نمایش',
             ]
         );
     }
@@ -20,12 +21,28 @@ class AddressService
         return Attribute::make(
             get: fn (mixed $value, array $attributes) => [
                 'latitude' => $attributes['latitude'],
-                'longitude' => $attributes['longitude']
+                'longitude' => $attributes['longitude'],
             ],
             set: fn (array $value) => [
                 'latitude' => $value['lat'],
-                'longitude' => $value['lng']
+                'longitude' => $value['lng'],
             ],
         );
+    }
+
+    public function getFullAddress(Address $address): string
+    {
+        $parts = [
+            $address->state,
+            $address->city,
+            $address->address,
+            $address->no,
+            $address->floor ? 'طبقه ' . $address->floor : null,
+            $address->unit ? 'واحد ' . $address->unit : null,
+        ];
+
+        $filteredParts = array_filter($parts);
+
+        return implode(' - ', $filteredParts);
     }
 }

@@ -8,9 +8,9 @@
                         <h1 class="font-bold text-xl">{{ $customer->name }}</h1>
                         <x-srj-badge md icon="phone" positive :label="$this->hideMiddleDigits($customer->phone)" class="ltr"/>
                     </div>
-                    <div>
+                    <div class="flex gap-2">
                         <x-phosphor.icons::duotone.map-pin-line class="w-5 h-5 me-1" />
-                        <p>{{$order->address->get}}</p>
+                        <p class="text-sm">{{$order->address->getFullAddress()}}</p>
                     </div>
                     <div
                         class="mt-auto mb-0 font-semibold leading-normal text-sm group text-slate-500 flex justify-between flex-row">
