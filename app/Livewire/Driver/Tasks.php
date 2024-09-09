@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Traits\Neshan;
 use Exception;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Routing\Redirector;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use function Laravel\Prompts\error;
@@ -32,9 +33,9 @@ class Tasks extends Component
     {
         return view('livewire.driver.tasks');
     }
-    public function goToIndex(): RedirectResponse
+    public function goToIndex()
     {
-        return redirect()->route("driver.panel.index");
+        return redirect()->to(route("driver.panel.index"));
     }
 
     public function makeCall($phoneNumber): void
