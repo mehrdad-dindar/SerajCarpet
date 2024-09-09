@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Driver\Order\Steps;
 
+use App\Models\Customer;
+use App\Models\Order;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Spatie\LivewireWizard\Components\StepComponent;
@@ -9,7 +11,8 @@ use Spatie\LivewireWizard\Components\StepComponent;
 #[Layout("driver.layouts.app")]
 class CustomerInfoStepComponent extends StepComponent
 {
-    public $customer;
+    public Customer $customer;
+    public Order $order;
     public $icon = "home";
 
     public function render()

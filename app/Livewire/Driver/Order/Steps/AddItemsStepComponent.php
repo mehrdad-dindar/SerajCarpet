@@ -49,8 +49,6 @@ class AddItemsStepComponent extends StepComponent
 
     public function submit()
     {
-//        $this->validate();
-
         $this->nextStep();
     }
 

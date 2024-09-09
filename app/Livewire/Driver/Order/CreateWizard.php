@@ -7,6 +7,7 @@ use App\Livewire\Driver\Order\Steps\ConfirmStepComponent;
 use App\Livewire\Driver\Order\Steps\CustomerInfoStepComponent;
 use App\Livewire\Driver\Order\Steps\SelectCustomerStepComponent;
 use App\Models\Customer;
+use App\Models\Order;
 use App\Support\CreateOrderWizardState;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -17,9 +18,12 @@ use Spatie\LivewireWizard\Components\WizardComponent;
 class CreateWizard extends WizardComponent
 {
     public Customer $customer;
-    public function mount(Customer $customer): void
+    public Order $order;
+
+    public function mount(Order $order): void
     {
-        $this->customer = $customer;
+        $this->order = $order;
+        $this->customer = $this->getCustomer();
     }
 
     public function initialState(): array
@@ -27,6 +31,7 @@ class CreateWizard extends WizardComponent
         return [
             'customer-info' => [
                 'customer' => $this->customer,
+                'order' => $this->order,
             ],
             'confirm-order' => [
                 'customer' => $this->customer,
@@ -45,5 +50,10 @@ class CreateWizard extends WizardComponent
     public function stateClass(): string
     {
         return CreateOrderWizardState::class;
+    }
+
+    private function getCustomer()
+    {
+        return $this->order->customer;
     }
 }

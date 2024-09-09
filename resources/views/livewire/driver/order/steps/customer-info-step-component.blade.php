@@ -4,11 +4,14 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-2 -mx-3">
             <div class="px-3">
                 <div class="flex flex-col h-full">
-                    <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-4">
                         <h1 class="font-bold text-xl">{{ $customer->name }}</h1>
                         <x-srj-badge md icon="phone" positive :label="$this->hideMiddleDigits($customer->phone)" class="ltr"/>
                     </div>
-
+                    <div>
+                        <x-phosphor.icons::duotone.map-pin-line class="w-5 h-5 me-1" />
+                        <p>{{$order->address->get}}</p>
+                    </div>
                     <div
                         class="mt-auto mb-0 font-semibold leading-normal text-sm group text-slate-500 flex justify-between flex-row">
                         <x-srj-button :label="__('Approve')" icon="rocket-launch" wire:click="submit"

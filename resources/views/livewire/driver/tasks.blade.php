@@ -32,7 +32,7 @@
                                  :class="$order->status->getColor($order->status_id) . ' text-xxs absolute top-0 left-0'"/>
                 </li>
                 <x-srj-modal-card title="{{ __('Edit Order') }}" name="cardModal-{{$order->id}}">
-                    <livewire:create-order-wizard :customer="$order->customer"/>
+                    <livewire:create-order-wizard :order="$order"/>
                 </x-srj-modal-card>
             @endforeach
         </ul>
