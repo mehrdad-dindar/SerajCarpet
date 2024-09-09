@@ -16,17 +16,21 @@ use Spatie\LivewireWizard\Components\WizardComponent;
 #[Layout('driver.layouts.app')]
 class CreateWizard extends WizardComponent
 {
-    public function mount(string $customer_id)
+    public Customer $customer;
+    public function mount(Customer $customer): void
     {
-        $this->customer_id = $customer_id;
+        $this->customer = $customer;
     }
 
     public function initialState(): array
     {
         return [
             'customer-info' => [
-                'customer' => $this->getCustomer(),
+                'customer' => $this->customer,
             ],
+            'confirm-order' => [
+                'customer' => $this->customer,
+            ]
         ];
     }
     public function steps(): array
@@ -41,10 +45,5 @@ class CreateWizard extends WizardComponent
     public function stateClass(): string
     {
         return CreateOrderWizardState::class;
-    }
-
-    private function getCustomer()
-    {
-        return Customer::findOrFail($this->customer_id);
     }
 }

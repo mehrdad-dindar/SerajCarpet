@@ -25,7 +25,6 @@ class ConfirmStepComponent extends StepComponent
 
     public function mount()
     {
-        $this->customer = Customer::find((int)$this->state()->customer());
         $this->tmp_order_items = $this->state()->orderItems();
         $this->orderItems = $this->getOrderItems();
         $this->totalPrice = $this->calculateTotal();

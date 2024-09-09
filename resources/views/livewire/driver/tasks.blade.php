@@ -24,15 +24,15 @@
                             <x-srj-mini-button icon="phone" rounded lime class="bg-gradient-lime"
                                                wire:click="makeCall('{{ $order->customer->phone }}')"/>
                             <x-srj-mini-button icon="pencil-square" rounded info class="bg-gradient-cyan"
-                                               x-on:click="$openModal('cardModal-{{$order->id}}')"/>
+                                               show-step="customer-info" x-on:click="$openModal('cardModal-{{$order->id}}')"/>
                         </div>
                     </div>
                     <span class="text-muted text-xs">{{$order->address->address}}</span>
                     <x-srj-badge :label="$order->status->getLabel($order->status_id)"
                                  :class="$order->status->getColor($order->status_id) . ' text-xxs absolute top-0 left-0'"/>
                 </li>
-                <x-srj-modal-card title="Edit Customer" name="cardModal-{{$order->id}}">
-                    <livewire:create-order-wizard :customer_id="$order->customer->id"/>
+                <x-srj-modal-card title="{{ __('Edit Order') }}" name="cardModal-{{$order->id}}">
+                    <livewire:create-order-wizard :customer="$order->customer"/>
                 </x-srj-modal-card>
             @endforeach
         </ul>

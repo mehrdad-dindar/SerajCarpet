@@ -38,7 +38,7 @@
                             </label>
                         @endif
                         @if ($index > 0)
-                            <x-mini-button rounded negative icon="trash" wire:click.prevent="removeItem({{ $index }})"/>
+                            <x-srj-mini-button rounded negative icon="trash" wire:click.prevent="removeItem({{ $index }})"/>
                         @endif
                         </div>
                     @endforeach
@@ -59,10 +59,6 @@
                     </div>
                     <div class="mt-auto mb-0 font-semibold leading-normal text-sm group text-slate-500 flex justify-between flex-row">
                         <x-srj-button :label="__('Submit')" icon="rocket-launch" wire:click="submit" class="bg-gradient-fuchsia"/>
-                        <div>
-                            <x-srj-button :label="__('Other Items')" icon="clipboard-document-check" info outline hover="success" focus:solid.gray  data-toggle="modal" data-target="#import" x-on:click="$openModal('simpleModal')"/>
-                            <livewire:driver.order.create-customer />
-                        </div>
                     </div>
                 </div>
             </div>

@@ -14,9 +14,4 @@ class CreateOrderWizardState extends State
     {
         return $this->forStep('select-items')['washing_type'];
     }
-
-    public function customer(): int
-    {
-        return $this->forStep('select-customer')['customer_id'];
-    }
 }
