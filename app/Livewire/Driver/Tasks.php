@@ -18,11 +18,11 @@ class Tasks extends Component
     public $opRoute;
     public $orders;
 
-    public function mount()
+    public function mount(): void
     {
-        $this->_getOptimizedRoute();
-        $this->_getOrders();
-        $this->_getPoints();
+        $this->getOptimizedRoute();
+        $this->getOrders();
+        $this->getPoints();
 
         $this->dispatch('pointsUpdated', $this->points);
     }
@@ -42,18 +42,18 @@ class Tasks extends Component
         $this->dispatch('callInitiated', number: intval($phoneNumber));
     }
 
-    private function _getOptimizedRoute(): void
+    private function getOptimizedRoute(): void
     {
         $this->opRoute = auth()->user()->optimizedRoutes()
             ->orderBy('created_at', 'desc')->first();
     }
 
-    private function _getOrders(): void
+    private function getOrders(): void
     {
         $this->orders = $this->opRoute->orders();
     }
 
-    private function _getPoints(): void
+    private function getPoints(): void
     {
         $this->points = $this->orders->map(
             function ($order) {
