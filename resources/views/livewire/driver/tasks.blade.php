@@ -4,12 +4,14 @@
         <script src="https://static.neshan.org/sdk/leaflet/v1.9.4/neshan-sdk/v1.0.8/index.js"></script>
     @endsection
     <div id="driver-map" class="absolute inset-0 z-0"></div>
-    <x-srj-mini-button icon="arrow-left" rounded fuchsia class="absolute left-5 top-5 z-10 bg-gradient-fuchsia" wire:click="goToIndex"/>
-    <x-srj-button id="getLocationButton" label="Salam" fuchsia class="absolute left-1/2 top-5 z-10 bg-gradient-fuchsia"/>
+    <x-srj-mini-button icon="arrow-left" rounded fuchsia class="absolute left-5 top-5 z-10 bg-gradient-fuchsia"
+                       wire:click="goToIndex"/>
+    <x-srj-button id="getLocationButton" label="Salam" fuchsia
+                  class="absolute left-1/2 top-5 z-10 bg-gradient-fuchsia"/>
     <div class="absolute bottom-16 inset-x-0 z-10 flex justify-center">
         <ul class="max-h-60 overflow-y-scroll w-4/5">
             @foreach($orders as $order)
-                <li class="bg-white rounded-xl p-4 mb-2 relative" x-on:click="$openModal('cardModal-{{$order->id}}')">
+                <li class="bg-white rounded-xl p-4 mb-2 relative">
                     <div class="flex justify-between items-center">
                         <div>
                             <h5 class="text-sm font-semibold">{{$order->customer->name}}</h5>
@@ -18,25 +20,19 @@
                             </span>
 
                         </div>
-                        <x-srj-mini-button icon="phone" rounded lime class="bg-gradient-lime"
-                                           wire:click="makeCall('{{ $order->customer->phone }}')"/>
+                        <div>
+                            <x-srj-mini-button icon="phone" rounded lime class="bg-gradient-lime"
+                                               wire:click="makeCall('{{ $order->customer->phone }}')"/>
+                            <x-srj-mini-button icon="pencil-square" rounded info class="bg-gradient-cyan"
+                                               x-on:click="$openModal('cardModal-{{$order->id}}')"/>
+                        </div>
                     </div>
                     <span class="text-muted text-xs">{{$order->address->address}}</span>
                     <x-srj-badge :label="$order->status->getLabel($order->status_id)"
                                  :class="$order->status->getColor($order->status_id) . ' text-xxs absolute top-0 left-0'"/>
                 </li>
                 <x-srj-modal-card title="Edit Customer" name="cardModal-{{$order->id}}">
-                    <livewire:create-order-wizard />
-
-                    <x-slot name="footer" class="flex justify-between gap-x-4">
-                        <x-srj-button flat negative label="Delete" x-on:click="close" />
-
-                        <div class="flex gap-x-4">
-                            <x-srj-button flat label="Cancel" x-on:click="close" />
-
-                            <x-srj-button primary label="Save" wire:click="save" />
-                        </div>
-                    </x-slot>
+                    <livewire:create-order-wizard :customer_id="$order->customer->id"/>
                 </x-srj-modal-card>
             @endforeach
         </ul>
@@ -59,7 +55,7 @@
         //     zoomControl: false
         // })
 
-        var map = L.map('driver-map',{
+        var map = L.map('driver-map', {
             zoomControl: false
         }).setView([35.6892, 51.3890], 12); // مرکز نقشه روی تهران
 
@@ -97,8 +93,8 @@
             routeWhileDragging: true,
             draggableWaypoints: false,
             addWaypoints: false,
-            createMarker: function(i, wp, nWps) {
-                return L.marker(wp.latLng, { draggable: false });
+            createMarker: function (i, wp, nWps) {
+                return L.marker(wp.latLng, {draggable: false});
             },
             // غیرفعال کردن توضیحات مسیر
             show: false,
@@ -117,7 +113,7 @@
             }),
             fitSelectedRoutes: false, // جلوگیری از زوم خودکار به مسیر انتخاب شده
             showAlternatives: false, // غیرفعال کردن نمایش مسیرهای جایگزین
-            altLineOptions: { styles: [{ opacity: 0 }]}
+            altLineOptions: {styles: [{opacity: 0}]}
         }).addTo(map);
 
         const driverMarker = L.marker([35.6892, 51.3890]).addTo(map);
@@ -141,7 +137,7 @@
 
         // بررسی پشتیبانی از Geolocation API و مشاهده موقعیت زنده راننده
         if (navigator.geolocation) {
-            navigator.geolocation.watchPosition(updateDriverLocation, function(error) {
+            navigator.geolocation.watchPosition(updateDriverLocation, function (error) {
                 console.error("Geolocation error: " + error.message);
             }, {
                 enableHighAccuracy: true,
@@ -181,7 +177,7 @@
                 @php /*foreach($points as $point){
              echo "L.latLng(".$point->location[0].", ".$point->location[1]."),\n";
             }*/
-                @endphp],
+        @endphp],
             lineOptions: {
                 styles: [
                     {
