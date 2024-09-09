@@ -28,7 +28,7 @@ class ConfirmStepComponent extends StepComponent
         $this->tmp_order_items = $this->state()->orderItems();
         $this->orderItems = $this->getOrderItems();
         $this->totalPrice = $this->calculateTotal();
-        $this->washing_type = $this->state()->whashingType();
+        $this->washing_type = $this->state()->washingType();
     }
 
     public function getOrderItems()
@@ -98,7 +98,7 @@ class ConfirmStepComponent extends StepComponent
     {
         $customer = Customer::find((int)$this->state()->customer());
         $orderItems = $this->getOrderItems();
-        $washing_type = $this->state()->whashingType();
+        $washing_type = $this->state()->washingType();
 
         try {
             $order = Order::create([
