@@ -11,13 +11,12 @@
             />
         @else
             <x-srj-button
-                :label="$step->label"
                 :icon="$step->icon"
                 outline
                 gray
                 hover="warning"
                 focus:solid.gray
-                :wire:click="$step->isPrevious() ? $step->show() : ''"
+                :wire:click="$step->show()"
             />
         @endif
     @endforeach

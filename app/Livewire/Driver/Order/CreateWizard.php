@@ -35,6 +35,7 @@ class CreateWizard extends WizardComponent
             ],
             'confirm-order' => [
                 'customer' => $this->customer,
+                'order' => $this->order,
             ]
         ];
     }
@@ -55,5 +56,10 @@ class CreateWizard extends WizardComponent
     private function getCustomer()
     {
         return $this->order->customer;
+    }
+    public function finish()
+    {
+        session()->flash('message', 'جزئیات سفارش با موفقیت بروز شد.');
+        $this->dispatch('closeModal');
     }
 }

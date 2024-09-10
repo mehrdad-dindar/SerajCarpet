@@ -2,23 +2,29 @@
 
 namespace App\Livewire\Driver\Order\Steps;
 
-use App\Enums\OrderStatus;
 use App\Enums\SmsPattern;
 use App\Models\Customer;
 use App\Models\Order;
+use App\Models\OrderStatus;
 use App\Models\Property;
 use App\Traits\Sms;
+use Exception;
 use Hashids\Hashids;
-use Livewire\Component;
 use Spatie\LivewireWizard\Components\StepComponent;
 use WireUi\Traits\WireUiActions;
 
 class ConfirmStepComponent extends StepComponent
 {
-    use WireUiActions,Sms;
+    use Sms, WireUiActions;
+
     public Customer $customer;
+
+    public Order $order;
+
     public $tmp_order_items = [];
+
     public $orderItems = [];
+
     public $totalPrice;
 
     public $washing_type;
@@ -50,9 +56,9 @@ class ConfirmStepComponent extends StepComponent
         foreach ($this->getOrderItems() as $item) {
             $dimensions = 1;
             if (isset($detail[$item->id]['dimensions'])) {
-                $dimensions = (int)$detail[$item->id]['dimensions'] ?? 1;
+                $dimensions = (int) $detail[$item->id]['dimensions'] ?? 1;
             }
-            $quantity = (int)$detail[$item->id]['quantity'] ?? 0;
+            $quantity = (int) $detail[$item->id]['quantity'] ?? 0;
             $unitPrice = $item->price;
             $total += $dimensions * $quantity * $unitPrice;
         }
@@ -70,16 +76,18 @@ class ConfirmStepComponent extends StepComponent
             if ($item['property_id']) {
                 $details[$item['property_id']] = [
                     'quantity' => $item['count'],
-                    'dimensions' => $item['dimensions']
+                    'dimensions' => $item['dimensions'],
                 ];
             }
         }
+
         return $details;
     }
 
     public function render()
     {
         $orderItems = $this->getOrderItems();
+
         return view('livewire.driver.order.steps.confirm-step-component', [
             'customer' => $this->customer,
             'orderItems' => $orderItems,
@@ -96,41 +104,48 @@ class ConfirmStepComponent extends StepComponent
 
     public function submitOrder()
     {
-        $customer = Customer::find((int)$this->state()->customer());
-        $orderItems = $this->getOrderItems();
-        $washing_type = $this->state()->washingType();
-
         try {
-            $order = Order::create([
-                'customer_id' => $this->customer->id,
-                'total' => $this->totalPrice,
-                'options' => $this->washing_type,
-                'driver_id' => auth('driver')->user()->id,
-                'status' => OrderStatus::IN_WAITING_LIST //TODO: check Again
-            ]);
-            foreach ($this->tmp_order_items as $item) {
-                $property = $orderItems->firstWhere("id",$item['property_id']);
-                $dimensions = (int)$item['dimensions'] ?? 1;
-                $order->items()->create([
-                    'property_id' => $property->id,
-                    'dimensions' => $dimensions,
-                    'quantity' => (int)$item['count'],
-                    'unit_price' => $property->price,
-                    'sub_total' => (int)$item['count'] * $dimensions * $property->price,
-                ]);
-            }
-
-
+            $this->updateOrder();
+            dd("test");
             try {
-                $hashids = new Hashids('',6);
+                $hashids = new Hashids('', 6);
                 $hashedID = $hashids->encode($this->customer->id);
-                $this->sendPattern($this->customer->phone,SmsPattern::SET_LOCATION,array($this->customer->name,$hashedID));
+                $this->sendPattern(
+                    $this->customer->phone,
+                    SmsPattern::SET_LOCATION,
+                    [$this->customer->name, $hashedID]
+                );
             } catch (\Exception $e) {
                 info($e->getMessage());
             }
 
             return redirect()->route('driver.panel.orders');
         } catch (\Exception $e) {
+            dd($e->getMessage());
+        }
+    }
+
+    private function updateOrder()
+    {
+        try {
+            $orderItems = $this->getOrderItems();
+            $order = $this->order->update([
+                'total' => $this->totalPrice,
+                'options' => $this->washing_type,
+            ]);
+            $this->order->updateOrderStatus(OrderStatus::CARPETS_RECEIVED);
+            foreach ($this->tmp_order_items as $item) {
+                $property = $orderItems->firstWhere('id', $item['property_id']);
+                $dimensions = (int) $item['dimensions'] ?? 1;
+                $order->items()->create([
+                    'property_id' => $property->id,
+                    'dimensions' => $dimensions,
+                    'quantity' => (int) $item['count'],
+                    'unit_price' => $property->price,
+                    'sub_total' => (int) $item['count'] * $dimensions * $property->price,
+                ]);
+            }
+        } catch (Exception $e) {
             dd($e->getMessage());
         }
     }
@@ -148,13 +163,12 @@ class ConfirmStepComponent extends StepComponent
     public function stepInfo(): array
     {
         return [
-            'label' => __("Confirm Order"),
+            'label' => __('Confirm Order'),
             'icon' => 'check-badge',
         ];
     }
 
     public function successNotification(): void
-
     {
 
         $this->notification()->send([
@@ -166,6 +180,5 @@ class ConfirmStepComponent extends StepComponent
             'description' => 'This is a description.',
 
         ]);
-
     }
 }

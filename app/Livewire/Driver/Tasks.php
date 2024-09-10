@@ -16,6 +16,7 @@ class Tasks extends Component
     use Neshan;
 
     public $points = [];
+    public $selectedOrder = null;
     public $opRoute;
     public $orders;
 
@@ -65,5 +66,11 @@ class Tasks extends Component
                 ];
             }
         );
+    }
+
+    public function showOrderWizard($orderId): void
+    {
+        $this->selectedOrder = $this->orders->firstWhere('id', $orderId);
+        $this->dispatch('openOrderWizardModal');
     }
 }
