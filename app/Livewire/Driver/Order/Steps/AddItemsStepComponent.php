@@ -2,22 +2,23 @@
 
 namespace App\Livewire\Driver\Order\Steps;
 
+use App\Models\Customer;
+use App\Models\Order;
 use Livewire\Attributes\Layout;
 use Spatie\LivewireWizard\Components\StepComponent;
 
 #[Layout("driver.layouts.app")]
 class AddItemsStepComponent extends StepComponent
 {
-    public $order_items = [];
+    public Customer $customer;
+
+    public Order $order;
+    public $order_tmp_items = [];
     public $washing_type = [];
 
     public function mount()
     {
-        $this->order_items[] = [
-            'property_id' => null,
-            'dimensions' => null,
-            'count' => 1
-        ];
+        $this->initOrderItems();
 
         $this->washing_type = [
             "آبشور",
@@ -28,7 +29,7 @@ class AddItemsStepComponent extends StepComponent
 
     public function addItem()
     {
-        $this->order_items[] = [
+        $this->order_tmp_items[] = [
             'property_id' => null,
             'dimensions' => null,
             'count' => 1
@@ -37,9 +38,9 @@ class AddItemsStepComponent extends StepComponent
 
     public function removeItem($index)
     {
-        unset($this->order_items[$index]);
+        unset($this->order_tmp_items[$index]);
 
-        $this->order_items = array_values($this->order_items);
+        $this->order_tmp_items = array_values($this->order_tmp_items);
     }
 
     public function render()
@@ -57,6 +58,16 @@ class AddItemsStepComponent extends StepComponent
         return [
             'label' => __("Order Items"),
             'icon' => 'list-bullet',
+        ];
+    }
+
+    private function initOrderItems()
+    {
+        dd($this->order->items()->count());
+        $this->order_tmp_items[] = [
+            'property_id' => null,
+            'dimensions' => null,
+            'count' => 1
         ];
     }
 }

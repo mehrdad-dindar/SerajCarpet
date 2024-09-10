@@ -5,7 +5,7 @@
                 <div class="flex flex-col h-full">
                     <h5 class="font-bold mb-12">{{__("Add Order Items")}}</h5>
                     <div class="flex flex-col gap-4">
-                    @foreach ($order_items as $index => $item)
+                    @foreach ($order_tmp_items as $index => $item)
                         <div class="grid grid-cols-1 md:grid-cols-6 items-start justify-center gap-4 border rounded-xl p-2">
                         <x-srj-select
                             wire:model.live="order_items.{{ $index }}.property_id"
@@ -18,14 +18,14 @@
                             option-value="id"
                             required
                         />
-                        @if(isset($order_items[$index]['property_id']))
+                        @if(isset($item['property_id']))
                             <x-srj-select
                                 wire:model.live="order_items.{{ $index }}.dimensions"
                                 :label="__('Dimensions')"
                                 name="order_items[{{ $index }}][dimensions]"
                                 class="mb-2 select-css"
                                 :placeholder="__('Select some Dimensions...')"
-                                :async-data="route('property.dimensions', $order_items[$index]['property_id'])"
+                                :async-data="route('property.dimensions', $item['property_id'])"
                                 option-label="title"
                                 option-value="id"
                             />

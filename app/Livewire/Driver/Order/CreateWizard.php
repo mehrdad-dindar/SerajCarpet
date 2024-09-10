@@ -33,6 +33,10 @@ class CreateWizard extends WizardComponent
                 'customer' => $this->customer,
                 'order' => $this->order,
             ],
+            'select-items' => [
+                'customer' => $this->customer,
+                'order' => $this->order,
+            ],
             'confirm-order' => [
                 'customer' => $this->customer,
                 'order' => $this->order,
