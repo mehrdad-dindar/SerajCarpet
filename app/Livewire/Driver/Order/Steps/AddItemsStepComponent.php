@@ -63,7 +63,7 @@ class AddItemsStepComponent extends StepComponent
 
     private function initOrderItems()
     {
-        dd($this->order->items()->count());
+//        dd($this->order->items()->count());
         $this->order_tmp_items[] = [
             'property_id' => null,
             'dimensions' => null,

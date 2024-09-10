@@ -26,6 +26,7 @@
                             <x-srj-mini-button icon="pencil-square" rounded info class="bg-gradient-cyan"
                                                show-step="customer-info"
                                                x-on:click="$openModal('orderWizardModal')"
+                                               :key="$order->id"
                                                wire:click="showOrderWizard({{ $order->id }})"/>
                         </div>
                     </div>
@@ -34,18 +35,11 @@
                                  :class="$order->status->getColor($order->status_id) . ' text-xxs absolute top-0 left-0'"/>
                 </li>
             @endforeach
-            <x-srj-modal-card title="{{ __('Edit Order') }}" name="orderWizardModal">
-                @if($selectedOrder)
-                    <livewire:create-order-wizard :order="$selectedOrder"/>
-                @endif
-                <x-slot name="footer" class="flex justify-between gap-x-4">
-                    <x-srj-button flat negative label="Cancel" x-on:click="close"/>
-
-                    <div class="flex gap-x-4">
-                        <x-srj-button primary label="Save" wire:click="$dispatch('nextStep')"/>
-                    </div>
-                </x-slot>
-            </x-srj-modal-card>
+                <x-srj-modal title="{{ __('Edit Order') }}" name="orderWizardModal" blur="base">
+                    @if($selectedOrder)
+                        <livewire:create-order-wizard show-step="customer-info" :order="$selectedOrder" :key="$selectedOrder->id"/>
+                    @endif
+                </x-srj-modal>
         </ul>
     </div>
     <script type="module">

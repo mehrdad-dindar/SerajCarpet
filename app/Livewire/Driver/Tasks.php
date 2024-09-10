@@ -71,6 +71,5 @@ class Tasks extends Component
     public function showOrderWizard($orderId): void
     {
         $this->selectedOrder = $this->orders->firstWhere('id', $orderId);
-        $this->dispatch('openOrderWizardModal');
     }
 }
