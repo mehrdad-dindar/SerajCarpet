@@ -106,7 +106,7 @@ class ConfirmStepComponent extends StepComponent
     {
         try {
             $this->updateOrder();
-            dd("test");
+            dd('test');
             try {
                 $hashids = new Hashids('', 6);
                 $hashedID = $hashids->encode($this->customer->id);
@@ -134,21 +134,54 @@ class ConfirmStepComponent extends StepComponent
                 'options' => $this->washing_type,
             ]);
             $this->order->updateOrderStatus(OrderStatus::CARPETS_RECEIVED);
+            $this->updateOrderItems();
             foreach ($this->tmp_order_items as $item) {
                 $property = $orderItems->firstWhere('id', $item['property_id']);
                 $dimensions = (int) $item['dimensions'] ?? 1;
-                $order->items()->create([
-                    'property_id' => $property->id,
-                    'dimensions' => $dimensions,
-                    'quantity' => (int) $item['count'],
-                    'unit_price' => $property->price,
-                    'sub_total' => (int) $item['count'] * $dimensions * $property->price,
+                $order->items->update([
+                    [
+                        'property_id' => $property->id,
+                    ], [
+                        'dimensions' => $dimensions,
+                        'quantity' => (int) $item['count'],
+                        'unit_price' => $property->price,
+                        'sub_total' => (int) $item['count'] * $dimensions * $property->price,
+                    ],
                 ]);
             }
         } catch (Exception $e) {
             dd($e->getMessage());
         }
     }
+    public function updateOrderItems()
+    {
+        // 1. بدست آوردن لیست property_id های جدید از $tmp_order_items
+        $newPropertyIds = collect($this->tmp_order_items)->pluck('property_id')->toArray();
+
+        // 2. حذف آیتم‌های موجود در سفارش که در لیست جدید نیستند
+        $this->order->items()->whereNotIn('property_id', $newPropertyIds)->delete();
+
+        // 3. حلقه برای ایجاد یا به‌روزرسانی آیتم‌ها
+        foreach ($this->tmp_order_items as $item) {
+            // بدست آوردن یا ساختن آیتم در سفارش (با استفاده از firstOrNew)
+            $orderItem = $this->order->items()->firstOrNew(['property_id' => $item['property_id']]);
+
+            // تنظیم مقادیر آیتم (ساخت یا بروزرسانی)
+            $dimensions = (int) $item['dimensions'] ?? 1;
+
+            $orderItem->fill([
+                'dimensions' => $dimensions,
+                'quantity' => (int) $item['count'],
+                'unit_price' => $orderItem->property->price ?? $item['price'], // اگر property به عنوان رابطه وجود ندارد
+                'sub_total' => (int) $item['count'] * $dimensions * ($orderItem->property->price ?? $item['price']),
+            ]);
+
+            // ذخیره آیتم (در صورتی که جدید باشد یا بروزرسانی شده باشد)
+            $orderItem->save();
+        }
+        dd("Done !");
+    }
+
 
     public function confirm()
     {
