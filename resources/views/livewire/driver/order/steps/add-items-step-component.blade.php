@@ -8,9 +8,9 @@
                     @foreach ($order_tmp_items as $index => $item)
                         <div class="grid grid-cols-1 md:grid-cols-6 items-start justify-center gap-4 border rounded-xl p-2">
                         <x-srj-select
-                            wire:model.live="order_items.{{ $index }}.property_id"
+                            wire:model.live="order_tmp_items.{{ $index }}.property_id"
                             :label="__('Select Item')"
-                            name="order_items[{{ $index }}][property_id]"
+                            name="order_tmp_items[{{ $index }}][property_id]"
                             class="mb-2 select-css"
                             :placeholder="__('Select some Item...')"
                             :async-data="route('property.index')"
@@ -20,9 +20,9 @@
                         />
                         @if(isset($item['property_id']))
                             <x-srj-select
-                                wire:model.live="order_items.{{ $index }}.dimensions"
+                                wire:model.live="order_tmp_items.{{ $index }}.dimensions"
                                 :label="__('Dimensions')"
-                                name="order_items[{{ $index }}][dimensions]"
+                                name="order_tmp_items[{{ $index }}][dimensions]"
                                 class="mb-2 select-css"
                                 :placeholder="__('Select some Dimensions...')"
                                 :async-data="route('property.dimensions', $item['property_id'])"
@@ -30,7 +30,7 @@
                                 option-value="id"
                             />
                             <label>{{ __("Quantity") }}
-                            <div x-data="{ count: @entangle('order_items.' . $index . '.count') }" class="flex items-center gap-x-3">
+                            <div x-data="{ count: @entangle('order_tmp_items.' . $index . '.count') }" class="flex items-center gap-x-3">
                                 <x-srj-button x-hold.click.repeat.200ms="count > 1 ? count-- : 1" icon="minus" />
                                 <span class="bg-cyan-100 px-5 py-1.5 rounded-lg" x-text="count"></span>
                                 <x-srj-button x-hold.click.repeat.200ms="count++" icon="plus" />
