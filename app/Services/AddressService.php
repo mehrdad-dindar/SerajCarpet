@@ -45,4 +45,11 @@ class AddressService
 
         return implode(' - ', $filteredParts);
     }
+
+    public function updateAddressGeo(Address $address, array $points): void
+    {
+        $address->latitude = $points[0];
+        $address->longitude = $points[1];
+        $address->save();
+    }
 }

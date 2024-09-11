@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
 
 trait Neshan
@@ -24,7 +25,7 @@ trait Neshan
         }
     }
 
-    public function salesman($points)
+    public function salesman($points): JsonResponse
     {
         $apiKey = 'service.df64f13754cc4cde9c69362bed1a62c4';
         $url = 'https://api.neshan.org/v3/trip?waypoints='
