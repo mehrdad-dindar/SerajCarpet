@@ -3,6 +3,7 @@
 namespace App\Livewire\Driver;
 
 use App\Models\Order;
+use App\Models\OrderStatus;
 use App\Traits\Neshan;
 use Exception;
 use Illuminate\Http\RedirectResponse;
@@ -53,6 +54,7 @@ class Tasks extends Component
     private function getOrders(): void
     {
         $this->orders = $this->opRoute->orders();
+//        dd($this->orders);
     }
 
     private function getPoints(): void

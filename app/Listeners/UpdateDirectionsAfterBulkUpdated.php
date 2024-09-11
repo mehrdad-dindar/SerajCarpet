@@ -28,7 +28,6 @@ class UpdateDirectionsAfterBulkUpdated
     {
         $oldOrders = $event->oldOrders;
         $orders = $event->orders;
-//        $optimizedRoute->calculateRoute($event->orders, $event->oldOrders);
         $uniqueOldDriverIds = $oldOrders->pluck('driver_id')->filter()->unique();
         $uniqueDriverIds = $orders->pluck('driver_id')->filter()->unique();
 

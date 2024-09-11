@@ -6,6 +6,7 @@ use App\Traits\Neshan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class OptimizedRoute extends Model
 {
@@ -28,17 +29,16 @@ class OptimizedRoute extends Model
             OrderStatus::IN_DISTRIBUTION_LIST,
             OrderStatus::REVISITING_DRIVER
         ];
-        $test = [];
 
         foreach ($allUniqueDriverIds as $driverId) {
             $driver = Driver::find($driverId);
             if ($driver->orders->count()) {
-                $orderLocations = $driver->orders->map(function ($order) use ($statuses,$test) {
+                $orderLocations = $driver->orders->map(function ($order) use ($statuses) {
 
-                    info($order->id. ' - ' .$order->status->name);
-                    if (!isset($order->address->latitude) || !in_array($order->status->name,$statuses)) {
+                    if (!isset($order->address->latitude) || !in_array($order->status->name, $statuses)) {
                         return null;
                     }
+
                     return [
                         'id' => $order->id,
                         'latitude' => $order->address->latitude,
@@ -48,7 +48,7 @@ class OptimizedRoute extends Model
                 $waypoints = $this->salesman($orderLocations);
                 if (isset($waypoints->getData()->points)) {
                     $points = $waypoints->getData()->points;
-                    $sortedOrders = $this->sortOrdersByIndex($driver->orders, $points);
+                    $sortedOrders = $this->sortOrdersByIndex($orderLocations, $points);
                     $orderIds = $sortedOrders->pluck('id')->toArray();
                     $driver->optimizedRoutes()->create([
                         "orders" => $orderIds
@@ -63,10 +63,9 @@ class OptimizedRoute extends Model
         array_shift($apiResponse);
         $sortedOrders = collect($apiResponse)->map(function ($point) use ($orders) {
             $orderIndex = $point->index;
-            $order = $orders[$orderIndex - 1];
-
+            $order = $orders[$orderIndex + 1];
+            $order = Order::find($order['id']);
             if ($order->address && isset($order->address->latitude)) {
-
                 if ($order->address->latitude !== $point->location[0]) {
                     $this->updateOrderAddressGeo($order->address, $point->location);
                 }
