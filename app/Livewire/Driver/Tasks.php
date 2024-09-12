@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Driver;
 
+use App\Models\OptimizedRoute;
 use App\Models\Order;
 use App\Models\OrderStatus;
 use App\Traits\Neshan;
@@ -23,7 +24,7 @@ class Tasks extends Component
 
     public function mount(): void
     {
-        $this->getOptimizedRoute();
+        $this->opRoute = OptimizedRoute::getDriverRoute();
         $this->getOrders();
         $this->getPoints();
 
@@ -45,16 +46,9 @@ class Tasks extends Component
         $this->dispatch('callInitiated', number: intval($phoneNumber));
     }
 
-    private function getOptimizedRoute(): void
-    {
-        $this->opRoute = auth()->user()->optimizedRoutes()
-            ->orderBy('created_at', 'desc')->first();
-    }
-
     private function getOrders(): void
     {
         $this->orders = $this->opRoute->orders();
-//        dd($this->orders);
     }
 
     private function getPoints(): void

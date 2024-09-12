@@ -47,7 +47,7 @@
                         </p>
                     </td>
                     <td class="p-2 leading-normal text-center align-middle bg-transparent border-b text-sm whitespace-nowrap shadow-transparent">
-                        <x-srj-badge :label="$order->getStatusLabel()" :class="$order->getStatusColor()"/>
+                        <x-srj-badge :label="$order->status->label" :class="$order->status->color"/>
                     </td>
                     <td class="p-2 text-center align-middle bg-transparent border-b whitespace-nowrap shadow-transparent">
                         <span class="font-semibold leading-tight text-xs text-slate-400">{{ $order->created_at }}</span>
@@ -59,7 +59,6 @@
                 @endforeach
                 </tbody>
             </table>
-            {{ $orders->links("vendor/livewire/tailwind") }}
         </div>
     </div>
 </div>

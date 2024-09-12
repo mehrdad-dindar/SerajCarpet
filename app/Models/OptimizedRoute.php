@@ -103,4 +103,10 @@ class OptimizedRoute extends Model
             $address->updateAddressGeo($location);
         }
     }
+
+    public static function getDriverRoute()
+    {
+        return auth('driver')->user()->optimizedRoutes()
+            ->orderBy('created_at', 'desc')->first();
+    }
 }

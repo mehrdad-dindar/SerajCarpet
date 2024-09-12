@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Driver;
 
+use App\Models\OptimizedRoute;
 use App\Models\Order;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -15,9 +16,15 @@ class Orders extends Component
     #[Layout('driver.layouts.app')]
     public function render()
     {
-        $orders = auth()->user()->orders()->latest()->paginate(10);
+
         return view('livewire.driver.orders')->with([
-            "orders" => $orders
+            "orders" => $this->getDriverOrders()
         ]);
+    }
+
+    private function getDriverOrders()
+    {
+        $driver = OptimizedRoute::getDriverRoute();
+        return $driver->orders();
     }
 }
