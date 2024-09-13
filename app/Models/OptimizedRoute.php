@@ -109,4 +109,14 @@ class OptimizedRoute extends Model
         return auth('driver')->user()->optimizedRoutes()
             ->orderBy('created_at', 'desc')->first();
     }
+
+    public static function getRouteTypes()
+    {
+        $statuses = [
+            OrderStatus::IN_COLLECTIVE_LIST,
+            OrderStatus::IN_DISTRIBUTION_LIST,
+            OrderStatus::REVISITING_DRIVER
+        ];
+        return OrderStatus::whereIn('name', $statuses)->get();
+    }
 }

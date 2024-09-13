@@ -22,7 +22,7 @@
       <div class="flex items-center md:ms-auto md:pe-4">
         <!-- pro btn  -->
         <a class="inline-block w-full px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all ease-in border-0 rounded-lg select-none shadow-soft-md bg-150 bg-x-25 leading-pro text-size-xs bg-gradient-fuchsia hover:shadow-soft-2xl hover:scale-102"
-          href="{{route("driver.tasks")}}">{{ __("My Tasks") }}</a>
+          href="{{--{{route("driver.tasks")}}--}}">{{ __("My Tasks") }}</a>
       </div>
       <ul
         class="flex flex-row justify-end pl-0 mb-0 list-none md-max:w-full {{ (true ? 'pr-10 ml-0 mr-auto' : '') }}{{--Request::is('rtl')--}}">

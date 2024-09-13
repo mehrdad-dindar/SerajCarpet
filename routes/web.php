@@ -81,5 +81,5 @@ Route::middleware(['auth:driver'])->prefix('dashboard')->group(function () {
     Route::get('/properties', PropertyController::class)->name('property.index');
     Route::get('/properties/dimensions/{property}', [PropertyController::class,'getDimensions'])
         ->name('property.dimensions');
-    Route::get('/tasks', Tasks::class)->name('driver.tasks');
+    Route::get('/tasks/{type}', Tasks::class)->name('driver.tasks');
 });
