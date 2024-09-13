@@ -3,6 +3,31 @@
         <h6>{{ __("Orders List") }}</h6>
         <x-srj-badge outline secondary :label="verta()->format('d F Y')" />
     </div>
+    <div class="relative end-0">
+        <ul class="relative flex flex-wrap p-1 list-none bg-transparent rounded-xl" nav-pills id="default-tab" data-tabs-toggle="#default-tab-content" role="tablist">
+            <li class="z-30 flex-auto text-center" role="presentation">
+                <button class="z-30 flex justify-center items-center gap-1.5 w-full px-0 py-1 mb-0 transition-all border-0 rounded-lg ease-soft-in-out bg-inherit text-slate-700"
+                        nav-link type="button" active id="profile-tab" data-tabs-target="#profile" role="tab" aria-controls="profile" aria-selected="true">
+                    <x-phosphor.icons::duotone.fire-truck class="w-5 h-5 me-1" />
+                    <span class="ms-1">{{ __("Distribution") }}</span>
+                </button>
+            </li>
+            <li class="z-30 flex-auto text-center" role="presentation">
+                <button class="z-30 flex justify-center items-center gap-1.5 w-full px-0 py-1 mb-0 transition-all border-0 rounded-lg ease-soft-in-out bg-inherit text-slate-700"
+                        nav-link type="button" id="address-tab" data-tabs-target="#address" role="tab" aria-controls="address" aria-selected="false">
+                    <x-phosphor.icons::duotone.truck class="w-5 h-5 me-1" />
+                    <span class="ms-1">{{ __("Collective") }}</span>
+                </button>
+            </li>
+            <li class="z-30 flex-auto text-center" role="presentation">
+                <button class="z-30 flex justify-center items-center gap-1.5 w-full px-0 py-1 mb-0 transition-colors border-0 rounded-lg ease-soft-in-out bg-inherit text-slate-700"
+                        nav-link type="button" id="setting-tab" data-tabs-target="#setting" role="tab" aria-controls="setting" aria-selected="false">
+                    <x-phosphor.icons::duotone.arrows-clockwise class="w-5 h-5 me-1"/>
+                    <span class="ms-1">{{ __("Revisit") }}</span>
+                </button>
+            </li>
+        </ul>
+    </div>
     <div class="flex-auto px-0 pt-0 pb-2">
         <div class="p-0 overflow-x-auto">
             <table class="items-center w-full mb-0 align-top border-gray-200 text-slate-500">
