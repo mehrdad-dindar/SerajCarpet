@@ -5,6 +5,7 @@ namespace App\Livewire\Driver\Order;
 use App\Models\OptimizedRoute;
 use App\Models\OrderStatus;
 use Livewire\Component;
+use WireUi\Actions\Notification;
 
 class Card extends Component
 {
@@ -32,6 +33,9 @@ class Card extends Component
 
     public function getRoute()
     {
-        return redirect()->route('driver.tasks', $this->type->id);
+        if ($this->ordersCount) {
+            return redirect()->route('driver.tasks', $this->type->id);
+        }
+        return false;
     }
 }
