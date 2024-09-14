@@ -99,30 +99,7 @@ class ConfirmStepComponent extends StepComponent
 
     public function submit()
     {
-        $this->submitOrder();
-    }
-
-    public function submitOrder()
-    {
-        try {
-            $this->updateOrder();
-            dd('test');
-            try {
-                $hashids = new Hashids('', 6);
-                $hashedID = $hashids->encode($this->customer->id);
-                $this->sendPattern(
-                    $this->customer->phone,
-                    SmsPattern::SET_LOCATION,
-                    [$this->customer->name, $hashedID]
-                );
-            } catch (\Exception $e) {
-                info($e->getMessage());
-            }
-
-            return redirect()->route('driver.panel.orders');
-        } catch (\Exception $e) {
-            dd($e->getMessage());
-        }
+        $this->updateOrder();
     }
 
     private function updateOrder()
