@@ -129,7 +129,7 @@ class ConfirmStepComponent extends StepComponent
     {
         try {
             $orderItems = $this->getOrderItems();
-            $order = $this->order->update([
+            $this->order->update([
                 'total' => $this->totalPrice,
                 'options' => $this->washing_type,
             ]);
@@ -138,35 +138,28 @@ class ConfirmStepComponent extends StepComponent
             foreach ($this->tmp_order_items as $item) {
                 $property = $orderItems->firstWhere('id', $item['property_id']);
                 $dimensions = (int) $item['dimensions'] ?? 1;
-                $order->items->update([
-                    [
-                        'property_id' => $property->id,
-                    ], [
-                        'dimensions' => $dimensions,
-                        'quantity' => (int) $item['count'],
-                        'unit_price' => $property->price,
-                        'sub_total' => (int) $item['count'] * $dimensions * $property->price,
-                    ],
+                $this->order->items()->update([
+                    'property_id' => $property->id,
+                    'dimensions' => $dimensions,
+                    'quantity' => (int) $item['count'],
+                    'unit_price' => $property->price,
+                    'sub_total' => (int) $item['count'] * $dimensions * $property->price,
                 ]);
             }
         } catch (Exception $e) {
             dd($e->getMessage());
         }
     }
+
     public function updateOrderItems()
     {
-        // 1. بدست آوردن لیست property_id های جدید از $tmp_order_items
         $newPropertyIds = collect($this->tmp_order_items)->pluck('property_id')->toArray();
 
-        // 2. حذف آیتم‌های موجود در سفارش که در لیست جدید نیستند
         $this->order->items()->whereNotIn('property_id', $newPropertyIds)->delete();
 
-        // 3. حلقه برای ایجاد یا به‌روزرسانی آیتم‌ها
         foreach ($this->tmp_order_items as $item) {
-            // بدست آوردن یا ساختن آیتم در سفارش (با استفاده از firstOrNew)
             $orderItem = $this->order->items()->firstOrNew(['property_id' => $item['property_id']]);
 
-            // تنظیم مقادیر آیتم (ساخت یا بروزرسانی)
             $dimensions = (int) $item['dimensions'] ?? 1;
 
             $orderItem->fill([
@@ -176,12 +169,9 @@ class ConfirmStepComponent extends StepComponent
                 'sub_total' => (int) $item['count'] * $dimensions * ($orderItem->property->price ?? $item['price']),
             ]);
 
-            // ذخیره آیتم (در صورتی که جدید باشد یا بروزرسانی شده باشد)
             $orderItem->save();
         }
-        dd("Done !");
     }
-
 
     public function confirm()
     {
