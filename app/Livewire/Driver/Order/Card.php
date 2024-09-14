@@ -27,8 +27,8 @@ class Card extends Component
         };
     }
 
-    public function getRoute(): RedirectResponse
+    public function getRoute()
     {
-        return redirect()->route("driver.tasks", $this->type->name);
+        return redirect()->route("driver.tasks", $this->type->id);
     }
 }

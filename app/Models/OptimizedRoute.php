@@ -2,12 +2,10 @@
 
 namespace App\Models;
 
-use App\Services\AddressService;
 use App\Traits\Neshan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 
 class OptimizedRoute extends Model
 {
@@ -19,28 +17,70 @@ class OptimizedRoute extends Model
         'orders' => 'array',
     ];
 
-    public function orders()
+    public static function getRouteTypes()
     {
-        return Order::whereIn('id', $this->orders)->get();
+        $statuses = [
+            OrderStatus::IN_COLLECTIVE_LIST,
+            OrderStatus::IN_DISTRIBUTION_LIST,
+            OrderStatus::REVISITING_DRIVER,
+        ];
+
+        return OrderStatus::whereIn('name', $statuses)->get();
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(OrderStatus::class, 'order_status_id');
     }
 
     public function calculateRoute($allUniqueDriverIds): void
     {
+        $statuses = [
+            OrderStatus::IN_COLLECTIVE_LIST,
+            OrderStatus::IN_DISTRIBUTION_LIST,
+            OrderStatus::REVISITING_DRIVER,
+        ];
+
         foreach ($allUniqueDriverIds as $driverId) {
             $driver = Driver::find($driverId);
-            if ($driver->orders->count()) {
-                $orderLocations = $this->processableOrders($driver->orders);
-                $waypoints = $this->salesman($orderLocations);
-                if (isset($waypoints->getData()->points)) {
-                    $points = $waypoints->getData()->points;
-                    $sortedOrders = $this->sortOrdersByIndex($orderLocations, $points);
-                    $orderIds = $sortedOrders->pluck('id')->toArray();
-                    $driver->optimizedRoutes()->create([
-                        'orders' => $orderIds,
-                    ]);
+            foreach ($statuses as $status) {
+                $orders = $driver->orders()
+                    ->whereHas('status', function ($query) use ($status) {
+                        $query->where('name', $status);
+                    })
+                    ->where('time_apply_status', '>=', now())
+                    ->get();
+                if ($orders->count()) {
+                    $orderLocations = $this->processableOrders($orders);
+                    $waypoints = $this->salesman($orderLocations);
+                    if (isset($waypoints->getData()->points)) {
+                        $points = $waypoints->getData()->points;
+                        $sortedOrders = $this->sortOrdersByIndex($orderLocations, $points);
+                        $orderIds = $sortedOrders->pluck('id')->toArray();
+                        $driver->optimizedRoutes()->updateOrCreate(
+                            [
+                                'driver_id' => $driver->id,
+                                'order_status_id' => (OrderStatus::whereName($status)->first())->id
+                            ],
+                            [
+                            'orders' => $orderIds,
+                            ]
+                        );
+                    }
+                } else {
+                    $driver->optimizedRoutes()
+                        ->whereHas('status', function ($query) use ($status) {
+                            $query->where('name', $status);
+                        })
+                        ->delete();
                 }
             }
         }
+    }
+
+    public function orders()
+    {
+        return Order::whereIn('id', $this->orders)->get();
     }
 
     private function processableOrders(Collection $orders)
@@ -52,16 +92,11 @@ class OptimizedRoute extends Model
 
     private function isProcessable($order): bool
     {
-        if (!isset($order->address->latitude)) {
+        if (! isset($order->address->latitude)) {
             return false;
         }
 
-        $processableStatuses = [
-            OrderStatus::IN_COLLECTIVE_LIST,
-            OrderStatus::IN_DISTRIBUTION_LIST,
-            OrderStatus::REVISITING_DRIVER,
-        ];
-        return in_array($order->status->name, $processableStatuses);
+        return true;
     }
 
     private function transformOrder($order): array
@@ -86,7 +121,7 @@ class OptimizedRoute extends Model
     {
         $orderIndex = $point->index;
 
-        if (!isset($orders[$orderIndex - 1])) {
+        if (! isset($orders[$orderIndex - 1])) {
             return null;
         }
 
@@ -102,21 +137,5 @@ class OptimizedRoute extends Model
         if ($address->latitude !== $location[0]) {
             $address->updateAddressGeo($location);
         }
-    }
-
-    public static function getDriverRoute()
-    {
-        return auth('driver')->user()->optimizedRoutes()
-            ->orderBy('created_at', 'desc')->first();
-    }
-
-    public static function getRouteTypes()
-    {
-        $statuses = [
-            OrderStatus::IN_COLLECTIVE_LIST,
-            OrderStatus::IN_DISTRIBUTION_LIST,
-            OrderStatus::REVISITING_DRIVER
-        ];
-        return OrderStatus::whereIn('name', $statuses)->get();
     }
 }

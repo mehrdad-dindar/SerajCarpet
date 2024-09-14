@@ -943,9 +943,6 @@ h6 {
 .mb-6 {
   margin-bottom: 1.5rem;
 }
-.mb-8 {
-  margin-bottom: 2rem;
-}
 .me-1 {
   margin-inline-end: 0.25rem;
 }
@@ -1170,6 +1167,9 @@ h6 {
 }
 .h-screen {
   height: 100vh;
+}
+.max-h-24 {
+  max-height: 6rem;
 }
 .max-h-40 {
   max-height: 10rem;
@@ -3261,6 +3261,10 @@ h6 {
 }
 .text-inherit {
   color: inherit;
+}
+.text-lime-300 {
+  --tw-text-opacity: 1;
+  color: rgb(190 242 100 / var(--tw-text-opacity));
 }
 .text-lime-500 {
   --tw-text-opacity: 1;
@@ -14292,6 +14296,10 @@ label[name="form.wrapper.container"]:has(input:focus) .invalidated\:input-focus\
 
   .md\:grid-cols-6 {
     grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .md\:flex-row {
+    flex-direction: row;
   }
 
   .md\:gap-6 {

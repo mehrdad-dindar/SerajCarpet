@@ -33,13 +33,13 @@ class UpdateDirectionsAfterLogCreated
         ];
 
         foreach ($oldValues as $field => $oldValue) {
-
-            if (!in_array($order->status->name,$statuses))
+            if (!in_array($order->status->name, $statuses)) {
                 continue;
+            }
 
             $newValue = $newValues[$field] ?? null;
             $allUniqueDriverIds = [];
-            if ($field == "driver_id"){
+            if ($field == "driver_id") {
                 if (!is_null($newValue)) {
                     $allUniqueDriverIds[] = $newValue;
                 }
@@ -56,7 +56,6 @@ class UpdateDirectionsAfterLogCreated
                 $optimizedRoute = new OptimizedRoute();
                 $optimizedRoute->calculateRoute($allUniqueDriverIds);
             }
-
         }
     }
 }

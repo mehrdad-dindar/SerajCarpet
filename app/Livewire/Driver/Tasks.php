@@ -18,13 +18,15 @@ class Tasks extends Component
     use Neshan;
 
     public $points = [];
+    public OrderStatus $routeStatus;
     public $selectedOrder = null;
     public $opRoute;
     public $orders;
 
-    public function mount(): void
+    public function mount($status_id): void
     {
-        $this->opRoute = OptimizedRoute::getDriverRoute();
+        $this->getRouteType($status_id);
+        $this->opRoute = $this->getDriverRoute();
         $this->getOrders();
         $this->getPoints();
 
@@ -67,5 +69,16 @@ class Tasks extends Component
     public function showOrderWizard($orderId): void
     {
         $this->selectedOrder = $this->orders->firstWhere('id', $orderId);
+    }
+
+    private function getRouteType($status_id)
+    {
+        $this->routeStatus = OrderStatus::findOrFail($status_id);
+    }
+
+    private function getDriverRoute()
+    {
+        auth('driver')->user()->optimizedRoutes()
+            ->orderBy('created_at', 'desc')->first();
     }
 }
