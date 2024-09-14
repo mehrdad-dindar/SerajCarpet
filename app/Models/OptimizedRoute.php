@@ -138,4 +138,16 @@ class OptimizedRoute extends Model
             $address->updateAddressGeo($location);
         }
     }
+
+    public static function getOrdersCount(OrderStatus $type)
+    {
+        $driver = auth('driver')->user();
+        $optimizedRoute = $driver->optimizedRoutes()
+            ->where('order_status_id', $type->id)
+            ->first();
+        if ($optimizedRoute) {
+            return $optimizedRoute->orders()->count();
+        }
+        return 0;
+    }
 }

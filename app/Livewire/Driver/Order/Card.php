@@ -2,13 +2,19 @@
 
 namespace App\Livewire\Driver\Order;
 
+use App\Models\OptimizedRoute;
 use App\Models\OrderStatus;
 use Livewire\Component;
 
 class Card extends Component
 {
     public $type;
+    public $ordersCount;
 
+    public function mount()
+    {
+        $this->ordersCount = OptimizedRoute::getOrdersCount($this->type);
+    }
     public function render()
     {
         return view('livewire.driver.order.card');
@@ -27,18 +33,5 @@ class Card extends Component
     public function getRoute()
     {
         return redirect()->route('driver.tasks', $this->type->id);
-    }
-
-    public function getOrdersCount()
-    {
-        $driver = auth('driver')->user();
-        $type = $this->type;
-        $optimizedRoute = $driver->optimizedRoutes()
-            ->where('order_status_id', $type->id)
-            ->first();
-        if ($optimizedRoute) {
-            return $optimizedRoute->orders()->count();
-        }
-        return 0;
     }
 }
