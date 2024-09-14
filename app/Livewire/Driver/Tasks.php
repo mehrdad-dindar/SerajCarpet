@@ -50,7 +50,15 @@ class Tasks extends Component
 
     private function getOrders(): void
     {
-        $this->orders = $this->opRoute->orders();
+        $statuses = [
+            OrderStatus::IN_COLLECTIVE_LIST,
+            OrderStatus::IN_DISTRIBUTION_LIST,
+            OrderStatus::REVISITING_DRIVER,
+        ];
+        $this->orders = $this->opRoute->orders()
+            ->where('status_id', $this->routeStatus->id)
+            ->where('time_apply_status', '>=', now())
+            ->where('time_apply_status', '<', now()->addDay());
     }
 
     private function getPoints(): void
