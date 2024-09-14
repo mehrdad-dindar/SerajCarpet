@@ -3,6 +3,7 @@
 namespace App\Livewire\Driver\Order\Steps;
 
 use App\Enums\SmsPattern;
+use App\Events\OrderReceivedByDriver;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderStatus;
@@ -100,6 +101,7 @@ class ConfirmStepComponent extends StepComponent
     public function submit()
     {
         $this->updateOrder();
+        event(new OrderReceivedByDriver($this->order));
     }
 
     private function updateOrder()
