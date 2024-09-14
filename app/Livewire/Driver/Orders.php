@@ -23,14 +23,6 @@ class Orders extends Component
     #[Layout('driver.layouts.app')]
     public function render()
     {
-        return view('livewire.driver.orders')->with([
-            "orders" => $this->getDriverOrders()
-        ]);
-    }
-
-    private function getDriverOrders()
-    {
-        $driver = OptimizedRoute::getDriverRoute();
-        return $driver->orders();
+        return view('livewire.driver.orders');
     }
 }
