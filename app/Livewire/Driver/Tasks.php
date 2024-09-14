@@ -78,7 +78,8 @@ class Tasks extends Component
 
     private function getDriverRoute()
     {
-        auth('driver')->user()->optimizedRoutes()
-            ->orderBy('created_at', 'desc')->first();
+        return auth('driver')->user()->optimizedRoutes()
+            ->where('order_status_id', $this->routeStatus->id)
+            ->first();
     }
 }
