@@ -54,7 +54,7 @@
                             placeholder="Select many statuses"
                             class="mb-2 md:w-1/4 select-css"
                             multiselect
-                            :options="['آبشور', 'اعلاء‌شوئی', 'براق‌شویی', 'رنگ‌برداری', 'رفوگری', 'پرداخت', 'کاور']"
+                            :options="$washingOptions"
                         />
                     </div>
                     <div class="mt-auto mb-0 font-semibold leading-normal text-sm group text-slate-500 flex justify-between flex-row">

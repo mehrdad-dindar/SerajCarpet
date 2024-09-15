@@ -2,15 +2,14 @@
 
 namespace App\Livewire\Driver\Order\Steps;
 
-use App\Enums\SmsPattern;
 use App\Events\OrderReceivedByDriver;
 use App\Models\Customer;
+use App\Models\Option;
 use App\Models\Order;
 use App\Models\OrderStatus;
 use App\Models\Property;
 use App\Traits\Sms;
 use Exception;
-use Hashids\Hashids;
 use Spatie\LivewireWizard\Components\StepComponent;
 use WireUi\Traits\WireUiActions;
 
@@ -35,7 +34,7 @@ class ConfirmStepComponent extends StepComponent
         $this->tmp_order_items = $this->state()->orderItems();
         $this->orderItems = $this->getOrderItems();
         $this->totalPrice = $this->calculateTotal();
-        $this->washing_type = $this->state()->washingType();
+        $this->washing_type = $this->getWashingTypes();
     }
 
     public function getOrderItems()
@@ -83,6 +82,16 @@ class ConfirmStepComponent extends StepComponent
         }
 
         return $details;
+    }
+
+    private function getWashingTypes()
+    {
+        $selected = $this->state()->washingType();
+
+        return Option::whereIn('id', $selected)
+            ->orWhereIn('name', $selected)
+            ->pluck('id')
+            ->toArray();
     }
 
     public function render()

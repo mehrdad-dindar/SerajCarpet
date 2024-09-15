@@ -3,6 +3,7 @@
 namespace App\Livewire\Driver\Order\Steps;
 
 use App\Models\Customer;
+use App\Models\Option;
 use App\Models\Order;
 use Livewire\Attributes\Layout;
 use Spatie\LivewireWizard\Components\StepComponent;
@@ -15,18 +16,19 @@ class AddItemsStepComponent extends StepComponent
     public Order $order;
     public $order_tmp_items = [];
     public $washing_type = [];
+    public $washingOptions = [];
 
     public function mount()
     {
         $this->initOrderItems();
 
-        $this->washing_type = [
-            "آبشور",
-            "اعلاء‌شوئی",
-            "کاور",
-        ];
-    }
+        $this->washingOptions = Option::pluck('name', 'id')
+            ->toArray();
 
+        $this->washing_type = Option::where('is_default', true)
+            ->pluck('name')
+            ->toArray();
+    }
     public function addItem()
     {
         $this->order_tmp_items[] = [

@@ -45,7 +45,7 @@
     <script type="module">
         document.addEventListener('livewire:init', function () {
             Livewire.on('callInitiated', function (data) {
-                $openModal('cardModal')
+                // $openModal('cardModal')
                 console.log('tel:+98' + data.number);
                 window.location.href = 'tel:+98' + data.number;
             });
