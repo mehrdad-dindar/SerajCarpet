@@ -10,7 +10,7 @@ class Show extends Component
 {
     public Order $order;
 
-    public function mount(Order $order)
+    public function mount(Order $order): void
     {
         $this->order = $order;
     }
@@ -18,8 +18,6 @@ class Show extends Component
     #[Layout("customer.layouts.app")]
     public function render()
     {
-        return view('livewire.customer.order.show')->with([
-            "order" => $this->order
-        ]);
+        return view('livewire.customer.order.show');
     }
 }
