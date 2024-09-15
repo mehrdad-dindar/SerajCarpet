@@ -146,7 +146,8 @@ class OptimizedRoute extends Model
             ->where('order_status_id', $type->id)
             ->first();
         if ($optimizedRoute) {
-            return $optimizedRoute->orders()->count();
+            return $optimizedRoute->orders()
+                ->where('status_id', $type->id)->count();
         }
         return 0;
     }
