@@ -51,7 +51,6 @@
                 @endforeach
                 </tbody>
             </table>
-            {{ $orders->links("vendor/livewire/tailwind") }}
         </div>
     </div>
 </div>

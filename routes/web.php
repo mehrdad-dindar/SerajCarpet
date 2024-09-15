@@ -14,7 +14,7 @@ use App\Livewire\Driver\Tasks;
 use App\Livewire\SetLocation;
 use App\Models\Address;
 use App\Models\Customer;
-use App\Livewire\Customer\Order as CustomerOrder;
+use App\Livewire\Customer\OrderComponent as CustomerOrder;
 use App\Livewire\Customer\Order\Show as CustomerOrderShow;
 use Hashids\Hashids;
 use Illuminate\Support\Facades\Route;
