@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OrderItem extends Model
 {
-    use SoftDeletes;
     protected $guarded;
 
     public function order(): BelongsTo

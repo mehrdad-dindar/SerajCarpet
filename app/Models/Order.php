@@ -111,25 +111,31 @@ class Order extends Model
             ->logOnlyDirty();
     }
 
+    public function updateOrderStatus(string $CARPETS_RECEIVED): void
+    {
+        $this->status_id = (OrderStatus::firstWhere('name', $CARPETS_RECEIVED))->id;
+        $this->save();
+    }
+
     protected function createdAt(): Attribute
     {
         return Attribute::make(
-            get: fn(string $value) => verta($value)->format('d F Y - H:i'),
+            get: fn (string $value) => verta($value)->format('d F Y - H:i'),
         );
     }
 
     protected function updatedAt(): Attribute
     {
         return Attribute::make(
-            get: fn(string $value) => verta($value)->format('d F Y - H:i'),
+            get: fn (string $value) => verta($value)->format('d F Y - H:i'),
         );
     }
 
     protected function options(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => json_decode($value, true),
-            set: fn($value) => json_encode($value),
+            get: fn ($value) => json_decode($value, true),
+            set: fn ($value) => json_encode($value),
         );
     }
 }

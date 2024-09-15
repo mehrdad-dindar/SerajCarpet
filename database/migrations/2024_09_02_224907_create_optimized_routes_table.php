@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('driver_id')->constrained();
             $table->json('orders');
+            $table->foreignId('order_status_id')->constrained("order_statuses");
             $table->timestamps();
         });
     }

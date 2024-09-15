@@ -34,17 +34,17 @@ Route::middleware([
 });
 
 // TODO: Hashed link for submitting location
-Route::get('test', function (){
-////    return view('welcome');
-//    $recipient = auth()->user();
-//
-//    \Filament\Notifications\Notification::make()
-//        ->title('Saved successfully')
-//        ->sendToDatabase($recipient);
-//    dd("sent");
-    $hashids = new Hashids('',6);
+Route::get('test', function () {
+    ////    return view('welcome');
+    //    $recipient = auth()->user();
+    //
+    //    \Filament\Notifications\Notification::make()
+    //        ->title('Saved successfully')
+    //        ->sendToDatabase($recipient);
+    //    dd("sent");
+    $hashids = new Hashids('', 6);
     $hashedID = $hashids->encode(51);
-    return '<a href="'.\route("set-location",$hashedID).'">hi</a>';
+    return '<a href="'.\route("set-location", $hashedID).'">hi</a>';
 });
 Route::get('/set-location/{id}', SetLocation::class)->name('set-location');
 
@@ -53,10 +53,10 @@ Route::post('create_address', [CustomerController::class, 'createAddress'])->nam
 
 
 Route::middleware(['guest'])->group(function () {
-//    Route::get('login-phone', [AuthController::class, 'loginPhone'])->name('login-phone');
-//    Route::post('login-phone', [AuthController::class, 'doLoginPhone'])->name('doLoginPhone');
-//    Route::get('verify', [AuthController::class, 'verify'])->name('verify');
-//    Route::post('doVerify', [AuthController::class, 'doVerify'])->name('doVerify');
+    //    Route::get('login-phone', [AuthController::class, 'loginPhone'])->name('login-phone');
+    //    Route::post('login-phone', [AuthController::class, 'doLoginPhone'])->name('doLoginPhone');
+    //    Route::get('verify', [AuthController::class, 'verify'])->name('verify');
+    //    Route::post('doVerify', [AuthController::class, 'doVerify'])->name('doVerify');
 });
 Route::middleware('guest')->group(function () {
     Route::get('/login', Login::class)->name('login');
@@ -64,7 +64,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth:customer'])->prefix('panel')->group(function () {
     Route::get('/', CustomerPanel::class)->name('customer.panel.index');
     Route::get('/profile', CustomerProfile::class)->name('customer.panel.profile');
-    Route::get('/test/{address}', function (Address $address){
+    Route::get('/test/{address}', function (Address $address) {
         $lat = $address->latitude;
         $lng = $address->longitude;
         return redirect("");
@@ -79,6 +79,7 @@ Route::middleware(['auth:driver'])->prefix('dashboard')->group(function () {
     Route::get('/order/wizard', CreateWizard::class)->name('driver.order.wizard');
     Route::get('/customers', CustomerController::class)->name('customer.index');
     Route::get('/properties', PropertyController::class)->name('property.index');
-    Route::get('/properties/dimensions/{property}', [PropertyController::class,'getDimensions'])->name('property.dimensions');
-    Route::get('/tasks', Tasks::class)->name('driver.tasks');
+    Route::get('/properties/dimensions/{property}', [PropertyController::class,'getDimensions'])
+        ->name('property.dimensions');
+    Route::get('/tasks/{status_id}', Tasks::class)->name('driver.tasks');
 });

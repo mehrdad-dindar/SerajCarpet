@@ -25,5 +25,5 @@ return [
         | <x-icon ... />
         |
     */
-    'alias' => 'srj-ph-icon',
+    'alias' => false,
 ];

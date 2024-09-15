@@ -4,11 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OrderStatus extends Model
 {
-    use HasFactory;
-
     const RESERVED = 'reserved';
     const IN_COLLECTIVE_LIST = 'in_collective_list';
     const IN_DISTRIBUTION_LIST = 'in_distribution_list';
@@ -41,4 +40,8 @@ class OrderStatus extends Model
         return $this->hasMany(Order::class);
     }
 
+    public function optimizedRoutes(): HasMany
+    {
+        return $this->hasMany(OptimizedRoute::class);
+    }
 }
