@@ -111,6 +111,7 @@ class ConfirmStepComponent extends StepComponent
     {
         $this->updateOrder();
         event(new OrderReceivedByDriver($this->order));
+        $this->dispatch('closeModal');
     }
 
     private function updateOrder()
@@ -137,6 +138,13 @@ class ConfirmStepComponent extends StepComponent
         } catch (Exception $e) {
             dd($e->getMessage());
         }
+    }
+
+    public function getWashingTypeLabel()
+    {
+        return Option::WhereIn('id', $this->washing_type)
+            ->pluck('name')
+            ->toArray();
     }
 
     public function updateOrderItems()

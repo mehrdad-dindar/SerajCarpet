@@ -60,7 +60,7 @@
                 </div>
                 @if($washing_type)
                 <div class="mb-4">
-                    @foreach($washing_type as $type)
+                    @foreach($this->getWashingTypeLabel() as $type)
                         <x-srj-badge icon-size="md" lg icon="check" lime label="Lime" :label="$type"/>
                     @endforeach
                 </div>
