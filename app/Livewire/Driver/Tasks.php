@@ -57,8 +57,7 @@ class Tasks extends Component
         ];
         $this->orders = $this->opRoute->orders()
             ->where('status_id', $this->routeStatus->id)
-            ->where('time_apply_status', '>=', now())
-            ->where('time_apply_status', '<', now()->addDay());
+            ->where('time_apply_status', '>=', now());
     }
 
     private function getPoints(): void
