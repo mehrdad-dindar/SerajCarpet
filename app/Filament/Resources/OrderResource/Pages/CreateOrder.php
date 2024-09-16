@@ -35,7 +35,7 @@ class CreateOrder extends CreateRecord
 
         if ($customer) {
             try {
-                $hashedID = $customer->getHasheId();
+                $hashedID = $customer->getHashedId();
                 SendSmsJob::dispatch($customer->phone, SmsPattern::SET_LOCATION, [$customer->name, $hashedID]);
             } catch (\Exception $e) {
                 info($e->getMessage()); // Log the error if SMS fails
