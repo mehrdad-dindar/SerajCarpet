@@ -35,11 +35,12 @@
                                  :class="$order->status->getColor($order->status_id) . ' text-xxs absolute top-0 left-0'"/>
                 </li>
             @endforeach
-                <x-srj-modal title="{{ __('Edit Order') }}" name="orderWizardModal" blur="base">
-                    @if($selectedOrder)
-                        <livewire:create-order-wizard show-step="customer-info" :order="$selectedOrder" :key="$selectedOrder->id"/>
-                    @endif
-                </x-srj-modal>
+            <x-srj-modal title="{{ __('Edit Order') }}" name="orderWizardModal" blur="base">
+                @if($selectedOrder)
+                    <livewire:create-order-wizard show-step="customer-info" :order="$selectedOrder"
+                                                  :key="$selectedOrder->id"/>
+                @endif
+            </x-srj-modal>
         </ul>
     </div>
     <script type="module">
@@ -88,6 +89,21 @@
             position: 'topright'
         }).addTo(map);
 
+        var LeafIcon = L.Icon.extend({
+            options: {
+                shadowUrl: false,
+                iconSize:     [71, 95],
+                iconAnchor:   [71, 95],
+                popupAnchor:  [-3, -76]
+            }
+        });
+
+        var generalIcon = new LeafIcon({iconUrl: '{{asset("panel/img/general-icon.png")}}'}),
+            driverIcon = new LeafIcon({iconUrl: '{{asset("panel/img/driver-icon.png")}}'});
+
+        L.icon = function (options) {
+            return new L.Icon(options);
+        };
 
         var control = L.Routing.control({
             waypoints: [
@@ -101,7 +117,10 @@
             draggableWaypoints: false,
             addWaypoints: false,
             createMarker: function (i, wp, nWps) {
-                return L.marker(wp.latLng, {draggable: false});
+                return L.marker(wp.latLng, {
+                    icon: generalIcon,
+                    draggable: false
+                });
             },
             // غیرفعال کردن توضیحات مسیر
             show: false,
@@ -123,7 +142,7 @@
             altLineOptions: {styles: [{opacity: 0}]}
         }).addTo(map);
 
-        const driverMarker = L.marker([35.6892, 51.3890]).addTo(map);
+        const driverMarker = L.marker([35.6892, 51.3890],{icon: driverIcon}).addTo(map);
 
         function updateDriverLocation(position) {
             var lat = position.coords.latitude;
@@ -139,17 +158,20 @@
             });
             var waypoints = control.getWaypoints();
             waypoints[0].latLng = L.latLng(lat, lng); // بروز رسانی نقطه شروع به موقعیت جدید
-            control.setWaypoints(waypoints);
+            // control.setWaypoints(waypoints);
         }
 
         // بررسی پشتیبانی از Geolocation API و مشاهده موقعیت زنده راننده
         if (navigator.geolocation) {
-            navigator.geolocation.watchPosition(updateDriverLocation, function (error) {
-                console.error("Geolocation error: " + error.message);
+            navigator.geolocation.watchPosition(function (position) {
+                Livewire.dispatch('updateLocation', position.coords.latitude, position.coords.longitude);
+                updateDriverLocation(position);
+            }, function (error) {
+                console.error(error);
             }, {
                 enableHighAccuracy: true,
-                maximumAge: 0,
-                timeout: 30000
+                timeout: 5000,
+                maximumAge: 0
             });
         } else {
             alert("Geolocation is not supported by this browser.");

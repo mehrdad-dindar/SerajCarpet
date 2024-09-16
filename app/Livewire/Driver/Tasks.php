@@ -96,4 +96,13 @@ class Tasks extends Component
             ->where('order_status_id', $this->routeStatus->id)
             ->first();
     }
+
+    public function updateLocation($latitude, $longitude)
+    {
+        auth('driver')->user()->locations()->updateOrCreate(
+            ['driver_id' => auth()->id()],
+            ['latitude' => $latitude, 'longitude' => $longitude]
+        );
+    }
+
 }
