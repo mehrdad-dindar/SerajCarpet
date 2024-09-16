@@ -4,6 +4,7 @@ namespace App\Filament\Resources\DriverResource\Pages;
 
 use App\Enums\SmsPattern;
 use App\Filament\Resources\DriverResource;
+use App\Jobs\SendSmsJob;
 use App\Traits\Sms;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
@@ -16,7 +17,7 @@ class CreateDriver extends CreateRecord
     protected function afterCreate()
     {
         $driver = $this->record;
-        $this->sendPattern($driver->phone, SmsPattern::DRIVER_WELCOME, array($driver->name,$driver->phone));
+        SendSmsJob::dispatch($driver->phone, SmsPattern::DRIVER_WELCOME, array($driver->name,$driver->phone));
     }
 
     protected function getRedirectUrl(): string

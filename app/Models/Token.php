@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\SmsPattern;
+use App\Jobs\SendSmsJob;
 use App\Traits\Sms;
 use Carbon\Carbon;
 use Exception;
@@ -99,7 +100,7 @@ class Token extends Model
         }
         try {
             if (app()->isProduction()) {
-                $this->sendPattern($this->tokenable->phone, SmsPattern::LOGIN, [strval($this->code)]);
+                SendSmsJob::dispatch($this->tokenable->phone, SmsPattern::LOGIN, [strval($this->code)]);
             } else {
                 session()->put('code', strval($this->code));
             }
