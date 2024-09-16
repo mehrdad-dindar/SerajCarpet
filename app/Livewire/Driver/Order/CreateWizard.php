@@ -61,9 +61,4 @@ class CreateWizard extends WizardComponent
     {
         return $this->order->customer;
     }
-    public function finish()
-    {
-        session()->flash('message', 'جزئیات سفارش با موفقیت بروز شد.');
-        $this->dispatch('closeModal');
-    }
 }

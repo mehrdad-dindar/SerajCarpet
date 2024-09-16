@@ -39,7 +39,7 @@ class Customer extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function addresses (): HasMany
+    public function addresses(): HasMany
     {
         return $this->hasMany(Address::class, 'customer_id');
     }
@@ -64,6 +64,6 @@ class Customer extends Authenticatable
 
     public function orders(): HasMany
     {
-        return $this->hasMany(Order::class);
+        return $this->hasMany(Order::class, 'customer_id');
     }
 }

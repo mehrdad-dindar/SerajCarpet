@@ -9,19 +9,21 @@ use App\Traits\Neshan;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
+use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use function Laravel\Prompts\error;
 
 class Tasks extends Component
 {
-    use Neshan;
+    use Neshan,LivewireAlert;
 
     public $points = [];
     public OrderStatus $routeStatus;
     public $selectedOrder = null;
     public $opRoute;
     public $orders;
+    protected $listeners = ['closeModal'];
 
     public function mount($status_id): void
     {
@@ -31,6 +33,11 @@ class Tasks extends Component
         $this->getPoints();
 
         $this->dispatch('pointsUpdated', $this->points);
+    }
+
+    public function closeModal()
+    {
+        $this->alert('success', 'Basic Alert');
     }
 
     #[Layout("driver.layouts.map")]
@@ -57,8 +64,7 @@ class Tasks extends Component
         ];
         $this->orders = $this->opRoute->orders()
             ->where('status_id', $this->routeStatus->id)
-            ->where('time_apply_status', '>=', now())
-            ->where('time_apply_status', '<', now()->addDay());
+            ->where('time_apply_status', '>=', now());
     }
 
     private function getPoints(): void
