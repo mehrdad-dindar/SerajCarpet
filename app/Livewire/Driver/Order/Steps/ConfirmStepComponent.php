@@ -45,7 +45,6 @@ class ConfirmStepComponent extends StepComponent
                 $items->push(Property::find($item['property_id']));
             }
         }
-
         return $items;
     }
 

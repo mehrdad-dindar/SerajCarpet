@@ -68,7 +68,7 @@ class AddItemsStepComponent extends StepComponent
         if ($this->order->items()->count()) {
             foreach ($this->order->items as $item) {
                 $this->order_tmp_items[] = [
-                    'property_id' => $item->id,
+                    'property_id' => $item->property_id,
                     'dimensions' => $item->dimensions,
                     'count' => $item->quantity
                 ];
