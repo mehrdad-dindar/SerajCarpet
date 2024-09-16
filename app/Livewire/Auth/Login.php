@@ -103,16 +103,19 @@ class Login extends Component
     {
         $token = null;
 
-        if (!session()->has('code_id') || !session()->has('customer_id'))
+        if (!session()->has('code_id') || !session()->has('customer_id')) {
             redirect()->route('login');
+        }
 
         $token = Token::find(session()->get('code_id'));
 
-        if (!$token || empty($token->id))
+        if (!$token || empty($token->id)) {
             redirect()->route('login');
+        }
 
-        if (!$token->isValid())
+        if (!$token->isValid()) {
             redirect()->back()->withErrors('The code is either expired or used.');
+        }
 
         if ($token->code !== $this->code) {
             $this->codeSent = false;
@@ -124,17 +127,13 @@ class Login extends Component
         ]);
 
         if (session()->get('auth_type') == "App\Models\Driver") {
-
             $driver = Driver::find(session()->get('auth_id'));
             Auth::guard('driver')->login($driver, $this->remember_me);
             return redirect()->route('driver.panel.index');
-
         } elseif (session()->get('auth_type') == "App\Models\Customer") {
-
             $customer = Customer::find(session()->get('auth_id'));
             Auth::guard('customer')->login($customer, $this->remember_me);
             return redirect()->route('customer.panel.index');
-
         }
         return redirect()->route('login');
     }

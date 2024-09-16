@@ -27,7 +27,7 @@
                                 </div>
                             </div>
                         </div>
-                        <x-srj-badge flat primary label="+{{ verta($customer->created_at)->formatDifference() }}" class="absolute top-0 left-0">
+                        <x-srj-badge flat primary label="+{{ verta($customer->created_at)->formatDifference() }}" class="absolute top-0 left-0 text-lime-300">
                             <x-slot name="append" class="relative flex items-center w-2 h-2">
                                 <span class="absolute inline-flex w-full h-full rounded-full opacity-75 bg-cyan-500 animate-ping"></span>
                                 <span class="relative inline-flex w-2 h-2 rounded-full bg-cyan-500"></span>
@@ -60,7 +60,7 @@
                 </div>
                 @if($washing_type)
                 <div class="mb-4">
-                    @foreach($washing_type as $type)
+                    @foreach($this->getWashingTypeLabel() as $type)
                         <x-srj-badge icon-size="md" lg icon="check" lime label="Lime" :label="$type"/>
                     @endforeach
                 </div>

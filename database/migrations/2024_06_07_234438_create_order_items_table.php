@@ -21,7 +21,6 @@ return new class extends Migration
             $table->string('sub_total');
             $table->string('title')->nullable();
             $table->boolean('is_custom')->default(0);
-            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -19,7 +19,6 @@ class DriverSeeder extends Seeder
             'license' => 98456789,
             'car_tag' => "36الف45678"
         ]);
-        Driver::factory()->count(50)->create();
-
+        Driver::factory()->count(5)->create();
     }
 }

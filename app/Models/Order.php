@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Events\BulkOrderUpdated;
 use App\Events\OrderLogCreated;
+use App\Services\OrderService;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +20,7 @@ class Order extends Model
     use LogsActivity;
 
     protected static bool $isBulkUpdate = false;
+    protected OrderService $orderService;
     protected $guarded;
 
     protected static function boot()
@@ -75,20 +77,23 @@ class Order extends Model
 
     public function getStatusLabel(): ?string
     {
-        return OrderStatus::from($this->status)->getLabel();
+        return $this->status->label;
     }
 
     public function getStatusColor(): string
     {
-        return match ($this->status) {
-            OrderStatus::RESERVED->value => 'bg-blue-500',
-            OrderStatus::IN_WAITING_LIST->value => 'bg-yellow-500',
-            OrderStatus::CARPETS_RECEIVED->value => 'bg-teal-500',
-            OrderStatus::PRE_WASH_REPAIR_SERVICE->value => 'bg-orange-500',
-            OrderStatus::SENT_TO_FACTORY_FOR_WASHING->value => 'bg-green-500',
-            OrderStatus::POST_WASH_REPAIR_SERVICE->value => 'bg-red-500',
-            OrderStatus::READY_FOR_DELIVERY_TO_CUSTOMER->value => 'bg-purple-500',
-            OrderStatus::DELIVERED_AND_PAID->value => 'bg-green-700',
+        return match ($this->status->name) {
+            OrderStatus::RESERVED => 'bg-blue-500',
+            OrderStatus::IN_COLLECTIVE_LIST => 'bg-yellow-500',
+            OrderStatus::IN_DISTRIBUTION_LIST => 'bg-yellow-500',
+            OrderStatus::REVISITING_DRIVER => 'bg-yellow-500',
+            OrderStatus::CARPETS_RECEIVED => 'bg-teal-500',
+            OrderStatus::PRE_WASH_REPAIR_SERVICE => 'bg-orange-500',
+            OrderStatus::SENT_TO_FACTORY_FOR_WASHING => 'bg-green-500',
+            OrderStatus::POST_WASH_REPAIR_SERVICE => 'bg-red-500',
+            OrderStatus::READY_FOR_DELIVERY_TO_CUSTOMER => 'bg-purple-500',
+            OrderStatus::DELIVERED_AND_PAID => 'bg-green-700',
+            default => 'bg-red-500'
         };
     }
 
@@ -111,25 +116,31 @@ class Order extends Model
             ->logOnlyDirty();
     }
 
+    public function updateOrderStatus(string $CARPETS_RECEIVED): void
+    {
+        $this->status_id = (OrderStatus::firstWhere('name', $CARPETS_RECEIVED))->id;
+        $this->save();
+    }
+
     protected function createdAt(): Attribute
     {
         return Attribute::make(
-            get: fn(string $value) => verta($value)->format('d F Y - H:i'),
+            get: fn (string $value) => verta($value)->format('d F Y - H:i'),
         );
     }
 
     protected function updatedAt(): Attribute
     {
         return Attribute::make(
-            get: fn(string $value) => verta($value)->format('d F Y - H:i'),
+            get: fn (string $value) => verta($value)->format('d F Y - H:i'),
         );
     }
 
     protected function options(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => json_decode($value, true),
-            set: fn($value) => json_encode($value),
+            get: fn ($value) => json_decode($value, true),
+            set: fn ($value) => json_encode($value),
         );
     }
 }

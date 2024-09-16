@@ -6,7 +6,8 @@
     <div id="driver-map" class="absolute inset-0 z-0"></div>
     <x-srj-mini-button icon="arrow-left" rounded fuchsia class="absolute left-5 top-5 z-10 bg-gradient-fuchsia"
                        wire:click="goToIndex"/>
-    <x-srj-button id="getLocationButton" label="Salam" fuchsia class="absolute left-1/2 top-5 z-10 bg-gradient-fuchsia"/>
+    <x-srj-button id="getLocationButton" label="Salam" fuchsia
+                  class="absolute left-1/2 top-5 z-10 bg-gradient-fuchsia"/>
     <div class="absolute bottom-16 inset-x-0 z-10 flex justify-center">
         <ul class="max-h-60 overflow-y-scroll w-4/5">
             @foreach($orders as $order)
@@ -17,22 +18,37 @@
                             <span class="text-xxs text-muted">
                                 {{ "منطقه " . $order->address->municipality_zone . " - " . $order->address->neighbourhood}}
                             </span>
+
                         </div>
-                        <x-srj-mini-button icon="phone" rounded lime class="bg-gradient-lime"
-                                           wire:click="makeCall('{{ $order->customer->phone }}')"/>
+                        <div>
+                            <x-srj-mini-button icon="phone" rounded lime class="bg-gradient-lime"
+                                               wire:click="makeCall('{{ $order->customer->phone }}')"/>
+                            <x-srj-mini-button icon="pencil-square" rounded info class="bg-gradient-cyan"
+                                               show-step="customer-info"
+                                               x-on:click="$openModal('orderWizardModal')"
+                                               :key="$order->id"
+                                               wire:click="showOrderWizard({{ $order->id }})"/>
+                        </div>
                     </div>
                     <span class="text-muted text-xs">{{$order->address->address}}</span>
                     <x-srj-badge :label="$order->status->getLabel($order->status_id)"
                                  :class="$order->status->getColor($order->status_id) . ' text-xxs absolute top-0 left-0'"/>
                 </li>
             @endforeach
+                <x-srj-modal title="{{ __('Edit Order') }}" name="orderWizardModal" blur="base">
+                    @if($selectedOrder)
+                        <livewire:create-order-wizard show-step="customer-info" :order="$selectedOrder" :key="$selectedOrder->id"/>
+                    @endif
+                </x-srj-modal>
         </ul>
     </div>
     <script type="module">
         document.addEventListener('livewire:init', function () {
             Livewire.on('callInitiated', function (data) {
-                console.log('tel:+98' + data.number);
                 window.location.href = 'tel:+98' + data.number;
+            });
+            Livewire.on('closeModal', function () {
+                $closeModal('orderWizardModal')
             });
         });
 
@@ -46,13 +62,26 @@
         //     zoomControl: false
         // })
 
-        var map = L.map('driver-map').setView([35.6892, 51.3890], 12); // مرکز نقشه روی تهران
+        var map = L.map('driver-map', {
+            zoomControl: false
+        }).setView([35.6892, 51.3890], 12); // مرکز نقشه روی تهران
 
-        L.tileLayer('http://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
-            zoomControl: false,
-            traffic: true,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=KLoLXEB9eFv60ELGhKUn	', {
+            maxZoom: 18,
+            tileSize: 512,
+            zoomOffset: -1,
+            attributionControl: false
         }).addTo(map);
+
+        var myAttrControl = L.control.attribution({position: 'bottomleft'}).addTo(map);
+        myAttrControl.setPrefix('<a href="https://serajcarpet.com/">سراج</a>');
+
+
+        // L.tileLayer('http://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
+        //     zoomControl: false,
+        //     traffic: true,
+        //     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        // }).addTo(map);
 
 
         L.control.zoom({
@@ -60,7 +89,7 @@
         }).addTo(map);
 
 
-        L.Routing.control({
+        var control = L.Routing.control({
             waypoints: [
                 L.latLng({{settings()->location_latitude}}, {{settings()->location_longitude}}),
                 @php foreach($points as $point){
@@ -68,7 +97,16 @@
             }
                 @endphp
                 L.latLng({{settings()->location_latitude}}, {{settings()->location_longitude}})],
+            routeWhileDragging: true,
+            draggableWaypoints: false,
+            addWaypoints: false,
+            createMarker: function (i, wp, nWps) {
+                return L.marker(wp.latLng, {draggable: false});
+            },
+            // غیرفعال کردن توضیحات مسیر
+            show: false,
             lineOptions: {
+                addWaypoints: false,
                 styles: [
                     {
                         color: "blue",
@@ -77,11 +115,45 @@
                     }
                 ]
             },
-            routeWhileDragging: false,
-            draggableWaypoints: false,
-            addWaypoints: false,
-            collapsible: false,
+            router: new L.Routing.OSRMv1({
+                serviceUrl: `https://router.project-osrm.org/route/v1`
+            }),
+            fitSelectedRoutes: false, // جلوگیری از زوم خودکار به مسیر انتخاب شده
+            showAlternatives: false, // غیرفعال کردن نمایش مسیرهای جایگزین
+            altLineOptions: {styles: [{opacity: 0}]}
         }).addTo(map);
+
+        const driverMarker = L.marker([35.6892, 51.3890]).addTo(map);
+
+        function updateDriverLocation(position) {
+            var lat = position.coords.latitude;
+            var lng = position.coords.longitude;
+
+            // به روز رسانی موقعیت مارکر راننده
+            driverMarker.setLatLng([lat, lng]);
+            // به روز رسانی مسیر با موقعیت جدید راننده
+
+            map.panTo(new L.LatLng(lat, lng), {
+                animate: true, // فعال کردن انیمیشن
+                duration: 1.0 // مدت زمان انیمیشن (به ثانیه)
+            });
+            var waypoints = control.getWaypoints();
+            waypoints[0].latLng = L.latLng(lat, lng); // بروز رسانی نقطه شروع به موقعیت جدید
+            control.setWaypoints(waypoints);
+        }
+
+        // بررسی پشتیبانی از Geolocation API و مشاهده موقعیت زنده راننده
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(updateDriverLocation, function (error) {
+                console.error("Geolocation error: " + error.message);
+            }, {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 30000
+            });
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
     </script>
 
 
@@ -112,7 +184,7 @@
                 @php /*foreach($points as $point){
              echo "L.latLng(".$point->location[0].", ".$point->location[1]."),\n";
             }*/
-                @endphp],
+        @endphp],
             lineOptions: {
                 styles: [
                     {

@@ -68,9 +68,9 @@ class OrderResource extends Resource
                     ->translateLabel()
                     ->sortable()
                     ->badge()
-                    ->color(fn(OrderStatusModel $state): string => $state->color)
+                    ->color(fn (OrderStatusModel $state): string => $state->color)
                     ->toggleable()
-                    ->formatStateUsing(fn(OrderStatusModel $state): string => $state->label),
+                    ->formatStateUsing(fn (OrderStatusModel $state): string => $state->label),
                 Tables\Columns\TextColumn::make('items_count')
                     ->sortable()
                     ->translateLabel()
@@ -79,9 +79,9 @@ class OrderResource extends Resource
                     ->alignCenter()
                     ->counts('items'),
                 Tables\Columns\TextColumn::make('area')
-                    ->badge()->color(fn($state, $record): string => $record->address ? "info" : "danger")
-                    ->getStateUsing(fn($record) => $record->address ? 'منطقه ' . $record->address->municipality_zone : 'X')
-                    ->description(fn($record) => $record->address ? 'محله ' . $record->address->neighbourhood : 'فاقد آدرس')
+                    ->badge()->color(fn ($state, $record): string => $record->address ? "info" : "danger")
+                    ->getStateUsing(fn ($record) => $record->address ? 'منطقه ' . $record->address->municipality_zone : 'X')
+                    ->description(fn ($record) => $record->address ? 'محله ' . $record->address->neighbourhood : 'فاقد آدرس')
                     ->sortable()
                     ->translateLabel()
                     ->toggleable()
@@ -219,7 +219,7 @@ class OrderResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->live()
-                                    ->afterStateUpdated(fn(Set $set) => $set('address_id', null))
+                                    ->afterStateUpdated(fn (Set $set) => $set('address_id', null))
                                     ->createOptionForm([
                                         Forms\Components\Grid::make()
                                             ->schema([
@@ -238,7 +238,7 @@ class OrderResource extends Resource
                                     ->prefixIcon('heroicon-o-map-pin')
                                     ->label(__("Customer's Address"))
                                     ->translateLabel()
-                                    ->options(fn(Get $get): SupportCollection => Address::query()
+                                    ->options(fn (Get $get): SupportCollection => Address::query()
                                         ->where('customer_id', $get('customer_id'))
                                         ->pluck('address', 'id'))
                                     ->createOptionForm([
@@ -246,17 +246,17 @@ class OrderResource extends Resource
                                             Forms\Components\TextInput::make('state')
                                                 ->required()
                                                 ->columnSpan(2)
-                                                ->helperText(fn(Get $get) => AddressResource::getHint('state', $get))
+                                                ->helperText(fn (Get $get) => AddressResource::getHint('state', $get))
                                                 ->label(__('State')),
                                             Forms\Components\TextInput::make('city')
                                                 ->required()
                                                 ->columnSpan(2)
-                                                ->helperText(fn(Get $get) => AddressResource::getHint('city', $get))
+                                                ->helperText(fn (Get $get) => AddressResource::getHint('city', $get))
                                                 ->label(__('City')),
                                             Forms\Components\TextInput::make('address')
                                                 ->required()
                                                 ->columnSpan(6)
-                                                ->helperText(fn(Get $get) => AddressResource::getHint('address', $get))
+                                                ->helperText(fn (Get $get) => AddressResource::getHint('address', $get))
                                                 ->label(__('Full Address')),
                                             Forms\Components\Toggle::make('is_suggested')
                                                 ->onIcon('heroicon-s-sparkles')
@@ -362,7 +362,7 @@ class OrderResource extends Resource
                                             ->translateLabel()
                                             ->required()
                                             ->reactive()
-                                            ->helperText(fn(Get $get) => Property::find($get('property_id'))->helperText ?? '')
+                                            ->helperText(fn (Get $get) => Property::find($get('property_id'))->helperText ?? '')
                                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
                                                 $set('sub_total', ((int)$get('dimensions') ?? 1) * $get('quantity') * Property::find($state)->price);
                                                 $set('unit_price', Property::find($state)->price);
@@ -425,8 +425,8 @@ class OrderResource extends Resource
                                             ->mask(RawJs::make("\$money(\$input)"))
                                             ->suffix('تومان')
                                             ->stripCharacters('.')
-                                            ->mutateStateForValidationUsing(fn($state) => str_replace(',', '', $state))
-                                            ->mutateDehydratedStateUsing(fn($state) => str_replace(',', '', $state)),
+                                            ->mutateStateForValidationUsing(fn ($state) => str_replace(',', '', $state))
+                                            ->mutateDehydratedStateUsing(fn ($state) => str_replace(',', '', $state)),
                                     ])
                                     ->columnSpanFull(),
                                 Forms\Components\Repeater::make('other_items')
@@ -467,8 +467,8 @@ class OrderResource extends Resource
                                                     $set('unit_price', number_format($price));
                                                 }
                                             })
-                                            ->mutateStateForValidationUsing(fn($state) => str_replace(',', '', $state))
-                                            ->mutateDehydratedStateUsing(fn($state) => str_replace(',', '', $state)),
+                                            ->mutateStateForValidationUsing(fn ($state) => str_replace(',', '', $state))
+                                            ->mutateDehydratedStateUsing(fn ($state) => str_replace(',', '', $state)),
                                         Forms\Components\TextInput::make('sub_total')
                                             ->label(__("Sub Total Price"))
                                             ->readOnly()
@@ -480,8 +480,8 @@ class OrderResource extends Resource
                                             ->mask(RawJs::make("\$money(\$input)"))
                                             ->suffix('تومان')
                                             ->stripCharacters('.')
-                                            ->mutateStateForValidationUsing(fn($state) => str_replace(',', '', $state))
-                                            ->mutateDehydratedStateUsing(fn($state) => str_replace(',', '', $state)),
+                                            ->mutateStateForValidationUsing(fn ($state) => str_replace(',', '', $state))
+                                            ->mutateDehydratedStateUsing(fn ($state) => str_replace(',', '', $state)),
 
                                     ])
                                     ->columnSpanFull(),
@@ -511,7 +511,7 @@ class OrderResource extends Resource
                                     ->required(),
                                 Forms\Components\Fieldset::make('تنظیم ')
                                     ->visible(
-                                        fn(Get $get): bool => OrderStatusModel::where('id', intval($get('status_id')))->value('has_time') == true
+                                        fn (Get $get): bool => OrderStatusModel::where('id', intval($get('status_id')))->value('has_time') == true
                                     )
                                     ->schema([
                                         Forms\Components\DatePicker::make('reservation_date')
@@ -540,11 +540,11 @@ class OrderResource extends Resource
                         Forms\Components\Section::make('قیمت کل')
                             ->schema([
                                 Forms\Components\Hidden::make('total')
-                                    ->mutateDehydratedStateUsing(fn(Get $get) => self::calculateTotal($get)),
+                                    ->mutateDehydratedStateUsing(fn (Get $get) => self::calculateTotal($get)),
                                 Forms\Components\Placeholder::make('order_total')
                                     ->label(__('Order Total'))
                                     ->reactive()
-                                    ->content(fn(Get $get): ?string => number_format(self::calculateTotal($get), 0) . ' تومان')
+                                    ->content(fn (Get $get): ?string => number_format(self::calculateTotal($get), 0) . ' تومان')
                             ])
                     ])
             ])->columns(3);

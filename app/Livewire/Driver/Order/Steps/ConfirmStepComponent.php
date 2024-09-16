@@ -2,34 +2,39 @@
 
 namespace App\Livewire\Driver\Order\Steps;
 
-use App\Enums\OrderStatus;
-use App\Enums\SmsPattern;
+use App\Events\OrderReceivedByDriver;
 use App\Models\Customer;
+use App\Models\Option;
 use App\Models\Order;
+use App\Models\OrderStatus;
 use App\Models\Property;
 use App\Traits\Sms;
-use Hashids\Hashids;
-use Livewire\Component;
+use Exception;
 use Spatie\LivewireWizard\Components\StepComponent;
 use WireUi\Traits\WireUiActions;
 
 class ConfirmStepComponent extends StepComponent
 {
-    use WireUiActions,Sms;
+    use Sms, WireUiActions;
+
     public Customer $customer;
+
+    public Order $order;
+
     public $tmp_order_items = [];
+
     public $orderItems = [];
+
     public $totalPrice;
 
     public $washing_type;
 
     public function mount()
     {
-        $this->customer = Customer::find((int)$this->state()->customer());
         $this->tmp_order_items = $this->state()->orderItems();
         $this->orderItems = $this->getOrderItems();
         $this->totalPrice = $this->calculateTotal();
-        $this->washing_type = $this->state()->whashingType();
+        $this->washing_type = $this->getWashingTypes();
     }
 
     public function getOrderItems()
@@ -40,7 +45,6 @@ class ConfirmStepComponent extends StepComponent
                 $items->push(Property::find($item['property_id']));
             }
         }
-
         return $items;
     }
 
@@ -51,9 +55,9 @@ class ConfirmStepComponent extends StepComponent
         foreach ($this->getOrderItems() as $item) {
             $dimensions = 1;
             if (isset($detail[$item->id]['dimensions'])) {
-                $dimensions = (int)$detail[$item->id]['dimensions'] ?? 1;
+                $dimensions = (int) $detail[$item->id]['dimensions'] ?? 1;
             }
-            $quantity = (int)$detail[$item->id]['quantity'] ?? 0;
+            $quantity = (int) $detail[$item->id]['quantity'] ?? 0;
             $unitPrice = $item->price;
             $total += $dimensions * $quantity * $unitPrice;
         }
@@ -71,16 +75,28 @@ class ConfirmStepComponent extends StepComponent
             if ($item['property_id']) {
                 $details[$item['property_id']] = [
                     'quantity' => $item['count'],
-                    'dimensions' => $item['dimensions']
+                    'dimensions' => $item['dimensions'],
                 ];
             }
         }
+
         return $details;
+    }
+
+    private function getWashingTypes()
+    {
+        $selected = $this->state()->washingType();
+
+        return Option::whereIn('id', $selected)
+            ->orWhereIn('name', $selected)
+            ->pluck('id')
+            ->toArray();
     }
 
     public function render()
     {
         $orderItems = $this->getOrderItems();
+
         return view('livewire.driver.order.steps.confirm-step-component', [
             'customer' => $this->customer,
             'orderItems' => $orderItems,
@@ -92,47 +108,63 @@ class ConfirmStepComponent extends StepComponent
 
     public function submit()
     {
-        $this->submitOrder();
+        $this->updateOrder();
+        event(new OrderReceivedByDriver($this->order));
+        $this->dispatch('closeModal');
     }
 
-    public function submitOrder()
+    private function updateOrder()
     {
-        $customer = Customer::find((int)$this->state()->customer());
-        $orderItems = $this->getOrderItems();
-        $washing_type = $this->state()->whashingType();
-
         try {
-            $order = Order::create([
-                'customer_id' => $this->customer->id,
+            $orderItems = $this->getOrderItems();
+            $this->order->update([
                 'total' => $this->totalPrice,
                 'options' => $this->washing_type,
-                'driver_id' => auth('driver')->user()->id,
-                'status' => OrderStatus::IN_WAITING_LIST //TODO: check Again
             ]);
+            $this->order->updateOrderStatus(OrderStatus::CARPETS_RECEIVED);
+            $this->updateOrderItems();
             foreach ($this->tmp_order_items as $item) {
-                $property = $orderItems->firstWhere("id",$item['property_id']);
-                $dimensions = (int)$item['dimensions'] ?? 1;
-                $order->items()->create([
+                $property = $orderItems->firstWhere('id', $item['property_id']);
+                $dimensions = (int) $item['dimensions'] ?? 1;
+                $this->order->items()->update([
                     'property_id' => $property->id,
                     'dimensions' => $dimensions,
-                    'quantity' => (int)$item['count'],
+                    'quantity' => (int) $item['count'],
                     'unit_price' => $property->price,
-                    'sub_total' => (int)$item['count'] * $dimensions * $property->price,
+                    'sub_total' => (int) $item['count'] * $dimensions * $property->price,
                 ]);
             }
-
-
-            try {
-                $hashids = new Hashids('',6);
-                $hashedID = $hashids->encode($this->customer->id);
-                $this->sendPattern($this->customer->phone,SmsPattern::SET_LOCATION,array($this->customer->name,$hashedID));
-            } catch (\Exception $e) {
-                info($e->getMessage());
-            }
-
-            return redirect()->route('driver.panel.orders');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             dd($e->getMessage());
+        }
+    }
+
+    public function getWashingTypeLabel()
+    {
+        return Option::WhereIn('id', $this->washing_type)
+            ->pluck('name')
+            ->toArray();
+    }
+
+    public function updateOrderItems()
+    {
+        $newPropertyIds = collect($this->tmp_order_items)->pluck('property_id')->toArray();
+
+        $this->order->items()->whereNotIn('property_id', $newPropertyIds)->delete();
+
+        foreach ($this->tmp_order_items as $item) {
+            $orderItem = $this->order->items()->firstOrNew(['property_id' => $item['property_id']]);
+
+            $dimensions = (int) $item['dimensions'] ?? 1;
+
+            $orderItem->fill([
+                'dimensions' => $dimensions,
+                'quantity' => (int) $item['count'],
+                'unit_price' => $orderItem->property->price ?? $item['price'], // اگر property به عنوان رابطه وجود ندارد
+                'sub_total' => (int) $item['count'] * $dimensions * ($orderItem->property->price ?? $item['price']),
+            ]);
+
+            $orderItem->save();
         }
     }
 
@@ -149,13 +181,12 @@ class ConfirmStepComponent extends StepComponent
     public function stepInfo(): array
     {
         return [
-            'label' => __("Confirm Order"),
+            'label' => __('Confirm Order'),
             'icon' => 'check-badge',
         ];
     }
 
     public function successNotification(): void
-
     {
 
         $this->notification()->send([
@@ -167,6 +198,5 @@ class ConfirmStepComponent extends StepComponent
             'description' => 'This is a description.',
 
         ]);
-
     }
 }
