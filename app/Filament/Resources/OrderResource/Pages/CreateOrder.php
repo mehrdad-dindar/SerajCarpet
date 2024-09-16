@@ -23,7 +23,7 @@ class CreateOrder extends CreateRecord
         try {
             $hashids = new Hashids('', 6);
             $hashedID = $hashids->encode($custumer->id);
-            SendSmsJob::dispatch($custumer->phone, SmsPattern::SET_LOCATION, array($custumer->name,$hashedID))
+            SendSmsJob::dispatch($custumer->phone, SmsPattern::SET_LOCATION, array($custumer->name,$hashedID));
         } catch (\Exception $e) {
             info($e->getMessage());
         }
