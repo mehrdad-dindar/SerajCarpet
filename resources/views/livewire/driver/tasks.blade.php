@@ -164,7 +164,11 @@
         // بررسی پشتیبانی از Geolocation API و مشاهده موقعیت زنده راننده
         if (navigator.geolocation) {
             navigator.geolocation.watchPosition(function (position) {
-                Livewire.dispatch('updateLocation', position.coords.latitude, position.coords.longitude);
+                console.log(position);
+                Livewire.dispatch('updateLocation', {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude
+                });
                 updateDriverLocation(position);
             }, function (error) {
                 console.error(error);

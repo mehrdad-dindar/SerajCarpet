@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use function Laravel\Prompts\error;
 
@@ -97,12 +98,12 @@ class Tasks extends Component
             ->first();
     }
 
+    #[On('updateLocation')]
     public function updateLocation($latitude, $longitude)
     {
         auth('driver')->user()->locations()->updateOrCreate(
-            ['driver_id' => auth()->id()],
+            ['driver_id' => auth("driver")->id()],
             ['latitude' => $latitude, 'longitude' => $longitude]
         );
     }
-
 }
