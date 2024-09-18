@@ -78,7 +78,7 @@ class AddressResource extends Resource
                                     ->translateLabel()
                                     ->content(fn ($record) => $record->municipality_zone.' / '.$record->neighbourhood),
                                 Forms\Components\Placeholder::make('fullـaddress')
-                                    ->label(__("Full Address"))
+                                    ->label(__('Full Address'))
                                     ->translateLabel()
                                     ->content(function ($record) {
                                         $address = [
@@ -95,10 +95,11 @@ class AddressResource extends Resource
                                         ->translateLabel()
                                         ->icon('heroicon-o-arrow-top-right-on-square')
                                         ->url(function (Model $record): string {
-                                            $lat = $record->latitude;
-                                            $lng = $record->longitude;
-
-                                            return "maps:?saddr=Current Location&daddr={$lat},{$lng}";
+                                            return sprintf(
+                                                'https://nshn.ir/?lat=%s&lng=%s',
+                                                $record->latitude,
+                                                $record->longitude
+                                            );
                                         }),
                                 ]),
                             ]),

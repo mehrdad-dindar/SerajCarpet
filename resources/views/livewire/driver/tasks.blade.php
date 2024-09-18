@@ -28,6 +28,8 @@
                                                x-on:click="$openModal('orderWizardModal')"
                                                :key="$order->id"
                                                wire:click="showOrderWizard({{ $order->id }})"/>
+                            <x-srj-mini-button icon="pencil-square" rounded warning class="bg-gradient-orange"
+                                               wire:click="getDirections({{$order}})" />
                         </div>
                     </div>
                     <span class="text-muted text-xs">{{$order->address->address}}</span>
