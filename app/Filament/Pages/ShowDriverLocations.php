@@ -9,7 +9,9 @@ class ShowDriverLocations extends Page
 {
 
     protected static ?string $navigationIcon = 'heroicon-o-map';
+    protected static ?string $activeNavigationIcon = 'heroicon-s-map';
     protected static string $view = 'filament.pages.show-driver-locations';
+    protected static ?string $navigationLabel = "نمایش رانندگان روی نقشه";
 
     public function getDriverLocations()
     {
