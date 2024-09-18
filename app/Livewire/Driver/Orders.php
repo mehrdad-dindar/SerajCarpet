@@ -14,8 +14,6 @@ use Livewire\WithPagination;
 class Orders extends Component
 {
     public Collection $routeTypes;
-    use WithPagination;
-
     public function mount()
     {
         $this->routeTypes = OptimizedRoute::getRouteTypes();
