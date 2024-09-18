@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Hashids\Hashids;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -65,5 +66,11 @@ class Customer extends Authenticatable
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class, 'customer_id');
+    }
+
+    public function getHashedId(): string
+    {
+        $hashids = new Hashids('', 6);
+        return $hashids->encode($this->id);
     }
 }
