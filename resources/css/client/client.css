@@ -7,6 +7,10 @@
     direction: ltr;
 }
 
+.z-30 {
+    z-index: 401;
+}
+
 .icon-margin svg{
     @apply mr-0 me-3;
 }
