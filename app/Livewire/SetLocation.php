@@ -10,36 +10,38 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Title("ثبت موقعیت مکانی")]
+#[Title('ثبت موقعیت مکانی')]
 class SetLocation extends Component
 {
-    use Neshan;
     use LivewireAlert;
+    use Neshan;
 
-    public $id;
     public $latitude;
+
     public $longitude;
+
+    public Customer $customer;
+
     protected $listeners = [
         'updateLocation' => 'updateLocation',
     ];
 
     public function mount($id)
     {
-        $this->id = $id;
+        $this->getCustomer($id);
     }
 
-    #[Layout("layouts.map")]
-    public function render()
+    private function getCustomer($id)
     {
         $hashid = new Hashids('', 6);
-        $customerID = $hashid->decode($this->id)[0];
-        $customer = Customer::findOrFail($customerID);
+        $customerID = $hashid->decode($id)[0];
+        $this->customer = Customer::findOrFail($customerID);
+    }
 
-        return view('livewire.set-location')
-            ->with([
-                'customer' => $customer,
-                'hashid' => $this->id,
-            ]);
+    #[Layout('layouts.map')]
+    public function render()
+    {
+        return view('livewire.set-location');
     }
 
     public function updateLocation($latitude, $longitude)
@@ -50,15 +52,13 @@ class SetLocation extends Component
 
     public function submit()
     {
-        $hashid = new Hashids('', 6);
-        $customerID = $hashid->decode($this->id)[0];
-        $customer = Customer::findOrFail($customerID);
+
         $addressData = $this->reverseGeocoding($this->latitude, $this->longitude)->getData();
 
         if ($addressData->status == 'OK') {
-            $customer->addresses()->update(['is_active' => false]);
+            $this->customer->addresses()->update(['is_active' => false]);
 
-            $address = $customer->addresses()->create([
+            $address = $this->customer->addresses()->create([
                 'state' => $addressData->state,
                 'city' => $addressData->city,
                 'address' => $addressData->formatted_address,
@@ -70,17 +70,20 @@ class SetLocation extends Component
                 'is_suggested' => true,
             ]);
             // get latest order of this customer
-            $order = $customer->orders()->latest()->firstOrFail();
-            if ($order){
+            $order = $this->customer->orders()->latest()->firstOrFail();
+            if ($order) {
                 $order->address()->associate($address);
                 $order->save();
-
             }
 
-            $this->alert('success', __("Your location has been successfully registered \nThe next steps will be informed via SMS"),[
-                'position' => 'center',
-                'timer' => 5000,
-            ]);
+            $this->alert(
+                'success',
+                __("Your location has been successfully registered \nThe next steps will be informed via SMS"),
+                [
+                    'position' => 'center',
+                    'timer' => 5000,
+                ]
+            );
         }
     }
 }
