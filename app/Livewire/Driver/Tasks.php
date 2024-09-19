@@ -24,7 +24,6 @@ class Tasks extends Component
     public $selectedOrder = null;
     public $opRoute;
     public $orders;
-    protected $listeners = ['closeModal'];
 
     public function mount($status_id): void
     {
@@ -73,6 +72,7 @@ class Tasks extends Component
         );
     }
 
+    #[On("closeModal")]
     public function closeModal()
     {
         $this->alert('success', 'Basic Alert');
@@ -119,8 +119,8 @@ class Tasks extends Component
         return redirect()->away($url);
     }
 
-    #[On('updateLocation')]
-    public function updateLocation($latitude, $longitude)
+    #[On('updateDriverLocation')]
+    public function updateDriverLocation($latitude, $longitude)
     {
         auth('driver')->user()->locations()->updateOrCreate(
             ['driver_id' => auth("driver")->id()],

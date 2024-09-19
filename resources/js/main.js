@@ -6,7 +6,6 @@ import "../css/client/client.css";
 // window.Alpine = Alpine
 
 // Alpine.start()
-console.log(1);
 
 import '@neshan-maps-platform/mapbox-gl/dist/NeshanMapboxGl.css';
 import nmp_mapboxgl from '@neshan-maps-platform/mapbox-gl';
