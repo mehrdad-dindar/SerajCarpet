@@ -17,7 +17,7 @@ use function Laravel\Prompts\error;
 
 class Tasks extends Component
 {
-    use Neshan,LivewireAlert;
+    use Neshan, LivewireAlert;
 
     public $points = [];
     public OrderStatus $routeStatus;
@@ -36,24 +36,16 @@ class Tasks extends Component
         $this->dispatch('pointsUpdated', $this->points);
     }
 
-    public function closeModal()
+    private function getRouteType($status_id)
     {
-        $this->alert('success', 'Basic Alert');
+        $this->routeStatus = OrderStatus::findOrFail($status_id);
     }
 
-    #[Layout("driver.layouts.map")]
-    public function render()
+    private function getDriverRoute()
     {
-        return view('livewire.driver.tasks');
-    }
-    public function goToIndex()
-    {
-        return redirect()->to(route("driver.panel.index"));
-    }
-
-    public function makeCall($phoneNumber): void
-    {
-        $this->dispatch('callInitiated', number: intval($phoneNumber));
+        return auth('driver')->user()->optimizedRoutes()
+            ->where('order_status_id', $this->routeStatus->id)
+            ->first();
     }
 
     private function getOrders(): void
@@ -81,21 +73,50 @@ class Tasks extends Component
         );
     }
 
+    public function closeModal()
+    {
+        $this->alert('success', 'Basic Alert');
+    }
+
+    #[Layout("driver.layouts.map")]
+    public function render()
+    {
+        return view('livewire.driver.tasks');
+    }
+
+    public function goToIndex()
+    {
+        return redirect()->to(route("driver.panel.index"));
+    }
+
+    public function makeCall($phoneNumber): void
+    {
+        $this->dispatch('callInitiated', number: intval($phoneNumber));
+    }
+
     public function showOrderWizard($orderId): void
     {
         $this->selectedOrder = $this->orders->firstWhere('id', $orderId);
     }
 
-    private function getRouteType($status_id)
+    public function getDirections(Order $order)
     {
-        $this->routeStatus = OrderStatus::findOrFail($status_id);
-    }
+        $origin = [
+            35.699756,
+            51.338076
+        ];
+        $destination = [
+            $order->address->latitude,
+            $order->address->longitude
+        ];
 
-    private function getDriverRoute()
-    {
-        return auth('driver')->user()->optimizedRoutes()
-            ->where('order_status_id', $this->routeStatus->id)
-            ->first();
+        $url = sprintf(
+            "https://nshn.ir?origin=%s&destination=%s&vehicle=d",
+            implode(',', $origin),
+            implode(',', $destination)
+        );
+
+        return redirect()->away($url);
     }
 
     #[On('updateLocation')]

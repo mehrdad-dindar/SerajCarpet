@@ -8,14 +8,19 @@
     <title>Set Your Location</title>
     @vite(['resources/css/app.css','resources/js/app.js'])
     @livewireStyles
-    <wireui:scripts />
-    <x-livewire-alert::scripts />
+    <wireui:scripts/>
+    <link rel="stylesheet" href="{{ asset("css/neshansdk-mapbox.css") }}"/>
+    <link rel="stylesheet" href="{{ asset("css/driver.css") }}"/>
+    {{--    <x-livewire-alert::scripts />--}}
 </head>
 <body>
 {{$slot}}
 @livewireScripts
-<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+{{--<x-livewire-alert::scripts />--}}
+<script src="{{ asset("js/neshansdk-mapbox.js") }}"></script>
+<script src="{{ asset("js/driver.js.iife.js") }}"></script>
+<script src="{{ asset("js/sweetalert2.all.min.js") }}"></script>
 <x-livewire-alert::scripts />
+@stack('scripts')
 </body>
 </html>

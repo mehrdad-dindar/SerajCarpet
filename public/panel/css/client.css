@@ -1168,9 +1168,6 @@ h6 {
 .h-screen {
   height: 100vh;
 }
-.max-h-24 {
-  max-height: 6rem;
-}
 .max-h-40 {
   max-height: 10rem;
 }
@@ -2686,6 +2683,9 @@ h6 {
 .bg-gradient-lime {
   background-image: linear-gradient(310deg,#17ad37,#98ec2d);
 }
+.bg-gradient-orange {
+  background-image: linear-gradient(310deg,#f53939,#fbcf33);
+}
 .bg-gradient-red {
   background-image: linear-gradient(310deg,#ea0606,#ff667c);
 }
@@ -3045,6 +3045,10 @@ h6 {
 }
 .font-sans {
   font-family: Open Sans;
+}
+.\!text-base {
+  font-size: 1rem !important;
+  line-height: 1.5rem !important;
 }
 .text-2xl {
   font-size: 1.5rem;
@@ -3908,8 +3912,27 @@ input[type="number"].appearance-number-none {
   flex-wrap: inherit;
 }
 
+@font-face {
+    font-family: IRANSansX;
+    font-style: normal;
+    font-weight: bold;
+    src: url('../../fonts/woff/IRANSansX-Bold.woff') format('woff'),
+    url('../../fonts/woff2/IRANSansX-Bold.woff2') format('woff2');
+}
+@font-face {
+    font-family: IRANSansX;
+    font-style: normal;
+    font-weight: normal;
+    src: url('../../fonts/woff/IRANSansX-Regular.woff') format('woff'),
+    url('../../fonts/woff2/IRANSansX-Regular.woff2') format('woff2');
+}
+
 .ltr {
     direction: ltr;
+}
+
+.z-30 {
+    z-index: 401;
 }
 
 .icon-margin svg {
@@ -4142,6 +4165,12 @@ input[type="number"].appearance-number-none {
   content: var(--tw-content);
 }
 
+.target\:shadow-sm:target {
+  --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
 .checked\:translate-x-3:checked {
   --tw-translate-x: 0.75rem;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
@@ -4249,6 +4278,14 @@ input[type="number"].appearance-number-none {
   --tw-scale-x: 1.25;
   --tw-scale-y: 1.25;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.hover\:cursor-not-allowed:hover {
+  cursor: not-allowed;
+}
+
+.hover\:cursor-pointer:hover {
+  cursor: pointer;
 }
 
 .hover\:rounded-lg:hover {

@@ -7,80 +7,93 @@ use App\Traits\Neshan;
 use Hashids\Hashids;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use function Laravel\Prompts\warning;
 
-#[Title("ثبت موقعیت مکانی")]
+#[Title('ثبت موقعیت مکانی')]
 class SetLocation extends Component
 {
-    use Neshan;
     use LivewireAlert;
+    use Neshan;
 
-    public $id;
     public $latitude;
+
     public $longitude;
-    protected $listeners = [
-        'updateLocation' => 'updateLocation',
-    ];
+
+    public Customer $customer;
 
     public function mount($id)
     {
-        $this->id = $id;
+        $this->getCustomer($id);
     }
 
-    #[Layout("layouts.map")]
-    public function render()
+    private function getCustomer($id)
     {
         $hashid = new Hashids('', 6);
-        $customerID = $hashid->decode($this->id)[0];
-        $customer = Customer::findOrFail($customerID);
-
-        return view('livewire.set-location')
-            ->with([
-                'customer' => $customer,
-                'hashid' => $this->id,
-            ]);
+        $customerID = $hashid->decode($id)[0];
+        $this->customer = Customer::findOrFail($customerID);
     }
 
+    #[Layout('layouts.map')]
+    public function render()
+    {
+        return view('livewire.set-location');
+    }
+
+    #[On("updateCustomerLocation")]
     public function updateLocation($latitude, $longitude)
     {
         $this->latitude = $latitude;
         $this->longitude = $longitude;
+        $this->submit();
     }
 
     public function submit()
     {
-        $hashid = new Hashids('', 6);
-        $customerID = $hashid->decode($this->id)[0];
-        $customer = Customer::findOrFail($customerID);
         $addressData = $this->reverseGeocoding($this->latitude, $this->longitude)->getData();
+        if ($addressData && $addressData->status === 'OK') {
+            $this->customer->addresses()->update(['is_active' => false]);
 
-        if ($addressData->status == 'OK') {
-            $customer->addresses()->update(['is_active' => false]);
-
-            $address = $customer->addresses()->create([
+            $address = $this->customer->addresses()->updateOrCreate(
+                [
+                'latitude' => $this->latitude,
+                'longitude' => $this->longitude,
+                ],
+                [
                 'state' => $addressData->state,
                 'city' => $addressData->city,
                 'address' => $addressData->formatted_address,
                 'municipality_zone' => $addressData->municipality_zone,
                 'neighbourhood' => $addressData->neighbourhood,
-                'latitude' => $this->latitude,
-                'longitude' => $this->longitude,
                 'is_active' => true,
                 'is_suggested' => true,
-            ]);
+                ]
+            );
             // get latest order of this customer
-            $order = $customer->orders()->latest()->firstOrFail();
-            if ($order){
+            $order = $this->customer->orders()->latest()->first();
+            if ($order) {
                 $order->address()->associate($address);
                 $order->save();
-
+                $this->alert(
+                    'success',
+                    __("Your location has been successfully registered \nThe next steps will be informed via SMS"),
+                    [
+                        'position' => 'center',
+                        'timer' => 5000,
+                    ]
+                );
+            } else {
+                $this->alert(
+                    'error',
+                    __("Unfortunately, your order was not found. Please contact support"),
+                    [
+                        'position' => 'center',
+                        'timer' => 5000,
+                    ]
+                );
             }
-
-            $this->alert('success', __("Your location has been successfully registered \nThe next steps will be informed via SMS"),[
-                'position' => 'center',
-                'timer' => 5000,
-            ]);
         }
     }
 }

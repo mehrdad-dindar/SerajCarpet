@@ -43,7 +43,7 @@ Route::get('test', function () {
     //        ->sendToDatabase($recipient);
     //    dd("sent");
     $hashids = new Hashids('', 6);
-    $hashedID = $hashids->encode(51);
+    $hashedID = $hashids->encode(1);
     return '<a href="'.\route("set-location", $hashedID).'">hi</a>';
 });
 Route::get('/set-location/{id}', SetLocation::class)->name('set-location');

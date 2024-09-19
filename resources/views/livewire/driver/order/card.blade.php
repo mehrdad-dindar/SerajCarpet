@@ -1,4 +1,4 @@
-<div class="w-full max-w-full md:flex-none xl:mb-0" wire:click="getRoute">
+<div class="w-full max-w-full md:flex-none xl:mb-0 @if($ordersCount) hover:cursor-pointer @else hover:cursor-not-allowed @endif" wire:click="getRoute">
     <div class="relative flex justify-between items-center min-w-0 break-words bg-white border-0 shadow-md rounded-2xl bg-clip-border p-4 target:shadow-sm">
         <div class="flex gap-2 items-center">
             @switch($type->name)

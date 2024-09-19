@@ -1,8 +1,4 @@
 <div class="font-iranSans">
-    @section('head')
-        <link rel="stylesheet" href="https://static.neshan.org/sdk/leaflet/v1.9.4/neshan-sdk/v1.0.8/index.css"/>
-        <script src="https://static.neshan.org/sdk/leaflet/v1.9.4/neshan-sdk/v1.0.8/index.js"></script>
-    @endsection
     <div id="driver-map" class="absolute inset-0 z-0"></div>
     <x-srj-mini-button icon="arrow-left" rounded fuchsia class="absolute left-5 top-5 z-10 bg-gradient-fuchsia"
                        wire:click="goToIndex"/>
@@ -28,6 +24,8 @@
                                                x-on:click="$openModal('orderWizardModal')"
                                                :key="$order->id"
                                                wire:click="showOrderWizard({{ $order->id }})"/>
+                            <x-srj-mini-button icon="pencil-square" rounded warning class="bg-gradient-orange"
+                                               wire:click="getDirections({{$order}})" />
                         </div>
                     </div>
                     <span class="text-muted text-xs">{{$order->address->address}}</span>
