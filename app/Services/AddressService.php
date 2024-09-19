@@ -36,7 +36,7 @@ class AddressService
             $address->state,
             $address->city,
             $address->address,
-            $address->no,
+            $address->no ? 'پلاک ' . $address->no : null,
             $address->floor ? 'طبقه ' . $address->floor : null,
             $address->unit ? 'واحد ' . $address->unit : null,
         ];

@@ -10,6 +10,9 @@
 .z-30 {
     z-index: 401;
 }
+.leaflet-container {
+    @apply !font-iranSans;
+}
 
 .icon-margin svg{
     @apply mr-0 me-3;
