@@ -8,6 +8,7 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/css/client/client.css',
                 'resources/js/app.js',
+                'resources/js/main.js',
             ],
             refresh: [
                 ...refreshPaths,

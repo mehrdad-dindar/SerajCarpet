@@ -7,8 +7,10 @@ use App\Traits\Neshan;
 use Hashids\Hashids;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use function Laravel\Prompts\warning;
 
 #[Title('ثبت موقعیت مکانی')]
 class SetLocation extends Component
@@ -21,10 +23,6 @@ class SetLocation extends Component
     public $longitude;
 
     public Customer $customer;
-
-    protected $listeners = [
-        'updateLocation' => 'updateLocation',
-    ];
 
     public function mount($id)
     {
@@ -44,46 +42,58 @@ class SetLocation extends Component
         return view('livewire.set-location');
     }
 
+    #[On("updateCustomerLocation")]
     public function updateLocation($latitude, $longitude)
     {
         $this->latitude = $latitude;
         $this->longitude = $longitude;
+        $this->submit();
     }
 
     public function submit()
     {
-
         $addressData = $this->reverseGeocoding($this->latitude, $this->longitude)->getData();
-
-        if ($addressData->status == 'OK') {
+        if ($addressData && $addressData->status === 'OK') {
             $this->customer->addresses()->update(['is_active' => false]);
 
-            $address = $this->customer->addresses()->create([
+            $address = $this->customer->addresses()->updateOrCreate(
+                [
+                'latitude' => $this->latitude,
+                'longitude' => $this->longitude,
+                ],
+                [
                 'state' => $addressData->state,
                 'city' => $addressData->city,
                 'address' => $addressData->formatted_address,
                 'municipality_zone' => $addressData->municipality_zone,
                 'neighbourhood' => $addressData->neighbourhood,
-                'latitude' => $this->latitude,
-                'longitude' => $this->longitude,
                 'is_active' => true,
                 'is_suggested' => true,
-            ]);
+                ]
+            );
             // get latest order of this customer
-            $order = $this->customer->orders()->latest()->firstOrFail();
+            $order = $this->customer->orders()->latest()->first();
             if ($order) {
                 $order->address()->associate($address);
                 $order->save();
+                $this->alert(
+                    'success',
+                    __("Your location has been successfully registered \nThe next steps will be informed via SMS"),
+                    [
+                        'position' => 'center',
+                        'timer' => 5000,
+                    ]
+                );
+            } else {
+                $this->alert(
+                    'error',
+                    __("Unfortunately, your order was not found. Please contact support"),
+                    [
+                        'position' => 'center',
+                        'timer' => 5000,
+                    ]
+                );
             }
-
-            $this->alert(
-                'success',
-                __("Your location has been successfully registered \nThe next steps will be informed via SMS"),
-                [
-                    'position' => 'center',
-                    'timer' => 5000,
-                ]
-            );
         }
     }
 }
