@@ -1,11 +1,14 @@
-<div wire:ignore id="driver-map" class="relative w-[100vw] h-[100vh]">
+<div class="relative">
+    @section('headerScripts')
+        <link rel="stylesheet" href="{{ asset("css/driver.css") }}"/>
+        <script src="{{ asset("js/driver.js.iife.js") }}"></script>
+    @endsection
+    <div wire:ignore id="driver-map" class="relative w-[100vw] h-[100vh]"></div>
         <x-srj-mini-button icon="arrow-left" rounded fuchsia class="absolute left-5 top-5 z-30 bg-gradient-fuchsia"
                            wire:click="goToIndex"/>
-        <x-srj-button id="getLocationButton" label="Salam" fuchsia
-                      class="absolute left-1/2 top-5 z-30 bg-gradient-fuchsia"/>
         <div class="absolute bottom-16 inset-x-0 z-30 flex justify-center">
-            <ul class="max-h-60 overflow-y-scroll w-4/5">
-                @foreach($orders as $order)
+            <ul class="max-h-60 overflow-y-scroll w-4/5" id="orders-container">
+                @foreach($orders as $key => $order)
                     <li class="bg-white rounded-xl p-4 mb-2 relative">
                         <div class="flex justify-between items-center">
                             <div>
@@ -15,16 +18,22 @@
                                 </span>
 
                             </div>
-                            <div>
+                            <div class="flex gap-2">
+                                <div @if($key === 0) id="phone" @endif>
                                 <x-srj-mini-button icon="phone" rounded lime class="bg-gradient-lime"
                                                    wire:click="makeCall('{{ $order->customer->phone }}')"/>
+                                </div>
+                                <div @if($key === 0) id="order-wizard" @endif>
                                 <x-srj-mini-button icon="pencil-square" rounded info class="bg-gradient-cyan"
                                                    show-step="customer-info"
                                                    x-on:click="$openModal('orderWizardModal')"
                                                    :key="$order->id"
                                                    wire:click="showOrderWizard({{ $order->id }})"/>
-                                <x-srj-mini-button icon="pencil-square" rounded warning class="bg-gradient-orange"
+                                </div>
+                                <div @if($key === 0) id="neshan" @endif>
+                                <x-srj-mini-button icon="map-pin" rounded warning class="bg-gradient-orange"
                                                    wire:click="getDirections({{$order}})" />
+                                </div>
                             </div>
                         </div>
                         <span class="text-muted text-xs">{{$order->address->getFullAddress()}}</span>
@@ -39,7 +48,6 @@
                 </x-srj-modal>
             </ul>
         </div>
-    @script
     <script type="module">
         document.addEventListener('livewire:init', function () {
             Livewire.on('callInitiated', function (data) {
@@ -49,13 +57,70 @@
                 $closeModal('orderWizardModal')
             });
         });
+        document.addEventListener('DOMContentLoaded', function () {
 
-        var map = L.map('driver-map', {
+            const driver = window.driver.js.driver;
+            const driverObj = driver({
+                nextBtnText: 'بعدی',
+                prevBtnText: 'قبلی',
+                doneBtnText: 'حله',
+                showProgress: true,
+                steps: [
+                    {
+                        popover: {
+                            title: 'سلام راننده 👋',
+                            description: 'به صفحه مسیرها و سفارشات خوش آمدید. اینجا مسیرهای شما برای سفارشات پخشی / جمعی نمایش داده می‌شود.'
+                        }
+                    },
+                    {
+                        element: '#driver-map',
+                        popover: {
+                            title: 'نقشه مسیرها',
+                            description: 'این نقشه تمامی مسیرها به همراه مقصدهای شما را نمایش می‌دهد. ما برای این مسیر یابی از شیوه‌ای بسیار نوین استفاده کردیم تا بهینه ترین مسیر برای شما فراهم شود'
+                        }
+                    },
+                    {
+                        element: '#orders-container',
+                        popover: {
+                            title: 'لیست سفارشات هر مقصد',
+                            description: 'هر مقصد دارای لیستی از سفارشات است که در این بخش نمایش داده می‌شود. شما می‌توانید جزئیات هر سفارش را مشاهده کنید.'
+                        }
+                    },
+                    {
+                        element: '#phone',
+                        popover: {
+                            title: 'تماس با مشتری',
+                            description: 'برای هماهنگی بیشتر یا سوالات دیگر، می‌توانید با مشتری از طریق این دکمه تماس بگیرید.'
+                        }
+                    },
+                    {
+                        element: '#order-wizard',
+                        popover: {
+                            title: 'ثبت تحویل سفارش',
+                            description: 'پس از تحویل سفارش در مقصد، با کلیک روی این دکمه و فرم نمایش داده شده تحویل را ثبت کنید.'
+                        }
+                    },
+                    {
+                        element: '#neshan',
+                        popover: {
+                            title: 'مسیریابی با نرم افزار نشان',
+                            description: 'برای مسیریابی تا مقصد هر سفارش با استفاده از مسیریاب نشان میتوانید از این دکمه استفاده کنید.'
+                        }
+                    }
+                ]
+            });
+
+            driverObj.drive();
+        });
+    </script>
+    @script
+    <script type="module">
+        const map = L.map('driver-map', {
             zoomControl: false
         }).setView([35.6892, 51.3890], 12); // مرکز نقشه روی تهران
 
         // http://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}
-        L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=KLoLXEB9eFv60ELGhKUn', {
+        L.tileLayer('http://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
             maxZoom: 18,
             tileSize: 512,
             zoomOffset: -1,
@@ -158,6 +223,8 @@
         } else {
             alert("Geolocation is not supported by this browser.");
         }
+
+
     </script>
     @endscript
 </div>
