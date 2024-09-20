@@ -60,7 +60,6 @@
         document.addEventListener('DOMContentLoaded', function () {
 
             const driver = window.driver.js.driver;
-            console.log(driver);
             const driverObj = driver({
                 nextBtnText: 'بعدی',
                 prevBtnText: 'قبلی',

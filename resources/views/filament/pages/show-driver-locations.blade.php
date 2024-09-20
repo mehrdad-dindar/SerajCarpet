@@ -8,7 +8,7 @@
                 zoomControl: false
             }).setView([35.6892, 51.3890], 12);
 
-            L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=KLoLXEB9eFv60ELGhKUn	', {
+            L.tileLayer('http://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
                 maxZoom: 18,
                 tileSize: 512,
                 zoomOffset: -1,
