@@ -120,7 +120,7 @@
         }).setView([35.6892, 51.3890], 12); // مرکز نقشه روی تهران
 
         // http://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}
-        L.tileLayer('http://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
+        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             maxZoom: 18,
             tileSize: 512,
             zoomOffset: -1,

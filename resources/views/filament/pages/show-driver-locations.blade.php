@@ -1,6 +1,7 @@
 <x-filament-panels::page>
     <div id="map" style="width: 100%; height: 500px;"></div>
 
+    @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 
@@ -40,4 +41,5 @@
             @endphp
         });
     </script>
+    @endpush
 </x-filament-panels::page>
