@@ -16,7 +16,7 @@
                     minZoom: 2,
                     maxZoom: 21,
                     trackResize: true,
-                    mapKey: 'web.9b720353743c4534a41a4a22df831720',
+                    mapKey: 'web.00dec639aee84334909b52fb87d55b51',
                     poi: false,
                     traffic: false,
                     mapTypeControllerOptions: {
