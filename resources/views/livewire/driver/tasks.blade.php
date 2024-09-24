@@ -37,11 +37,13 @@
                             </div>
                         </div>
                         <span class="text-muted text-xs">{{$order->address->getFullAddress()}}</span>
-                        <x-srj-badge :label="$order->status->getLabel($order->status_id)"
-                                     :class="$order->status->getColor($order->status_id) . ' text-xxs absolute top-0 left-0'"/>
+                        <div class="text-xxs absolute top-0 right-0 left-0 flex items-center justify-between gap-2">
+                            <x-srj-badge :label="verta($order->time_apply_status)->format('H:i')" icon="clock" info/>
+                            <x-srj-badge :label="$order->status->getLabel($order->status_id)" :class="$order->status->getColor($order->status_id)"/>
+                        </div>
                     </li>
                 @endforeach
-                <x-srj-modal title="{{ __('Edit Order') }}" name="orderWizardModal" blur="base">
+                <x-srj-modal title="{{ __('Edit Order') }}" name="orderWizardModal" blur="base" class="XXXX">
                     @if($selectedOrder)
                         <livewire:create-order-wizard show-step="customer-info" :order="$selectedOrder" :key="$selectedOrder->id"/>
                     @endif
