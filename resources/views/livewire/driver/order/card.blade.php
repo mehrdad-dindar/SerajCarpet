@@ -11,7 +11,7 @@
                 @default
                     <x-phosphor.icons::duotone.repeat class="w-5 h-5 me-1"/>
             @endswitch
-            <span class="font-semibold text-sm">{!! $this->typeLabel() !!}</span>
+            <span class="font-semibold text-sm">{!! $type->typeLabel() !!}</span>
         </div>
         @if($ordersCount)
             <x-srj-badge icon="map-pin" outline negative :label="$ordersCount . ' آدرس'" />

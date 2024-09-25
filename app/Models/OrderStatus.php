@@ -35,6 +35,16 @@ class OrderStatus extends Model
         }
     }
 
+    public function typeLabel(): string
+    {
+        return match ($this->name) {
+            OrderStatus::IN_COLLECTIVE_LIST => 'لیست جمعی',
+            OrderStatus::IN_DISTRIBUTION_LIST => 'لیست پخشی',
+            OrderStatus::REVISITING_DRIVER => 'مراجعه مجدد',
+            default => 'وضعیت نامشخص'
+        };
+    }
+
     public function orders()
     {
         return $this->hasMany(Order::class);
