@@ -1,7 +1,7 @@
 <aside
     class="max-w-62.5 ease-nav-brand z-990 fixed inset-y-0 my-4 block w-full flex-wrap items-center justify-between overflow-y-auto rounded-2xl border-0 bg-white p-0 antialiased shadow-none transition-transform duration-200 xl:right-0 mr-4 translate-x-full xl:translate-x-0 xl:bg-transparent">
     <div class="h-19.5">
-        <i class="absolute top-0 right-0 hidden p-4 opacity-50 cursor-pointer fas fa-times text-slate-400 xl:hidden"
+        <i class="absolute top-0 left-0 hidden p-4 opacity-50 cursor-pointer fas fa-times text-slate-400 xl:hidden"
            sidenav-close></i>
         <a class="block px-8 py-6 m-0 text-size-sm whitespace-nowrap text-slate-700"
            href="{{route('driver.panel.index')}}"
