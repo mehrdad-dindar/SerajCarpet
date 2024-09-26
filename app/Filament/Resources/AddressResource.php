@@ -187,6 +187,7 @@ class AddressResource extends Resource
                                 ->helperText(fn (Get $get) => self::getHint('address', $get))
                                 ->label(__('Full Address')),
                             Forms\Components\Toggle::make('is_suggested')
+                                ->translateLabel()
                                 ->onIcon('heroicon-s-sparkles')
                                 ->offIcon('heroicon-o-star')
                                 ->inline(false)

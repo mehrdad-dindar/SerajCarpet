@@ -19,7 +19,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                         ->autofocus()
                         ->required(),
                 ])
-                ->action(function (array $data){
+                ->action(function (array $data) {
                     $recipient = User::find(1);
                     Notification::make()
                         ->title('Saved successfully'.implode(', ', $data))

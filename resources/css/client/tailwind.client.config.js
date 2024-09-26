@@ -1,5 +1,7 @@
 const plugin = require("tailwindcss/plugin");
 const defaultTheme = require("tailwindcss/defaultTheme");
+import preset from '../../../vendor/filament/support/tailwind.config.preset'
+
 
 module.exports = {
     mode: "jit",
@@ -15,8 +17,10 @@ module.exports = {
         "./vendor/wireui/wireui/ts/**/*.ts",
         "./vendor/wireui/wireui/src/WireUi/**/*.php",
         "./vendor/wireui/wireui/src/Components/**/*.php",
+        './vendor/filament/**/*.blade.php',
     ],
     presets: [
+        preset,
         require("./../../../vendor/wireui/wireui/tailwind.config.js")
     ],
     darkMode: "class",
