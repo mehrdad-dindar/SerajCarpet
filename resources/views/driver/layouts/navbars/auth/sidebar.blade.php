@@ -1,7 +1,7 @@
 <aside
     class="max-w-62.5 ease-nav-brand z-990 fixed inset-y-0 my-4 block w-full flex-wrap items-center justify-between overflow-y-auto rounded-2xl border-0 bg-white p-0 antialiased shadow-none transition-transform duration-200 xl:right-0 mr-4 translate-x-full xl:translate-x-0 xl:bg-transparent">
     <div class="h-19.5">
-        <i class="absolute top-0 right-0 hidden p-4 opacity-50 cursor-pointer fas fa-times text-slate-400 xl:hidden"
+        <i class="absolute top-0 left-0 hidden p-4 opacity-50 cursor-pointer fas fa-times text-slate-400 xl:hidden"
            sidenav-close></i>
         <a class="block px-8 py-6 m-0 text-size-sm whitespace-nowrap text-slate-700"
            href="{{route('driver.panel.index')}}"
@@ -99,7 +99,7 @@
             </li>
             <li class="mt-0.5 w-full">
                 <a class="py-2.7 text-size-sm ease-nav-brand my-0 mx-4 flex items-center whitespace-nowrap px-4 transition-colors {{ (Request::is('dashboard/orders') ? 'shadow-soft-xl rounded-lg bg-white font-semibold text-slate-700' : '') }}"
-                   href="{{ route("driver.panel.orders") }}">
+                   href="{{ route("driver.orders") }}">
 
                     <div
                         class="{{ (Request::is('dashboard/orders') ? ' bg-gradient-fuchsia fill-white' : 'fill-slate-800') }} shadow-soft-2xl me-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white bg-center stroke-0 text-center xl:p-2.5">

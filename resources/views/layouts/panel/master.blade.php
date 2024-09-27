@@ -50,6 +50,7 @@
     <!-- Main Styling -->
     <link href="{{ asset('panel/css/styles.css') }}?v=1.0.3" rel="stylesheet"/>
 
+    @filamentStyles
     @vite('resources/css/client/client.css')
 
     @livewireStyles
@@ -60,16 +61,15 @@
 <x-srj-notifications />
 @yield("content")
 
+@vite('resources/js/app.js')
+@filamentScripts
 @livewireScripts
 </body>
-
 <!-- plugin for charts  -->
-<script src="{{ asset('panel/js/plugins/chartjs.min.js') }}" async></script>
+{{--<script src="{{ asset('panel/js/plugins/chartjs.min.js') }}" async></script>--}}
 <!-- plugin for scrollbar  -->
-<script src="{{ asset('panel/js/plugins/perfect-scrollbar.min.js') }}" async></script>
-<!-- github button -->
-<script async defer src="https://buttons.github.io/buttons.js"></script>
+{{--<script src="{{ asset('panel/js/plugins/perfect-scrollbar.min.js') }}" async></script>--}}
 <!-- main script file  -->
-<script src="{{ asset('panel/js/soft-ui-dashboard-tailwind.js') }}?v=1.0.3" async></script>
+{{--<script src="{{ asset('panel/js/soft-ui-dashboard-tailwind.js') }}?v=1.0.3" async></script>--}}
 
 </html>

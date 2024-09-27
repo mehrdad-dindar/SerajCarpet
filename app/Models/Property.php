@@ -45,7 +45,7 @@ class Property extends Model
         $title .= $this->name;
 
         return Attribute::make(
-            get: fn() => $title,
+            get: fn () => $title,
         );
     }
 
@@ -53,7 +53,7 @@ class Property extends Model
     {
         $title =  ' هر ' . __($this->unit) . ' ' . number_format($this->price) . ' تومان';
         return Attribute::make(
-            get: fn() => $title,
+            get: fn () => $title,
         );
     }
 }
