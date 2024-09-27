@@ -4,11 +4,11 @@ namespace App\Livewire\Driver\Order;
 
 use App\Models\Option;
 use App\Models\Order;
+use App\Models\OrderStatus;
 use App\Models\Property;
 use App\Traits\Neshan;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
@@ -27,7 +27,6 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
-use WireUi\Components\Badge\Mini;
 
 class EditOrder extends Component implements HasForms
 {
@@ -40,6 +39,10 @@ class EditOrder extends Component implements HasForms
 
     public function mount(Order $order)
     {
+        $status_ids = [2, 3, 4];
+        if (!in_array($this->order->status_id, $status_ids)) {
+            abort(404);
+        }
         $this->order = $order;
         $this->form->fill($order->toArray());
     }
@@ -416,31 +419,6 @@ BLADE
         };
     }
 
-    private function getFinalAddress(Get $get): string
-    {
-        $address = $this->order->address->getFullAddress();
-
-        if ($get('edit_address')) {
-            $address = $this->getAddressFromState($get);
-        }
-
-        return $address;
-    }
-
-    private function getAddressFromState(Get $get): string
-    {
-        $fullAddress = [
-            $get('state'),
-            $get('city'),
-            $get('address'),
-            $get('no') ? 'پلاک '.$get('no') : null,
-            $get('floor') ? 'طبقه '.$get('floor') : null,
-            $get('unit') ? 'واحد '.$get('unit') : null,
-        ];
-
-        return implode(' - ', array_filter($fullAddress));
-    }
-
     #[Layout('driver.layouts.app')]
     public function render()
     {
@@ -458,7 +436,11 @@ BLADE
     private function updateDataBeforeSaving()
     {
         $data = $this->form->getState();
+
+        $data['status_id'] = OrderStatus::whereName(OrderStatus::CARPETS_RECEIVED)->first()->id;
+
         unset($data['current_location'], $data['edit_address']);
+
         return $data;
     }
 }
