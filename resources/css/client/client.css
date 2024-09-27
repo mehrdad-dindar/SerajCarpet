@@ -27,3 +27,7 @@
 #alert svg {
     @apply me-3 !mr-0;
 }
+
+.mapboxgl-ctrl-group button {
+    @apply !w-12 !h-12;
+}
