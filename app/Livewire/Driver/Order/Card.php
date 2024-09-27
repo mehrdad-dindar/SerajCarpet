@@ -21,21 +21,11 @@ class Card extends Component
         return view('livewire.driver.order.card');
     }
 
-    public function typeLabel(): string
-    {
-        return match ($this->type->name) {
-            OrderStatus::IN_COLLECTIVE_LIST => 'لیست جمعی',
-            OrderStatus::IN_DISTRIBUTION_LIST => 'لیست پخشی',
-            OrderStatus::REVISITING_DRIVER => 'مراجعه مجدد',
-            default => 'وضعیت نامشخص'
-        };
-    }
-
     public function getRoute()
     {
-        if ($this->ordersCount) {
-            return redirect()->route('driver.tasks', $this->type->id);
-        }
+//        if ($this->ordersCount) {
+//            return redirect()->route('driver.tasks', $this->type->id);
+//        }
         return false;
     }
 }

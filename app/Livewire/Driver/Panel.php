@@ -11,11 +11,6 @@ use Livewire\Component;
 #[Title("پیشخوان راننده")]
 class Panel extends Component
 {
-    public Collection $routeTypes;
-    public function mount()
-    {
-        $this->routeTypes = OptimizedRoute::getRouteTypes();
-    }
     #[Layout('driver.layouts.app')]
     public function render()
     {
