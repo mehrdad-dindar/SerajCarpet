@@ -195,16 +195,13 @@ class AddressResource extends Resource
                                 ->default(false)
                                 ->afterStateUpdated(function (Get $get, Set $set, $state) {
                                     if ($state) {
-                                        $latitude = $get('latitude');
-                                        $longitude = $get('longitude');
-                                        if ($latitude && $longitude) {
-                                            $neshan = self::reverseGeocoding($latitude, $longitude)->getData();
-                                            $set('address', $neshan->formatted_address);
-                                            $set('state', $neshan->state);
-                                            $set('city', $neshan->city);
-                                            $set('municipality_zone', $neshan->municipality_zone);
-                                            $set('neighbourhood', $neshan->neighbourhood);
-                                        }
+                                        $neshan = self::getHint(field: null, get: $get, all: true);
+
+                                        $set('address', $neshan->formatted_address);
+                                        $set('state', $neshan->state);
+                                        $set('city', $neshan->city);
+                                        $set('municipality_zone', $neshan->municipality_zone);
+                                        $set('neighbourhood', $neshan->neighbourhood);
                                     }
                                 }),
                             Forms\Components\TextInput::make('no')
@@ -239,7 +236,7 @@ class AddressResource extends Resource
                                 'lat' => 35.699741844984004,
                                 'lng' => 51.33805990219117,
                             ])
-                            ->afterStateUpdated(function (Get $get, Set $set, string|array|null $old, ?array $state): void {
+                            ->afterStateUpdated(function (Get $get, Set $set, $old, $state): void {
                                 $set('latitude', $state['lat']);
                                 $set('longitude', $state['lng']);
                                 if ($get('is_suggested')) {
@@ -254,7 +251,13 @@ class AddressResource extends Resource
                                 }
                             })
                             ->afterStateHydrated(function ($state, $record, Set $set): void {
-                                is_null($record) ?: $set('location', ['lat' => $record->latitude, 'lng' => $record->longitude]);
+                                is_null($record) ?: $set(
+                                    'location',
+                                    [
+                                        'lat' => $record->latitude,
+                                        'lng' => $record->longitude
+                                    ]
+                                );
                             })
                             ->extraStyles([
                                 'min-height: 50vh',
