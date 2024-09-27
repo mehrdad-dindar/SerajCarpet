@@ -3,7 +3,9 @@
 namespace App\Livewire\Driver\Order;
 
 use App\Models\Order;
+use App\Models\OrderStatus as OrderStatusModel;
 use App\Traits\Neshan;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Actions\Action;
@@ -78,6 +80,19 @@ class ListOrders extends Component implements HasForms, HasTable
                     EditAction::make('Edit')
                         ->label(__('Edit Order'))
                         ->url(fn (Order $record) => route('driver.orders.edit', $record)),
+                    Action::make('change_status')
+                        ->translateLabel()
+                        ->icon('heroicon-o-tag')
+                        ->color('danger')
+                        ->action(function (Order $record, array $data): void {
+                            $record->update([
+                                'status_id' => $data['status_id'],
+                            ]);
+                        })
+                        ->form([
+                            Select::make('status_id')
+                                ->options(OrderStatusModel::all()->pluck('label', 'id'))
+                        ]),
                     Action::make('Call')
                         ->icon('heroicon-o-phone-arrow-up-right')
                         ->translateLabel()
