@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Driver\Order;
 
+use App\Events\OrderReceivedByDriver;
 use App\Models\Option;
 use App\Models\Order;
 use App\Models\OrderStatus;
@@ -429,7 +430,7 @@ BLADE
     {
         $this->order->update($this->updateDataBeforeSaving());
         session()->flash('message', 'Order updated successfully!');
-
+        event(new OrderReceivedByDriver($this->order));
         return redirect()->route('driver.orders');
     }
 
