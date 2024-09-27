@@ -94,7 +94,9 @@ class ListOrders extends Component implements HasForms, HasTable
             ])
             ->actions([
                 ActionGroup::make([
-                    EditAction::make('Edit'),
+                    EditAction::make('Edit')
+                        ->label(__('Edit Order'))
+                        ->url(fn (Order $record) => route('driver.orders.edit', $record)),
                     Action::make('Call')
                         ->icon('heroicon-o-phone-arrow-up-right')
                         ->translateLabel()
@@ -429,10 +431,7 @@ class ListOrders extends Component implements HasForms, HasTable
             ])
             ->bulkActions([
                 // ...
-            ])
-            ->checkIfRecordIsSelectableUsing(
-                fn (Order $order): bool => dd($order->status_id !== OrderStatus::CARPETS_RECEIVED),
-            );
+            ]);
     }
 
     public static function getHint(?string $field, Get $get, bool $all = false)

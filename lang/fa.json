@@ -141,10 +141,15 @@
     "To:" : "به:",
     "Changed by:" : "توسط:",
     "At:" : "در:",
+    "Special services" : "خدمات ویژه",
     "Actions" : "عملیات",
+    "Customer information" : "اطلاعات مشتری",
     "Need to edit?" : "نیاز به ویرایش ؟",
     "Check customer information" : "بررسی اطلاعات مشتری",
     "Check or edit customer address" : "بررسی یا ویرایش آدرس مشتری",
+    "Check or edit order items" : "بررسی یا ویرایش موارد سفارش",
+    "Application of ancillary services" : "اعمال خدمات جانبی",
+    "Pre-invoice and order details" : "پیش‌فاکتور و جزئیات سفارش",
     "Driver changed from:" : "تغییر راننده از:",
     "Customer" : "مشتری"
 }
