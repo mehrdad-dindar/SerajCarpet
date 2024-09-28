@@ -16,6 +16,10 @@ return new class extends Migration
             $table->text('body');
             $table->morphs('commentable');
             $table->morphs('commenter');
+            $table->foreignId('parent_id')
+                ->nullable()
+                ->constrained('comments')
+                ->onDelete('cascade');
             $table->timestamps();
         });
     }
