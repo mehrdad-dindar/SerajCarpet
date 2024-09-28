@@ -77,11 +77,15 @@ class User extends Authenticatable implements FilamentUser
         return Attribute::make(
             get: fn (string $value) => verta($value)->format('d F Y - H:i'),
         );
-
     }
 
     public function sms(): MorphMany
     {
         return $this->morphMany(Sms::class, 'smsable');
+    }
+
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commenter');
     }
 }
