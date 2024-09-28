@@ -143,4 +143,9 @@ class Order extends Model
             set: fn ($value) => json_encode($value),
         );
     }
+
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
 }
