@@ -429,7 +429,7 @@ class OrderResource extends Resource
                                             ->mutateDehydratedStateUsing(fn ($state) => str_replace(',', '', $state)),
                                     ])
                                     ->columnSpanFull(),
-                                Forms\Components\Repeater::make('other_items')
+                                Forms\Components\Repeater::make('otherItems')
                                     ->label(__('Other Items'))
                                     ->translateLabel()
                                     ->relationship()
@@ -552,7 +552,7 @@ class OrderResource extends Resource
 
     private static function calculateTotal($data): int
     {
-        $items = array_merge($data('items'), $data('other_items'));
+        $items = array_merge($data('items'), $data('otherItems'));
         $total = 0;
         foreach ($items as $item) {
             $dimensions = 1;
