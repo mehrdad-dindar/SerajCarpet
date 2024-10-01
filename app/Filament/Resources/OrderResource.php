@@ -2,47 +2,48 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\OrderStatus;
 use App\Events\BulkOrderUpdated;
-use App\Filament\Resources\OrderResource\Widgets\OrderStatusHistoryWidget;
-use App\Models\OrderStatus as OrderStatusModel;
 use App\Filament\Resources\CustomerResource\RelationManagers\AddressRelationManager;
 use App\Filament\Resources\OrderResource\Pages;
-use App\Filament\Resources\OrderResource\RelationManagers;
+use App\Filament\Resources\OrderResource\Widgets\OrderStatusHistoryWidget;
 use App\Models\Address;
 use App\Models\Customer;
 use App\Models\Driver;
 use App\Models\Option;
 use App\Models\Order;
+use App\Models\OrderStatus;
 use App\Models\Property;
 use Dotswan\MapPicker\Fields\Map;
-use Filament\Actions\Action;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
-use Filament\Infolists\Components\RepeatableEntry;
-use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Filament\Support\Colors\Color;
 use Filament\Support\RawJs;
 use Filament\Tables;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection as SupportCollection;
-use Illuminate\Support\Facades\Schema;
 
 class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
 
     protected static ?string $navigationGroup = 'Management';
+
     protected static ?string $navigationLabel = 'سفارش ها';
-    protected static ?string $pluralModelLabel = "سفارش ها";
+
+    protected static ?string $pluralModelLabel = 'سفارش ها';
+
     protected static ?string $modelLabel = 'سفارش';
+
     protected static ?int $navigationSort = 1;
 
     public static function table(Table $table): Table
@@ -68,9 +69,9 @@ class OrderResource extends Resource
                     ->translateLabel()
                     ->sortable()
                     ->badge()
-                    ->color(fn (OrderStatusModel $state): string => $state->color)
+                    ->color(fn (OrderStatus $state): string => $state->color)
                     ->toggleable()
-                    ->formatStateUsing(fn (OrderStatusModel $state): string => $state->label),
+                    ->formatStateUsing(fn (OrderStatus $state): string => $state->label),
                 Tables\Columns\TextColumn::make('items_count')
                     ->sortable()
                     ->translateLabel()
@@ -79,9 +80,9 @@ class OrderResource extends Resource
                     ->alignCenter()
                     ->counts('items'),
                 Tables\Columns\TextColumn::make('area')
-                    ->badge()->color(fn ($state, $record): string => $record->address ? "info" : "danger")
-                    ->getStateUsing(fn ($record) => $record->address ? 'منطقه ' . $record->address->municipality_zone : 'X')
-                    ->description(fn ($record) => $record->address ? 'محله ' . $record->address->neighbourhood : 'فاقد آدرس')
+                    ->badge()->color(fn ($state, $record): string => $record->address ? 'info' : 'danger')
+                    ->getStateUsing(fn ($record) => $record->address ? 'منطقه '.$record->address->municipality_zone : 'X')
+                    ->description(fn ($record) => $record->address ? 'محله '.$record->address->neighbourhood : 'فاقد آدرس')
                     ->sortable()
                     ->translateLabel()
                     ->toggleable()
@@ -89,7 +90,7 @@ class OrderResource extends Resource
                     ->counts('items'),
                 Tables\Columns\TextColumn::make('total')
                     ->formatStateUsing(function ($state) {
-                        return number_format($state, 0) . ' تومان';
+                        return number_format($state, 0).' تومان';
                     })
                     ->badge()
                     ->translateLabel()
@@ -112,14 +113,52 @@ class OrderResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
-                    ->options(OrderStatus::class)
-                    ->label(__('Status')),
+                    ->relationship('status', 'label')
+                    ->searchable()
+                    ->preload()
+                    ->translateLabel(),
+                Tables\Filters\SelectFilter::make('area')
+                    ->options(function () {
+                        return Address::distinct()
+                            ->pluck('municipality_zone', 'municipality_zone')
+                            ->toArray();
+                    })
+                    ->query(function ($query, $state) {
+                        if (!$state['value']) {
+                            return $query;
+                        }
+
+                        return $query->whereHas('address', function ($query) use ($state) {
+                            $query->where('municipality_zone', $state);
+                        });
+                    })
+                    ->translateLabel(),
+                Tables\Filters\Filter::make('created_at')
+                    ->form([
+                        DatePicker::make('created_from')
+                            ->translateLabel()
+                            ->jalali(),
+                        DatePicker::make('created_until')
+                            ->translateLabel()
+                            ->jalali(),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['created_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                            );
+                    })
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('assignDriver')
                         ->label('Assign Driver')
-                        ->icon("heroicon-o-truck")
+                        ->icon('heroicon-o-truck')
                         ->translateLabel()
                         ->action(function (Order $record, array $data): void {
                             $record->update([
@@ -132,36 +171,16 @@ class OrderResource extends Resource
                                 ->relationship('driver', 'name') // رابطه صحیح باید استفاده شود
                                 ->required(),
                         ]),
-//                    Action::make('set_driver')
-//                        ->label(__('Set Driver'))
-//                        ->icon('heroicon-o-arrows-right-left')
-//                        ->form([
-//                            Forms\Components\Select::make('status')
-//                                ->label(__('Order Status'))
-//                                ->hiddenLabel()
-//                                ->options(OrderStatus::class)
-//                                ->default(OrderStatus::RESERVED)
-//                                ->live()
-//                                ->required(),
-//                        ])
-//                        ->action(function (Order $record, array $data) {
-//                            $record->driver_id = $data['driver_id'];
-//                            $record->save();
-//                            Notification::make()
-//                                ->title($record->driver_id ? __('Driver Assigned') : __('Driver Unassigned'))
-//                                ->body('yesss')
-//                                ->success();
-//                        }),
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
-                ])
+                ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\BulkAction::make('assignDriver')
                         ->label('Assign Driver')
-                        ->icon("heroicon-o-truck")
+                        ->icon('heroicon-o-truck')
                         ->translateLabel()
                         ->action(function (Collection $records, array $data): void {
                             $ids = $records->pluck('id');
@@ -172,32 +191,12 @@ class OrderResource extends Resource
                         })
                         ->form([
                             Forms\Components\Select::make('driver_id')
-                                ->label("Driver")
+                                ->label('Driver')
                                 ->translateLabel()
                                 ->relationship('driver', 'name') // رابطه صحیح باید استفاده شود
                                 ->required(),
                         ]),
                     Tables\Actions\DeleteBulkAction::make(),
-//                    Action::make('set_driver')
-//                        ->label(__('Set Driver'))
-//                        ->icon('heroicon-o-arrows-right-left')
-//                        ->form([
-//                            Forms\Components\Select::make('status')
-//                                ->label(__('Order Status'))
-//                                ->hiddenLabel()
-//                                ->options(OrderStatus::class)
-//                                ->default(OrderStatus::RESERVED)
-//                                ->live()
-//                                ->required(),
-//                        ])
-//                        ->action(function ($record, array $data) {
-//                            $record->driver_id = $data['driver_id'];
-//                            $record->save();
-//                            Notification::make()
-//                                ->title($record->driver_id ? __('Driver Assigned') : __('Driver Unassigned'))
-//                                ->body('yesss')
-//                                ->success();
-//                        })
                 ]),
             ]);
     }
@@ -223,15 +222,15 @@ class OrderResource extends Resource
                                     ->createOptionForm([
                                         Forms\Components\Grid::make()
                                             ->schema([
-                                                Forms\Components\TextInput::make("name")
-                                                    ->label(__("Customer Name"))
+                                                Forms\Components\TextInput::make('name')
+                                                    ->label(__('Customer Name'))
                                                     ->required(),
-                                                Forms\Components\TextInput::make("phone")
-                                                    ->label(__("Customer Phone"))
+                                                Forms\Components\TextInput::make('phone')
+                                                    ->label(__('Customer Phone'))
                                                     ->unique()
                                                     ->required(),
                                             ])
-                                            ->columns()
+                                            ->columns(),
                                     ])
                                     ->required(),
                                 Forms\Components\Select::make('address_id')
@@ -310,7 +309,7 @@ class OrderResource extends Resource
                                             ->columnSpanFull()
                                             ->default([
                                                 'lat' => 35.699741844984004,
-                                                'lng' => 51.33805990219117
+                                                'lng' => 51.33805990219117,
                                             ])
                                             ->afterStateUpdated(function (Get $get, Set $set, string|array|null $old, ?array $state): void {
                                                 $set('latitude', $state['lat']);
@@ -326,21 +325,22 @@ class OrderResource extends Resource
                                             })
                                             ->extraStyles([
                                                 'min-height: 50vh',
-                                                'border-radius: 16px'
+                                                'border-radius: 16px',
                                             ])
                                             ->liveLocation()
                                             ->showMarker()
-                                            ->markerColor("#40E0D0")
+                                            ->markerColor('#40E0D0')
                                             ->showFullscreenControl()
                                             ->showZoomControl()
                                             ->draggable()
                                             ->detectRetina()
                                             ->showMyLocationButton()
                                             ->zoom(11)
-                                            ->tilesUrl("http://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}")
+                                            ->tilesUrl('http://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}'),
                                     ])
                                     ->createOptionUsing(function (array $data, Get $get): int {
                                         $customer = Customer::findOrFail($get('customer_id'));
+
                                         return $customer->addresses()->create($data)->getKey();
                                     })
                                     ->searchable()
@@ -364,7 +364,7 @@ class OrderResource extends Resource
                                             ->reactive()
                                             ->helperText(fn (Get $get) => Property::find($get('property_id'))->helperText ?? '')
                                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                                $set('sub_total', ((int)$get('dimensions') ?? 1) * $get('quantity') * Property::find($state)->price);
+                                                $set('sub_total', ((int) $get('dimensions') ?? 1) * $get('quantity') * Property::find($state)->price);
                                                 $set('unit_price', Property::find($state)->price);
                                             })
                                             ->relationship('property', 'fullTitle')
@@ -376,12 +376,14 @@ class OrderResource extends Resource
                                             ->options(function ($state, Get $get) {
                                                 if ($propertyId = $get('property_id')) {
                                                     $dimensions = Property::find($propertyId)->dimensions ?? [];
+
                                                     return array_combine($dimensions, $dimensions);
                                                 }
+
                                                 return [];
                                             })
                                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                                $set('sub_total', ((int)$get('dimensions') ?? 1) * $get('quantity') * Property::find($get('property_id'))->price);
+                                                $set('sub_total', ((int) $get('dimensions') ?? 1) * $get('quantity') * Property::find($get('property_id'))->price);
                                                 $set('unit_price', Property::find($get('property_id'))->price);
                                             })
                                             ->translateLabel()
@@ -390,24 +392,26 @@ class OrderResource extends Resource
                                                 $propertyId = $get('property_id');
                                                 $property = $propertyId ? Property::find($propertyId) : null;
 
-                                                if (!$propertyId || !$property || !$property->dimensions) {
+                                                if (! $propertyId || ! $property || ! $property->dimensions) {
                                                     $set('dimensions', 1);
+
                                                     return true;
                                                 }
+
                                                 return false;
                                             })
                                             ->columnSpan(2),
                                         Forms\Components\TextInput::make('quantity')
-                                            ->label(__("Quantity"))
+                                            ->label(__('Quantity'))
                                             ->translateLabel()
                                             ->numeric()
                                             ->default(1)
                                             ->minValue(1)
                                             ->reactive()
                                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                                if ($get("property_id") !== null) {
-                                                    $price = Property::find($get("property_id"))->price;
-                                                    $set('sub_total', ((int)$get('dimensions') ?? 1) * $state * $price);
+                                                if ($get('property_id') !== null) {
+                                                    $price = Property::find($get('property_id'))->price;
+                                                    $set('sub_total', ((int) $get('dimensions') ?? 1) * $state * $price);
                                                     $set('unit_price', $price);
                                                 }
                                             })
@@ -415,14 +419,14 @@ class OrderResource extends Resource
                                             ->required(),
                                         Forms\Components\Hidden::make('unit_price'),
                                         Forms\Components\TextInput::make('sub_total')
-                                            ->label(__("Sub Total Price"))
+                                            ->label(__('Sub Total Price'))
                                             ->readOnly()
                                             ->dehydrated()
                                             ->translateLabel()
                                             ->integer()
                                             ->required()
                                             ->columnSpan(4)
-                                            ->mask(RawJs::make("\$money(\$input)"))
+                                            ->mask(RawJs::make('$money($input)'))
                                             ->suffix('تومان')
                                             ->stripCharacters('.')
                                             ->mutateStateForValidationUsing(fn ($state) => str_replace(',', '', $state))
@@ -441,7 +445,7 @@ class OrderResource extends Resource
                                         Forms\Components\TextInput::make('title')
                                             ->columnSpan(4),
                                         Forms\Components\TextInput::make('quantity')
-                                            ->label(__("Quantity"))
+                                            ->label(__('Quantity'))
                                             ->translateLabel()
                                             ->numeric()
                                             ->default(1)
@@ -449,35 +453,35 @@ class OrderResource extends Resource
                                             ->reactive()
                                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
                                                 if ($price = str_replace(',', '', $get('unit_price'))) {
-                                                    $set('sub_total', (int)$state * (int)$price);
+                                                    $set('sub_total', (int) $state * (int) $price);
                                                 }
                                             })
                                             ->columnSpan(2)
                                             ->required(),
                                         Forms\Components\TextInput::make('unit_price')
-                                            ->label(__("Unit Price"))
+                                            ->label(__('Unit Price'))
                                             ->columnSpan(3)
-                                            ->mask(RawJs::make("\$money(\$input)"))
+                                            ->mask(RawJs::make('$money($input)'))
                                             ->suffix('تومان')
                                             ->stripCharacters('.')
                                             ->reactive()
                                             ->afterStateUpdated(function ($state, Set $set, Get $get) {
                                                 if ($price = str_replace(',', '', $state)) {
-                                                    $set('sub_total', number_format((int)$get('quantity') * (int)$price));
+                                                    $set('sub_total', number_format((int) $get('quantity') * (int) $price));
                                                     $set('unit_price', number_format($price));
                                                 }
                                             })
                                             ->mutateStateForValidationUsing(fn ($state) => str_replace(',', '', $state))
                                             ->mutateDehydratedStateUsing(fn ($state) => str_replace(',', '', $state)),
                                         Forms\Components\TextInput::make('sub_total')
-                                            ->label(__("Sub Total Price"))
+                                            ->label(__('Sub Total Price'))
                                             ->readOnly()
                                             ->dehydrated()
                                             ->translateLabel()
                                             ->integer()
                                             ->required()
                                             ->columnSpan(3)
-                                            ->mask(RawJs::make("\$money(\$input)"))
+                                            ->mask(RawJs::make('$money($input)'))
                                             ->suffix('تومان')
                                             ->stripCharacters('.')
                                             ->mutateStateForValidationUsing(fn ($state) => str_replace(',', '', $state))
@@ -485,7 +489,7 @@ class OrderResource extends Resource
 
                                     ])
                                     ->columnSpanFull(),
-                            ])->icon('heroicon-o-list-bullet')
+                            ])->icon('heroicon-o-list-bullet'),
                     ]),
                 Forms\Components\Grid::make('Order')
                     ->columnSpan(1)
@@ -502,16 +506,15 @@ class OrderResource extends Resource
                             ]),
                         Forms\Components\Section::make('وضعیت سفارش')
                             ->schema([
-                                Forms\Components\Select::make('status_id')
-                                    ->label(__('Order Status'))
+                                Forms\Components\Select::make('status')
+                                    ->relationship('status', 'label')
                                     ->hiddenLabel()
-                                    ->options(OrderStatusModel::all()->pluck('label', 'id'))
-//                                    ->default(OrderStatusModel::RESERVED)
                                     ->live()
-                                    ->required(),
+                                    ->required()
+                                    ->translateLabel(),
                                 Forms\Components\Fieldset::make('تنظیم ')
                                     ->visible(
-                                        fn (Get $get): bool => OrderStatusModel::where('id', intval($get('status_id')))->value('has_time') == true
+                                        fn (Get $get): bool => OrderStatus::where('id', intval($get('status')))->value('has_time') == true
                                     )
                                     ->schema([
                                         Forms\Components\DatePicker::make('reservation_date')
@@ -544,9 +547,9 @@ class OrderResource extends Resource
                                 Forms\Components\Placeholder::make('order_total')
                                     ->label(__('Order Total'))
                                     ->reactive()
-                                    ->content(fn (Get $get): ?string => number_format(self::calculateTotal($get), 0) . ' تومان')
-                            ])
-                    ])
+                                    ->content(fn (Get $get): ?string => number_format(self::calculateTotal($get), 0).' تومان'),
+                            ]),
+                    ]),
             ])->columns(3);
     }
 
@@ -557,10 +560,10 @@ class OrderResource extends Resource
         foreach ($items as $item) {
             $dimensions = 1;
             if (isset($item['dimensions'])) {
-                $dimensions = (int)$item['dimensions'] ?? 1;
+                $dimensions = (int) $item['dimensions'] ?? 1;
             }
-            $quantity = (int)$item['quantity'] ?? 0;
-            $unitPrice = (int)str_replace(',', '', $item['unit_price']);
+            $quantity = (int) $item['quantity'] ?? 0;
+            $unitPrice = (int) str_replace(',', '', $item['unit_price']);
             $total += $dimensions * $quantity * $unitPrice;
         }
         if ($total) {
@@ -573,7 +576,7 @@ class OrderResource extends Resource
     public static function getRelations(): array
     {
         return [
-//            AddressRelationManager::class
+            //            AddressRelationManager::class
         ];
     }
 
