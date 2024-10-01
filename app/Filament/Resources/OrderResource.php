@@ -506,15 +506,18 @@ class OrderResource extends Resource
                             ]),
                         Forms\Components\Section::make('وضعیت سفارش')
                             ->schema([
-                                Forms\Components\Select::make('status')
+                                Forms\Components\Select::make('status_id')
                                     ->relationship('status', 'label')
                                     ->hiddenLabel()
                                     ->live()
                                     ->required()
-                                    ->translateLabel(),
+                                    ->label(__('Order Status')),
                                 Forms\Components\Fieldset::make('تنظیم ')
                                     ->visible(
-                                        fn (Get $get): bool => OrderStatus::where('id', intval($get('status')))->value('has_time') == true
+                                        fn (Get $get): bool => OrderStatus::where(
+                                            'id',
+                                            intval($get('status_id'))
+                                        )->value('has_time') == true
                                     )
                                     ->schema([
                                         Forms\Components\DatePicker::make('reservation_date')
