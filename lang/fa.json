@@ -163,5 +163,10 @@
     "Application of ancillary services" : "اعمال خدمات جانبی",
     "Pre-invoice and order details" : "پیش‌فاکتور و جزئیات سفارش",
     "Driver changed from:" : "تغییر راننده از:",
+    "Reservation setting for" : "تنظیم رزرو برای",
+    "Reservation Date" : "تاریخ رزرو",
+    "Shift" : "شیفت",
+    "Morning" : "صبح",
+    "Afternoon" : "عصر",
     "Customer" : "مشتری"
 }

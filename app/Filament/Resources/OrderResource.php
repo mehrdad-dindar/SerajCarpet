@@ -512,7 +512,8 @@ class OrderResource extends Resource
                                     ->live()
                                     ->required()
                                     ->label(__('Order Status')),
-                                Forms\Components\Fieldset::make('تنظیم ')
+                                Forms\Components\Fieldset::make('reservation setting')
+                                    ->label(__('Reservation setting for'))
                                     ->visible(
                                         fn (Get $get): bool => OrderStatus::where(
                                             'id',
@@ -522,21 +523,18 @@ class OrderResource extends Resource
                                     ->schema([
                                         Forms\Components\DatePicker::make('reservation_date')
                                             ->prefixIcon('heroicon-o-calendar-days')
-                                            ->label('Reservation Date')
+                                            ->label(__('Reservation Date'))
                                             ->translateLabel()
                                             ->reactive()
                                             ->displayFormat('Y-m-d')
                                             ->columnSpanFull()
+                                            ->required()
                                             ->jalali(),
                                         Select::make('reservation_time')
-                                            ->label('Reservation Time')
+                                            ->label(__('Shift'))
                                             ->options([
-                                                '08:00:00' => '08:00 - 10:00',
-                                                '10:00:00' => '10:00 - 12:00',
-                                                '12:00:00' => '12:00 - 14:00',
-                                                '14:00:00' => '14:00 - 16:00',
-                                                '16:00:00' => '16:00 - 18:00',
-                                                '18:00:00' => '18:00 - 20:00',
+                                                '09:00:00' => __('Morning'),
+                                                '15:00:00' => __('Afternoon'),
                                             ])
                                             ->reactive()
                                             ->required(),
