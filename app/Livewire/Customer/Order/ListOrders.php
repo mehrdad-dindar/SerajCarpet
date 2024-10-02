@@ -6,7 +6,7 @@ use App\Models\Order;
 use App\Models\OrderStatus as OrderStatusModel;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -61,7 +61,10 @@ class ListOrders extends Component implements HasForms, HasTable
                     ->relationship('status', 'label'),
             ])
             ->actions([
-                // ...
+                Action::make('مشاهده')
+                    ->icon('heroicon-o-eye') // آیکون برای اکشن
+                    ->url(fn ($record) => route('customer.panel.orders.show', $record))
+                    ->color('primary'),
             ])
             ->bulkActions([
                 // ...
