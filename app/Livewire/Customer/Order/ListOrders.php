@@ -6,9 +6,11 @@ use App\Models\Order;
 use App\Models\OrderStatus as OrderStatusModel;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Livewire\Component;
 
@@ -54,7 +56,9 @@ class ListOrders extends Component implements HasForms, HasTable
                     ->translateLabel(),
             ])
             ->filters([
-                // ...
+                SelectFilter::make('status_id')
+                    ->label(__('Status'))
+                    ->relationship('status', 'label'),
             ])
             ->actions([
                 // ...
