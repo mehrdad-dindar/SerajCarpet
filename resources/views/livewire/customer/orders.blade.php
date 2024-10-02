@@ -5,6 +5,6 @@
     @if($orders->count())
         <livewire:customer.order.list-orders :orders="$orders"/>
     @else
-        <x-srj-alert id="alert" :title="__('Select a card to view orders.')" warning rounded="2xl" />
+        <x-srj-alert id="alert" :title="__('There are currently no orders.')" warning rounded="2xl" />
     @endif
 </div>
