@@ -22,29 +22,15 @@ class OptimizedRoute extends Model
         'orders' => 'array',
     ];
 
-    // TODO: will be remove this methode
-    public static function getRouteTypes()
-    {
-        $statuses = [
-            OrderStatus::IN_COLLECTIVE_LIST,
-            OrderStatus::IN_DISTRIBUTION_LIST,
-            OrderStatus::REVISITING_DRIVER,
-        ];
-
-        return OrderStatus::whereIn('name', $statuses)->get();
-    }
-
-    public static function getOrdersCount(OrderStatus $type)
+    public static function getOrdersCount($shift)
     {
         $driver = auth('driver')->user();
         $optimizedRoute = $driver->optimizedRoutes()
-            ->where('order_status_id', $type->id)
+            ->whereShift($shift)
             ->first();
         if ($optimizedRoute) {
-            return $optimizedRoute->orders()
-                ->where('status_id', $type->id)->count();
+            return $optimizedRoute->orders()->count();
         }
-
         return 0;
     }
 
