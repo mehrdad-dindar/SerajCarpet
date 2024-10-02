@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\OptimizedRoute;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,7 +16,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('driver_id')->constrained();
             $table->json('orders');
-            $table->foreignId('order_status_id')->constrained("order_statuses");
+            $table->tinyInteger('shift')
+                ->default(OptimizedRoute::MORNING_SHIFT)
+                ->comment('1 = Morning, 2 = Afternoon');
             $table->timestamps();
         });
     }

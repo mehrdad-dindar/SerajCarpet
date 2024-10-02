@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\Neshan;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -11,12 +12,17 @@ class OptimizedRoute extends Model
 {
     use HasFactory, Neshan;
 
+    const MORNING_SHIFT = 1;
+
+    const AFTERNOON_SHIFT = 2;
+
     protected $guarded;
 
     protected $casts = [
         'orders' => 'array',
     ];
 
+    // TODO: will be remove this methode
     public static function getRouteTypes()
     {
         $statuses = [
@@ -28,59 +34,87 @@ class OptimizedRoute extends Model
         return OrderStatus::whereIn('name', $statuses)->get();
     }
 
-    public function status()
+    public static function getOrdersCount(OrderStatus $type)
     {
-        return $this->belongsTo(OrderStatus::class, 'order_status_id');
-    }
-
-    public function calculateRoute($allUniqueDriverIds): void
-    {
-        $statuses = [
-            OrderStatus::IN_COLLECTIVE_LIST,
-            OrderStatus::IN_DISTRIBUTION_LIST,
-            OrderStatus::REVISITING_DRIVER,
-        ];
-
-        foreach ($allUniqueDriverIds as $driverId) {
-            $driver = Driver::find($driverId);
-            foreach ($statuses as $status) {
-                $orders = $driver->orders()
-                    ->whereHas('status', function ($query) use ($status) {
-                        $query->where('name', $status);
-                    })
-                    ->where('time_apply_status', '>=', now())
-                    ->get();
-                if ($orders->count()) {
-                    $orderLocations = $this->processableOrders($orders);
-                    $waypoints = $this->salesman($orderLocations);
-                    if (isset($waypoints->getData()->points)) {
-                        $points = $waypoints->getData()->points;
-                        $sortedOrders = $this->sortOrdersByIndex($orderLocations, $points);
-                        $orderIds = $sortedOrders->pluck('id')->toArray();
-                        $driver->optimizedRoutes()->updateOrCreate(
-                            [
-                                'driver_id' => $driver->id,
-                                'order_status_id' => (OrderStatus::whereName($status)->first())->id
-                            ],
-                            [
-                            'orders' => $orderIds,
-                            ]
-                        );
-                    }
-                } else {
-                    $driver->optimizedRoutes()
-                        ->whereHas('status', function ($query) use ($status) {
-                            $query->where('name', $status);
-                        })
-                        ->delete();
-                }
-            }
+        $driver = auth('driver')->user();
+        $optimizedRoute = $driver->optimizedRoutes()
+            ->where('order_status_id', $type->id)
+            ->first();
+        if ($optimizedRoute) {
+            return $optimizedRoute->orders()
+                ->where('status_id', $type->id)->count();
         }
+
+        return 0;
     }
 
     public function orders()
     {
         return Order::whereIn('id', $this->orders)->get();
+    }
+
+    public function calculateRoute(array $driverIds): void
+    {
+        foreach ($driverIds as $driverId) {
+            $driver = Driver::find($driverId);
+            if (! $driver) {
+                continue;
+            }
+
+            $this->processDriverOrdersForShift($driver, 'morning');
+            $this->processDriverOrdersForShift($driver, 'afternoon');
+        }
+    }
+
+    private function processDriverOrdersForShift(Driver $driver, string $shift): void
+    {
+        $orders = $this->getOrders($driver, $shift);
+        $this->updateOptimizedRoutes($driver, $orders, $shift);
+    }
+
+    private function getOrders(Driver $driver, $shift)
+    {
+        $orders = $driver->orders()
+            ->whereDate('time_apply_status', Carbon::today());
+
+        return match ($shift) {
+            'morning' => $orders
+                ->whereTime('time_apply_status', '>=', '09:00:00')
+                ->whereTime('time_apply_status', '<=', '14:00:00')
+                ->get(),
+            'afternoon' => $orders
+                ->whereTime('time_apply_status', '>=', '14:00:01')
+                ->whereTime('time_apply_status', '<=', '19:00:00')
+                ->get(),
+        };
+    }
+
+    private function updateOptimizedRoutes(Driver $driver, $orders, $shift): void
+    {
+        if ($orders->count()) {
+            $orderLocations = $this->processableOrders($orders);
+            $waypoints = $this->salesman($orderLocations);
+            if (isset($waypoints->getData()->points)) {
+                $points = $waypoints->getData()->points;
+                $sortedOrders = $this->sortOrdersByIndex($orderLocations, $points);
+                $orderIds = $sortedOrders->pluck('id')->toArray();
+                $driver->optimizedRoutes()->updateOrCreate(
+                    [
+                        'driver_id' => $driver->id,
+                        'shift' => $shift === 'morning' ?
+                            OptimizedRoute::MORNING_SHIFT :
+                            OptimizedRoute::AFTERNOON_SHIFT,
+                    ],
+                    [
+                        'orders' => $orderIds,
+                    ]
+                );
+            }
+        } else {
+            $driver->optimizedRoutes()
+                ->whereShift($shift === 'morning' ? OptimizedRoute::MORNING_SHIFT : OptimizedRoute::AFTERNOON_SHIFT)
+                ->delete();
+        }
     }
 
     private function processableOrders(Collection $orders)
@@ -137,18 +171,5 @@ class OptimizedRoute extends Model
         if ($address->latitude !== $location[0]) {
             $address->updateAddressGeo($location);
         }
-    }
-
-    public static function getOrdersCount(OrderStatus $type)
-    {
-        $driver = auth('driver')->user();
-        $optimizedRoute = $driver->optimizedRoutes()
-            ->where('order_status_id', $type->id)
-            ->first();
-        if ($optimizedRoute) {
-            return $optimizedRoute->orders()
-                ->where('status_id', $type->id)->count();
-        }
-        return 0;
     }
 }
