@@ -48,7 +48,7 @@ class Order extends Model
         return $this->hasMany(OrderItem::class)->nonCustom();
     }
 
-    public function other_items(): HasMany
+    public function otherItems(): HasMany
     {
         return $this->hasMany(OrderItem::class)->custom();
     }

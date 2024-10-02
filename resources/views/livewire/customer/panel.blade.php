@@ -10,7 +10,7 @@
                             <div>
                                 <p class="mb-0 font-sans font-semibold leading-normal text-size-sm">{{ __("Wallet") }}</p>
                                 <h5 class="mb-0 font-bold">
-                                     ت 53,000
+                                     ت {{ $wallet }}
                                     <span
                                         class="leading-normal text-size-sm font-weight-bolder text-lime-500">+0%</span>
                                 </h5>
@@ -36,15 +36,15 @@
                                 <p class="mb-0 font-sans font-semibold leading-normal text-size-sm">{{ __("Referred Customers") }}
                                 </p>
                                 <h5 class="mb-0 font-bold">
-                                    1,300
+                                    0
                                     <span
-                                        class="leading-normal text-size-sm font-weight-bolder text-lime-500">+3%</span>
+                                        class="leading-normal text-size-sm font-weight-bolder text-lime-500">+0%</span>
                                 </h5>
                             </div>
                         </div>
-                        <div class="px-3 text-right basis-1/3">
+                        <div class="px-3 text-left basis-1/3">
                             <div class="inline-block w-12 h-12 text-center rounded-lg bg-gradient-fuchsia">
-                                <i class="ni ni-world text-size-lg relative top-3.5 text-white"></i>
+                                <x-phosphor.icons::duotone.user-circle-plus class="w-6 relative top-3.5 text-white" />
                             </div>
                         </div>
                     </div>
@@ -61,14 +61,14 @@
                             <div>
                                 <p class="mb-0 font-sans font-semibold leading-normal text-size-sm">{{__("Orders")}}</p>
                                 <h5 class="mb-0 font-bold">
-                                    62
-                                    <span class="leading-normal text-lime-500 text-size-sm font-weight-bolder">+2%</span>
+                                    {{ $ordersCount }}
+{{--                                    <span class="leading-normal text-lime-500 text-size-sm font-weight-bolder">+2%</span>--}}
                                 </h5>
                             </div>
                         </div>
-                        <div class="px-3 text-right basis-1/3">
+                        <div class="px-3 text-left basis-1/3">
                             <div class="inline-block w-12 h-12 text-center rounded-lg bg-gradient-fuchsia">
-                                <i class="ni ni-paper-diploma text-size-lg relative top-3.5 text-white"></i>
+                                <x-phosphor.icons::duotone.shopping-bag class="w-6 relative top-3.5 text-white"/>
                             </div>
                         </div>
                     </div>
