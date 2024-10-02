@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\OrderResource\Pages;
 
-use App\Enums\OrderStatus;
 use App\Filament\Resources\OrderResource;
+use App\Models\OrderStatus;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Resources\Components\Tab;
@@ -16,14 +16,60 @@ class ListOrders extends ListRecords
     {
         return [
             null => Tab::make(__('All')),
-            'reserved' => Tab::make('رزرو شده')->query(fn($query) => $query->where('status', OrderStatus::RESERVED)),
-            'in_waiting_list' => Tab::make('در لیست جمعی قرار دارد')->query(fn($query) => $query->where('status', OrderStatus::IN_WAITING_LIST)),
-            'carpets_received' => Tab::make('فرش ها تحویل گرفته شده')->query(fn($query) => $query->where('status', OrderStatus::CARPETS_RECEIVED)),
-            'pre_wash_repair_service' => Tab::make('خدمات ترمیم پیش از شستشو دارد')->query(fn($query) => $query->where('status', OrderStatus::PRE_WASH_REPAIR_SERVICE)),
-            'sent_to_factory_for_washing' => Tab::make('جهت شستشو به کارخانه ارسال گردیده')->query(fn($query) => $query->where('status', OrderStatus::SENT_TO_FACTORY_FOR_WASHING)),
-            'post_wash_repair_service' => Tab::make('خدمات ترمیم پس از شستشو دارد')->query(fn($query) => $query->where('status', OrderStatus::POST_WASH_REPAIR_SERVICE)),
-            'ready_for_delivery_to_customer' => Tab::make('اماده تحویل به مشتری')->query(fn($query) => $query->where('status', OrderStatus::READY_FOR_DELIVERY_TO_CUSTOMER)),
-            'delivered_and_paid' => Tab::make('تحویل و تسویه شده')->query(fn($query) => $query->where('status', OrderStatus::DELIVERED_AND_PAID)),
+            OrderStatus::RESERVED => Tab::make()
+                ->label(__('Reserved'))
+                ->query(fn ($query) => $query->whereHas(
+                    'status',
+                    fn ($q) => $q->where('name', OrderStatus::RESERVED)
+                )),
+            OrderStatus::IN_COLLECTIVE_LIST => Tab::make()
+                ->label(__('In collective list'))
+                ->query(fn ($query) => $query->whereHas(
+                    'status',
+                    fn ($q) => $q->where('name', OrderStatus::IN_COLLECTIVE_LIST)
+                )),
+            OrderStatus::IN_DISTRIBUTION_LIST => Tab::make()
+                ->label(__('In Distribution list'))
+                ->query(fn ($query) => $query->whereHas(
+                    'status',
+                    fn ($q) => $q->where('name', OrderStatus::IN_DISTRIBUTION_LIST)
+                )),
+            OrderStatus::CARPETS_RECEIVED => Tab::make()
+                ->label(__('Carpets received'))
+                ->query(fn ($query) => $query->whereHas(
+                    'status',
+                    fn ($q) => $q->where('name', OrderStatus::CARPETS_RECEIVED)
+                )),
+            OrderStatus::PRE_WASH_REPAIR_SERVICE => Tab::make()
+                ->label(__('Pre-wash repair service'))
+                ->query(fn ($query) => $query->whereHas(
+                    'status',
+                    fn ($q) => $q->where('name', OrderStatus::PRE_WASH_REPAIR_SERVICE)
+                )),
+            OrderStatus::POST_WASH_REPAIR_SERVICE => Tab::make()
+                ->label(__('Post-wash repair service'))
+                ->query(fn ($query) => $query->whereHas(
+                    'status',
+                    fn ($q) => $q->where('name', OrderStatus::POST_WASH_REPAIR_SERVICE)
+                )),
+            OrderStatus::SENT_TO_FACTORY_FOR_WASHING => Tab::make()
+                ->label(__('Sent to factory for washing'))
+                ->query(fn ($query) => $query->whereHas(
+                    'status',
+                    fn ($q) => $q->where('name', OrderStatus::SENT_TO_FACTORY_FOR_WASHING)
+                )),
+            OrderStatus::READY_FOR_DELIVERY_TO_CUSTOMER => Tab::make()
+                ->label(__('Ready for delivery to customer'))
+                ->query(fn ($query) => $query->whereHas(
+                    'status',
+                    fn ($q) => $q->where('name', OrderStatus::READY_FOR_DELIVERY_TO_CUSTOMER)
+                )),
+            OrderStatus::DELIVERED_AND_PAID => Tab::make()
+                ->label(__('Delivered and paid'))
+                ->query(fn ($query) => $query->whereHas(
+                    'status',
+                    fn ($q) => $q->where('name', OrderStatus::DELIVERED_AND_PAID)
+                )),
         ];
     }
 

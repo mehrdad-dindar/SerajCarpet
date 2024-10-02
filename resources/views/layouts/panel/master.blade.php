@@ -70,6 +70,6 @@
 <!-- plugin for scrollbar  -->
 {{--<script src="{{ asset('panel/js/plugins/perfect-scrollbar.min.js') }}" async></script>--}}
 <!-- main script file  -->
-{{--<script src="{{ asset('panel/js/soft-ui-dashboard-tailwind.js') }}?v=1.0.3" async></script>--}}
+<script src="{{ asset('panel/js/soft-ui-dashboard-tailwind.js') }}?v=1.0.3" async></script>
 
 </html>

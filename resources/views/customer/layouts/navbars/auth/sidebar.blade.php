@@ -52,7 +52,7 @@
             </li>
 
             <li class="w-full mt-4">
-                <h6 class="{{ (true ? 'pr-6 mr-2' : 'pl-6 ml-2') }} font-bold leading-tight uppercase text-size-xs opacity-60"></h6>
+                <h6 class="pr-6 mr-2 font-bold leading-tight uppercase text-size-xs opacity-60"></h6>
             </li>
             <li class="mt-0.5 w-full">
                 <a class="py-2.7 text-size-sm ease-nav-brand my-0 mx-4 flex items-center gap-2 whitespace-nowrap px-4 transition-colors
@@ -102,10 +102,9 @@
                 <a class="py-2.7 text-size-sm ease-nav-brand my-0 mx-4 flex items-center whitespace-nowrap px-4 transition-colors {{ (Request::is('panel/orders') ? 'shadow-soft-xl rounded-lg bg-white font-semibold text-slate-700' : '') }}"
                    href="{{ route("customer.panel.orders") }}">
 
-                    <div
-                        class="{{ (Request::is('panel/orders') ? ' bg-gradient-fuchsia' : '') }} shadow-soft-2xl me-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white bg-center stroke-0 text-center xl:p-2.5">
+                    <div class="{{ (Request::is('panel/orders') ? ' bg-gradient-fuchsia fill-white' : 'fill-slate-800') }} shadow-soft-2xl me-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white bg-center stroke-0 text-center xl:p-2.5">
 
-                        <svg class="fill-slate-800" xmlns="http://www.w3.org/2000/svg" width="12px"
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12px"
                              height="12px" viewBox="0 0 576 512">
                             <!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
                             <path

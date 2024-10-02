@@ -310,7 +310,7 @@ class EditOrder extends Component implements HasForms
                                         ->mutateDehydratedStateUsing(fn ($state) => str_replace(',', '', $state)),
                                 ])
                                 ->columnSpanFull(),
-                            Repeater::make('other_items')
+                            Repeater::make('otherItems')
                                 ->label(__('Other Items'))
                                 ->translateLabel()
                                 ->relationship()

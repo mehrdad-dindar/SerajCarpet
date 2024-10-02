@@ -7,13 +7,13 @@ use App\Services\OrderService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-class OrderComponent extends Component
+class Orders extends Component
 {
     public $orders;
     #[Layout("customer.layouts.app")]
     public function render()
     {
-        return view('livewire.customer.order-component');
+        return view('livewire.customer.orders');
     }
 
     public function mount()

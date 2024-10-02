@@ -3,7 +3,7 @@
 namespace App\Livewire\Driver\Order;
 
 use App\Models\Order;
-use App\Models\OrderStatus as OrderStatusModel;
+use App\Models\OrderStatus;
 use App\Traits\Neshan;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -41,6 +41,14 @@ class ListOrders extends Component implements HasForms, HasTable
                 TextColumn::make('customer.name')
                     ->searchable()
                     ->label(__('Customer Name')),
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->translateLabel()
+                    ->sortable()
+                    ->badge()
+                    ->color(fn (OrderStatus $state): string => $state->color)
+                    ->toggleable()
+                    ->formatStateUsing(fn (OrderStatus $state): string => $state->label),
                 TextColumn::make('items_count')
                     ->translateLabel()
                     ->label('Order Item Count')
@@ -91,7 +99,7 @@ class ListOrders extends Component implements HasForms, HasTable
                         })
                         ->form([
                             Select::make('status_id')
-                                ->options(OrderStatusModel::all()->pluck('label', 'id'))
+                                ->options(OrderStatus::all()->pluck('label', 'id'))
                         ]),
                     Action::make('Call')
                         ->icon('heroicon-o-phone-arrow-up-right')

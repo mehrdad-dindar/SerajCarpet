@@ -48,7 +48,7 @@ class Order extends Model
         return $this->hasMany(OrderItem::class)->nonCustom();
     }
 
-    public function other_items(): HasMany
+    public function otherItems(): HasMany
     {
         return $this->hasMany(OrderItem::class)->custom();
     }
@@ -142,5 +142,10 @@ class Order extends Model
             get: fn ($value) => json_decode($value, true),
             set: fn ($value) => json_encode($value),
         );
+    }
+
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commentable');
     }
 }

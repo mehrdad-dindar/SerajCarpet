@@ -49,4 +49,9 @@ class Driver extends Authenticatable
     {
         return $this->hasOne(DriverLocation::class);
     }
+
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commenter');
+    }
 }

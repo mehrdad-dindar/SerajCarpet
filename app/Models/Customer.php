@@ -73,4 +73,9 @@ class Customer extends Authenticatable
         $hashids = new Hashids('', 6);
         return $hashids->encode($this->id);
     }
+
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commenter');
+    }
 }
