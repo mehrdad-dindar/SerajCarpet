@@ -79,6 +79,11 @@ class ListOrders extends Component implements HasForms, HasTable
                     ->description(fn (Order $record): string => $record->address->getFullAddress(), position: 'above')
                     ->wrap()
                     ->toggleable(),
+                TextColumn::make('Comment')
+                    ->getStateUsing(function (Order $order) {
+                        $comment = $order->address->customerComments()->orderBy('created_at', 'desc')->first();
+                        return $comment->body;
+                    })
             ])
             ->filters([
                 // ...
