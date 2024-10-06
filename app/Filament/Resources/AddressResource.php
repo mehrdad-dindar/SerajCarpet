@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AddressResource\Pages;
 use App\Filament\Resources\AddressResource\RelationManagers\CustomerRelationManager;
+use App\Filament\Resources\CommentResource\RelationManagers\CommentRelationManager;
 use App\Models\Address;
 use App\Traits\Neshan;
 use Dotswan\MapPicker\Fields\Map;
@@ -310,6 +311,7 @@ class AddressResource extends Resource
     {
         return [
             CustomerRelationManager::class,
+            CommentRelationManager::class
         ];
     }
 
