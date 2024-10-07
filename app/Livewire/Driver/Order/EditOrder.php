@@ -10,6 +10,7 @@ use App\Models\Property;
 use App\Traits\Neshan;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
@@ -41,7 +42,7 @@ class EditOrder extends Component implements HasForms
     public function mount(Order $order)
     {
         $status_ids = [2, 3, 4];
-        if (!in_array($this->order->status_id, $status_ids)) {
+        if (! in_array($this->order->status_id, $status_ids)) {
             abort(404);
         }
         $this->order = $order;
@@ -76,9 +77,18 @@ class EditOrder extends Component implements HasForms
                         ->schema([
                             Fieldset::make('customer_address')
                                 ->schema([
-                                    Placeholder::make('Full Address')
-                                        ->content(fn (Order $order): string => $order->address->getFullAddress())
-                                        ->label(__('Full Address')),
+                                    Group::make([
+                                        Placeholder::make('Full Address')
+                                            ->content(fn (Order $order): string => $order->address->getFullAddress())
+                                            ->label(__('Full Address')),
+                                        Placeholder::make('Comment')
+                                            ->content(function (Order $order) {
+                                                $comment = $order->address->customerComments()
+                                                    ->orderBy('created_at', 'desc')->first();
+                                                return $comment->body;
+                                            })
+                                            ->label(__('Customer comment for address')),
+                                    ]),
                                     Map::make('current_location')
                                         ->label(__('Location'))
                                         ->defaultLocation(latitude: 40.4168, longitude: -3.7038)
