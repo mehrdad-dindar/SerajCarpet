@@ -15,6 +15,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Livewire\Component;
 
 class ListOrders extends Component implements HasForms, HasTable
@@ -32,13 +33,7 @@ class ListOrders extends Component implements HasForms, HasTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(Order::whereIn('id', $this->orders)
-//                ->whereHas(
-//                    'status',
-//                    fn ($q) => $q->where('name', OrderStatus::RESERVED)
-//
-//                )
-                ->orderByRaw('FIELD(id, ' . implode(',', $this->orders) . ')'))
+            ->query($this->tableQuery())
             ->columns([
                 TextColumn::make('id')
                     ->prefix('#')
@@ -151,5 +146,20 @@ class ListOrders extends Component implements HasForms, HasTable
     public function render()
     {
         return view('livewire.driver.order.list-orders');
+    }
+
+    private function tableQuery(): Builder
+    {
+        return Order::whereIn('id', $this->orders)
+            ->whereHas(
+                'status',
+                fn ($q) => $q->whereIn('name', [
+                    OrderStatus::RESERVED,
+                    OrderStatus::IN_DISTRIBUTION_LIST,
+                    OrderStatus::IN_COLLECTIVE_LIST,
+                    OrderStatus::REVISITING_DRIVER
+                ])
+            )
+            ->orderByRaw('FIELD(id, ' . implode(',', $this->orders) . ')');
     }
 }
