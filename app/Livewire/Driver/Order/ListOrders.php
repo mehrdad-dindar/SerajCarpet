@@ -32,7 +32,13 @@ class ListOrders extends Component implements HasForms, HasTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(Order::whereIn('id', $this->orders->pluck('id')))
+            ->query(Order::whereIn('id', $this->orders)
+//                ->whereHas(
+//                    'status',
+//                    fn ($q) => $q->where('name', OrderStatus::RESERVED)
+//
+//                )
+                ->orderByRaw('FIELD(id, ' . implode(',', $this->orders) . ')'))
             ->columns([
                 TextColumn::make('id')
                     ->prefix('#')
@@ -82,7 +88,10 @@ class ListOrders extends Component implements HasForms, HasTable
                 TextColumn::make('Comment')
                     ->getStateUsing(function (Order $order) {
                         $comment = $order->address->customerComments()->orderBy('created_at', 'desc')->first();
-                        return $comment->body;
+                        if ($comment) {
+                            return $comment->body;
+                        }
+                        return null;
                     })
             ])
             ->filters([

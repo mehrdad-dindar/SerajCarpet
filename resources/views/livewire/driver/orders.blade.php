@@ -3,7 +3,7 @@
         <div class="relative flex flex-col w-full min-w-0 mb-0 break-words bg-white border-0 border-transparent border-solid shadow-soft-xl rounded-2xl bg-clip-border">
             <div class="p-6 pb-0 mb-0 bg-white rounded-t-2xl">
                 @php
-                    $shift = Carbon\Carbon::now()->hour <= 14 ? \App\Models\OptimizedRoute::MORNING_SHIFT : \App\Models\OptimizedRoute::AFTERNOON_SHIFT;
+                    $shift = Carbon\Carbon::now()->hour < 14 ? \App\Models\OptimizedRoute::MORNING_SHIFT : \App\Models\OptimizedRoute::AFTERNOON_SHIFT;
                     $title =  __("Orders List") . ' ' . __("Shift") . ' ';
                     $title .=  $shift === \App\Models\OptimizedRoute::MORNING_SHIFT ? __("Morning") : __("Afternoon");
                 @endphp
@@ -14,5 +14,7 @@
                 @livewire('driver.order.list-orders',['orders'=>$orders])
             </div>
         </div>
+    @else
+        <x-srj-alert id="alert" :title="__('There are currently no orders.')" warning rounded="2xl" />
     @endif
 </div>

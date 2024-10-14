@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use function Laravel\Prompts\alert;
 
 class EditOrder extends Component implements HasForms
 {
@@ -85,8 +86,13 @@ class EditOrder extends Component implements HasForms
                                             ->content(function (Order $order) {
                                                 $comment = $order->address->customerComments()
                                                     ->orderBy('created_at', 'desc')->first();
-                                                return $comment->body;
+                                                if ($comment) {
+                                                    return $comment->body;
+                                                }
+                                                return null;
                                             })
+                                            ->visible(fn(Order $order) => $order->address->customerComments()
+                                                ->orderBy('created_at', 'desc')->first())
                                             ->label(__('Customer comment for address')),
                                     ]),
                                     Map::make('current_location')
@@ -117,41 +123,35 @@ class EditOrder extends Component implements HasForms
                             Toggle::make('edit_address')
                                 ->live()
                                 ->label(__('Need to edit?')),
-                            Fieldset::make('Address')->schema([
+                            Fieldset::make('Address')
+                                ->relationship('address')
+                                ->schema([
                                 TextInput::make('state')
-                                    ->formatStateUsing(fn (Order $order) => $order->address->state)
                                     ->required()
                                     ->helperText(fn (Get $get) => self::getHint('state', $get))
                                     ->label(__('State')),
                                 TextInput::make('city')
-                                    ->formatStateUsing(fn (Order $order) => $order->address->city)
                                     ->required()
                                     ->helperText(fn (Get $get) => self::getHint('city', $get))
                                     ->label(__('City')),
                                 Textarea::make('address')
-                                    ->formatStateUsing(fn (Order $order) => $order->address->address)
                                     ->autosize()
                                     ->required()
                                     ->columnSpanFull()
                                     ->helperText(fn (Get $get) => self::getHint('address', $get))
                                     ->label(__('Full Address')),
                                 TextInput::make('no')
-                                    ->formatStateUsing(fn (Order $order) => $order->address->no)
                                     ->required()
                                     ->label(__('No.')),
                                 TextInput::make('floor')
-                                    ->formatStateUsing(fn (Order $order) => $order->address->floor)
                                     ->required()
                                     ->label(__('Floor')),
                                 TextInput::make('unit')
-                                    ->formatStateUsing(fn (Order $order) => $order->address->unit)
                                     ->label(__('Unit')),
                                 Hidden::make('latitude')
-                                    ->required()
-                                    ->label(__('Latitude')),
+                                    ->required(),
                                 Hidden::make('longitude')
-                                    ->required()
-                                    ->label(__('longitude')),
+                                    ->required(),
                                 Hidden::make('municipality_zone'),
                                 Hidden::make('neighbourhood'),
                                 Map::make('location')
@@ -167,19 +167,21 @@ class EditOrder extends Component implements HasForms
                                         $set('longitude', $state['lng']);
                                         if ($get('is_suggested')) {
                                             $data = self::getHint(field: null, get: $get, all: true);
-                                            if ($data->status == 'OK') {
+                                            if ($data && $data->status == 'OK') {
                                                 $set('state', $data->state);
                                                 $set('city', $data->city);
                                                 $set('address', $data->formatted_address);
                                                 $set('municipality_zone', $data->municipality_zone);
                                                 $set('neighbourhood', $data->neighbourhood);
+                                            } else {
+                                                alert('Error');
                                             }
                                         }
                                     })
-                                    ->afterStateHydrated(function ($state, Order $order, Set $set): void {
+                                    ->afterStateHydrated(function (Get $get, Order $order, Set $set): void {
                                         $set('location', [
-                                            'lat' => $order->address->latitude,
-                                            'lng' => $order->address->longitude,
+                                            'lat' => $get('latitude'),
+                                            'lng' => $get('longitude'),
                                         ]);
                                     })
                                     ->extraStyles([
@@ -218,7 +220,7 @@ class EditOrder extends Component implements HasForms
                             ])
                                 ->columns()
                                 ->reactive()
-                                ->visible(fn ($state) => $state['edit_address']),
+                                ->visible(fn (Get $get) => $get('edit_address')),
                         ]),
                     Wizard\Step::make('Order Items')
                         ->icon('heroicon-o-list-bullet')
