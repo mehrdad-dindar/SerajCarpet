@@ -3,6 +3,7 @@
 namespace App\Livewire\Driver\Order;
 
 use App\Events\OrderReceivedByDriver;
+use App\Models\Comment;
 use App\Models\Option;
 use App\Models\Order;
 use App\Models\OrderStatus;
@@ -381,7 +382,6 @@ class EditOrder extends Component implements HasForms
                         ]),
                     Wizard\Step::make('Special services')
                         ->icon('heroicon-o-sparkles')
-                        ->columns()
                         ->translateLabel()
                         ->description(__('Application of ancillary services'))
                         ->schema([
@@ -392,6 +392,9 @@ class EditOrder extends Component implements HasForms
                                 ->default(Option::where('is_default', true)->pluck('id')->toArray())
                                 ->native()
                                 ->required(),
+                            Textarea::make('comment')
+                                ->label(__('Order Description'))
+                            ->autosize()
                         ]),
                 ])
                     ->submitAction(new HtmlString(Blade::render(
@@ -450,10 +453,25 @@ BLADE
     {
         $data = $this->form->getState();
 
+        if ($data['comment']) {
+            $this->submitOrderComment($data['comment']);
+        }
         $data['status_id'] = OrderStatus::whereName(OrderStatus::CARPETS_RECEIVED)->first()->id;
 
-        unset($data['current_location'], $data['edit_address']);
+        unset(
+            $data['current_location'],
+            $data['edit_address'],
+            $data['comment']
+        );
 
         return $data;
+    }
+
+    private function submitOrderComment($commentBody)
+    {
+        $comment = new Comment();
+        $comment->body = $commentBody;
+        $comment->commenter()->associate(auth('driver')->user());
+        $this->order->comments()->save($comment);
     }
 }
