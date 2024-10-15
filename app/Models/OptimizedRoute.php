@@ -36,7 +36,19 @@ class OptimizedRoute extends Model
 
     public function orders()
     {
-        return Order::whereIn('id', $this->orders)->get();
+        return Order::whereIn('id', $this->orders)
+            ->orderByRaw('FIELD(id, ' . implode(',', $this->orders) . ')')
+            ->whereDate('time_apply_status', Carbon::today())
+            ->whereHas(
+                'status',
+                fn ($q) => $q->whereIn('name', [
+                    OrderStatus::RESERVED,
+                    OrderStatus::IN_COLLECTIVE_LIST,
+                    OrderStatus::IN_DISTRIBUTION_LIST,
+                    OrderStatus::REVISITING_DRIVER,
+                ])
+            )
+            ->get();
     }
 
     public function calculateRoute(array $driverIds): void

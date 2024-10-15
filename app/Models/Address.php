@@ -47,4 +47,10 @@ class Address extends Model
     {
         return $this->morphMany(Comment::class, 'commentable');
     }
+
+    public function customerComments()
+    {
+        return $this->morphMany(Comment::class, 'commentable')
+            ->whereHasMorph('commenter', [Customer::class]);
+    }
 }

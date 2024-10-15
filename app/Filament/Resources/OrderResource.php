@@ -119,9 +119,9 @@ class OrderResource extends Resource
                     ->translateLabel(),
                 Tables\Filters\SelectFilter::make('area')
                     ->options(function () {
-                        return Address::distinct()
+                        return array_filter(Address::distinct()
                             ->pluck('municipality_zone', 'municipality_zone')
-                            ->toArray();
+                            ->toArray());
                     })
                     ->query(function ($query, $state) {
                         if (!$state['value']) {

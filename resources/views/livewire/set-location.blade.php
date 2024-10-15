@@ -1,8 +1,26 @@
 <div class="relative w-screen h-screen">
-    <div id="map" class="w-full h-full"></div>
+    <div wire:ignore id="map" class="w-full h-full"></div>
     <span class="text-white absolute top-1.5 left-1.5 z-30">SerajCarpet</span>
     <div class="absolute bottom-16 z-30 right-0 left-0 flex justify-center">
         <x-srj-button :label="__('Submit Location')" class="bg-gradient-fuchsia font-iranSans !text-base" id="button1"/>
+        <x-srj-modal-card title="آدرس انتخابی" name="cardModal">
+            @if($addressData)
+                <x-srj-badge outline fuchsia :label="$addressData['city']"/>
+                <x-srj-badge outline fuchsia :label="$addressData['area']"/>
+                <x-srj-badge outline fuchsia :label="$addressData['formatted_address']" class="inline-block"/>
+                <x-srj-alert :title="__('message.address_description_alert')" warning class="my-4"/>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <x-srj-input :label="__('No.')" class="[&>label]:ring-accent-600"/>
+                    <x-srj-input :label="__('Floor')" class="[&>label]:ring-accent-600"/>
+                    <x-srj-input :label="__('Unit')" class="[&>label]:ring-accent-600"/>
+                    <x-srj-textarea wire:model="commentBody" :label="__('Address Description')" :placeholder="__('message.address_description')" class="col-span-full [&>label]:ring-accent-600"/>
+                </div>
+            @endif
+            <x-slot name="footer" class="flex justify-between gap-x-4">
+                <x-srj-button flat warning :label="__('Cancel')" x-on:click="close"/>
+                <x-srj-button fuchsia :label="__('Submit')" wire:click="submit" x-on:click="close" class="bg-gradient-fuchsia w-full"/>
+            </x-slot>
+        </x-srj-modal-card>
     </div>
     @push('scripts')
         <script type="module">
@@ -60,6 +78,7 @@
                         latitude: centerCoordinates.lat,
                         longitude: centerCoordinates.lng
                     });
+                    $openModal('cardModal');
                 });
 
                 const driver = window.driver.js.driver;

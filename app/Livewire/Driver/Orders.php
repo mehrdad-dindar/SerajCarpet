@@ -19,7 +19,7 @@ class Orders extends Component
     public Collection $routeTypes;
     public $opRoute;
 
-    public Collection $orders;
+    public $orders = [];
     public function mount()
     {
         $this->opRoute = $this->getDriverRoute();
@@ -28,7 +28,7 @@ class Orders extends Component
     private function getDriverRoute()
     {
         $currentHour = Carbon::now()->hour;
-        $shift = $currentHour <= 14 ? OptimizedRoute::MORNING_SHIFT : OptimizedRoute::AFTERNOON_SHIFT;
+        $shift = $currentHour < 14 ? OptimizedRoute::MORNING_SHIFT : OptimizedRoute::AFTERNOON_SHIFT;
 
         return auth('driver')->user()->optimizedRoutes()
             ->whereShift($shift)
@@ -37,9 +37,9 @@ class Orders extends Component
     private function getOrders(): void
     {
         if (!is_null($this->opRoute)) {
-            $this->orders = $this->opRoute->orders();
+            $this->orders = $this->opRoute->orders;
         } else {
-            $this->reset('orders');
+            $this->orders = [];
         }
     }
     #[Layout('driver.layouts.app')]

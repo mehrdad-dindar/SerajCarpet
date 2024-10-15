@@ -168,6 +168,10 @@
     "Shift" : "شیفت",
     "Morning" : "صبح",
     "Afternoon" : "عصر",
+    "Cancel" : "لغو",
+    "Order Description" : "توضیحات سفارش",
+    "Customer comment for address" : "توضیحات مشتری برای آدرس سفارش",
+    "Address Description" : "توضیحات آدرس",
     "There are currently no orders." : "در حال حاضر سفارشی وجود ندارد.",
     "Customer" : "مشتری"
 }
