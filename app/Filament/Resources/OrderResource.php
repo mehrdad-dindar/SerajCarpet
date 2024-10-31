@@ -13,6 +13,7 @@ use App\Models\Option;
 use App\Models\Order;
 use App\Models\OrderStatus;
 use App\Models\Property;
+use Carbon\Carbon;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
@@ -31,6 +32,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection as SupportCollection;
+use Illuminate\Support\Facades\DB;
 
 class OrderResource extends Resource
 {
@@ -178,6 +180,64 @@ class OrderResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('changeStatus')
+                        ->label('Change status')
+                        ->icon('heroicon-o-arrow-path-rounded-square')
+                        ->translateLabel()
+                        ->action(function (Collection $records, array $data): void {
+                            $ids = $records->pluck('id');
+
+                            $reservationDate = $data['reservation_date'] ?? null;
+                            $reservationTime = $data['reservation_time'] ?? null;
+
+                            if ($reservationDate && $reservationTime) {
+                                $time_apply_status = Carbon::parse("$reservationDate $reservationTime");
+                            } else {
+                                $time_apply_status = null;
+                            }
+
+                            $orders = Order::whereIn('id', $ids)->update([
+                                'status_id' => $data['status_id'],
+                                'time_apply_status' => $time_apply_status ?? DB::raw('time_apply_status'),
+                            ]);
+                            if ($orders) {
+                                event(new BulkOrderUpdated($records));
+                            }
+                        })
+                        ->form([
+                            Forms\Components\Select::make('status_id')
+                                ->relationship('status', 'label')
+                                ->hiddenLabel()
+                                ->live()
+                                ->required()
+                                ->label(__('Order Status')),
+                            Forms\Components\Fieldset::make('reservation setting')
+                                ->label(__('Reservation setting for'))
+                                ->visible(
+                                    fn (Get $get): bool => OrderStatus::where(
+                                        'id',
+                                        intval($get('status_id'))
+                                    )->value('has_time') == true
+                                )
+                                ->schema([
+                                    Forms\Components\DatePicker::make('reservation_date')
+                                        ->prefixIcon('heroicon-o-calendar-days')
+                                        ->label(__('Reservation Date'))
+                                        ->translateLabel()
+                                        ->reactive()
+                                        ->displayFormat('Y-m-d')
+                                        ->required()
+                                        ->jalali(),
+                                    Select::make('reservation_time')
+                                        ->label(__('Shift'))
+                                        ->options([
+                                            '09:00:00' => __('Morning'),
+                                            '15:00:00' => __('Afternoon'),
+                                        ])
+                                        ->reactive()
+                                        ->required(),
+                                ]),
+                        ]),
                     Tables\Actions\BulkAction::make('assignDriver')
                         ->label('Assign Driver')
                         ->icon('heroicon-o-truck')
