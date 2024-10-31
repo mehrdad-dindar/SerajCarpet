@@ -18,13 +18,17 @@ class BulkOrderUpdated
 
     public Collection $oldOrders;
     public Collection $orders;
+    public $user;
+    public $statusId;
     /**
      * Create a new event instance.
      */
-    public function __construct(Collection $orders)
+    public function __construct(Collection $orders, $statusId = null)
     {
         $this->oldOrders = $orders;
         $this->orders = Order::whereIn('id', $orders->pluck('id'))->get();
+        $this->user = auth()->user();
+        $this->statusId = $statusId;
     }
 
     /**

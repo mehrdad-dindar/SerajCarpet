@@ -201,7 +201,7 @@ class OrderResource extends Resource
                                 'time_apply_status' => $time_apply_status ?? DB::raw('time_apply_status'),
                             ]);
                             if ($orders) {
-                                event(new BulkOrderUpdated($records));
+                                event(new BulkOrderUpdated($records,$data['status_id']));
                             }
                         })
                         ->form([
