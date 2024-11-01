@@ -1,7 +1,5 @@
 <?php
 
-use App\Settings\SystemSettings;
-
 return [
 
     /*
@@ -9,7 +7,8 @@ return [
      * put them (manually) here.
      */
     'settings' => [
-        SystemSettings::class,
+        \App\Settings\SystemSettings::class,
+        \App\Settings\ShiftSettings::class
     ],
 
     /*
