@@ -31,16 +31,21 @@ class Orders extends Component
     {
         $shiftHours = $shiftSettings->shift_hours;
         $now = Verta::now();
-        $currentHour = $now->hour;
 
-        $dayShift = array_filter($shiftHours, fn($item) => $item['day'] == $now->dayOfWeek);
+        $dayShift = array_filter($shiftHours, fn ($item) => $item['day'] == $now->dayOfWeek);
         $shiftDetails = reset($dayShift);
 
         $shift = null;
-        if ($shiftDetails){
-            if ($currentHour >= (int)$shiftDetails['morning_start'] && $currentHour < (int)$shiftDetails['morning_end']) {
+        if ($shiftDetails) {
+
+            $morningStart = Verta::createFromFormat('H:i', $shiftDetails['morning_start']);
+            $morningEnd = Verta::createFromFormat('H:i', $shiftDetails['morning_end']);
+            $afternoonStart = Verta::createFromFormat('H:i', $shiftDetails['afternoon_start']);
+            $afternoonEnd = Verta::createFromFormat('H:i', $shiftDetails['afternoon_end']);
+
+            if ($now->between($morningStart,$morningEnd)) {
                 $shift = OptimizedRoute::MORNING_SHIFT;
-            } elseif ($currentHour >= (int)$shiftDetails['afternoon_start'] && $currentHour < (int)$shiftDetails['afternoon_end']) {
+            } elseif ($now->between($afternoonStart,$afternoonEnd)) {
                 $shift = OptimizedRoute::AFTERNOON_SHIFT;
             }
         }
