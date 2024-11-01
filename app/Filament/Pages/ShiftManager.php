@@ -6,6 +6,7 @@ use App\Settings\ShiftSettings;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Pages\SettingsPage;
+use Filament\Support\Enums\Alignment;
 use Verta;
 
 class ShiftManager extends SettingsPage
@@ -82,6 +83,7 @@ class ShiftManager extends SettingsPage
                                     ->required(),
                             ]),
                     ])
+                    ->reorderable(false)
                     ->addActionLabel(__('Add shift'))
                     ->columnSpan('full')
                     ->columns(3),
