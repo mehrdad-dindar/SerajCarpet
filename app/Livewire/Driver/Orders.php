@@ -57,17 +57,15 @@ class Orders extends Component
 
         $dayShift = array_filter($shiftHours, fn ($item) => $item['day'] == $now->dayOfWeek);
         $shiftDetails = reset($dayShift);
-
         if ($shiftDetails) {
-
             $morningStart = Verta::createFromFormat('H:i', $shiftDetails['morning_start']);
             $morningEnd = Verta::createFromFormat('H:i', $shiftDetails['morning_end']);
             $afternoonStart = Verta::createFromFormat('H:i', $shiftDetails['afternoon_start']);
             $afternoonEnd = Verta::createFromFormat('H:i', $shiftDetails['afternoon_end']);
 
-            if ($now->between($morningStart,$morningEnd)) {
+            if ($now->between($morningStart, $morningEnd)) {
                  $this->shift = OptimizedRoute::MORNING_SHIFT;
-            } elseif ($now->between($afternoonStart,$afternoonEnd)) {
+            } elseif ($now->between($afternoonStart, $afternoonEnd)) {
                 $this->shift = OptimizedRoute::AFTERNOON_SHIFT;
             }
         }
