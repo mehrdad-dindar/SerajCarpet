@@ -15,6 +15,7 @@ class ShowDriverLocations extends Page
 
     public function getDriverLocations()
     {
-        return DriverLocation::where('updated_at', '>=', now()->subMinutes(30))->get();
+        $res = DriverLocation::where('updated_at', '>=', now()->subMinutes(30))->get();
+        return $res;
     }
 }
