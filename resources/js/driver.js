@@ -15,22 +15,37 @@ function updateDriverLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.watchPosition(
             (position) => {
-                // موقعیت مکانی جدید راننده
                 const latitude = position.coords.latitude.toFixed(12);
                 const longitude = position.coords.longitude.toFixed(12);
 
-                // ارسال به سرور با استفاده از AJAX
                 axios.post('/dashboard/update-location', {
                     latitude: latitude,
                     longitude: longitude
                 }).then(response => {
-                    console.log("Location updated successfully:", response.data);
+                    console.log("موقعیت با موفقیت به‌روزرسانی شد:", response.data);
                 }).catch(error => {
-                    console.error("Error updating location:", error);
+                    console.error("خطا در به‌روزرسانی موقعیت:", error);
                 });
             },
             (error) => {
-                console.error("Error getting location:", error);
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        console.error("کاربر اجازه دسترسی به موقعیت مکانی را نداد.");
+                        alert("لطفاً دسترسی به موقعیت مکانی را در تنظیمات مرورگر فعال کنید.");
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        // console.error("اطلاعات موقعیت مکانی در دسترس نیست.");
+                        alert("اطلاعات موقعیت مکانی در دسترس نمی‌باشد.");
+                        break;
+                    case error.TIMEOUT:
+                        // console.error("درخواست موقعیت مکانی به پایان رسید.");
+                        alert("درخواست موقعیت مکانی زمان‌بر بود. لطفاً دوباره تلاش کنید.");
+                        break;
+                    default:
+                        // console.error("خطای ناشناخته‌ای رخ داده است.");
+                        alert("مشکلی در دریافت موقعیت مکانی شما وجود دارد.");
+                        break;
+                }
             },
             {
                 enableHighAccuracy: true, // دقت بالاتر برای موقعیت
@@ -39,7 +54,10 @@ function updateDriverLocation() {
             }
         );
     } else {
-        console.error("Geolocation is not supported by this browser.");
+        // alert("مرورگر شما از موقعیت‌یاب پشتیبانی نمی‌کند.");
+        console.error("مرورگر شما از موقعیت‌یاب پشتیبانی نمی‌کند.");
     }
 }
+setInterval(() => {
 updateDriverLocation();
+    },10000);
