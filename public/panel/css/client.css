@@ -2236,6 +2236,9 @@ h6 {
 .m-0 {
   margin: 0px;
 }
+.m-4 {
+  margin: 1rem;
+}
 .-mx-2 {
   margin-left: -0.5rem;
   margin-right: -0.5rem;
@@ -2456,6 +2459,9 @@ h6 {
 }
 .ms-3 {
   margin-inline-start: 0.75rem;
+}
+.ms-4 {
+  margin-inline-start: 1rem;
 }
 .ms-auto {
   margin-inline-start: auto;
@@ -3219,6 +3225,9 @@ h6 {
 }
 .grid-cols-1 {
   grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .grid-cols-3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -6055,8 +6064,12 @@ input[type="number"].appearance-number-none {
 
 #alert svg {
   margin-inline-end: 0.75rem;
-  --tw-bg-opacity: 1;
-  background-color: rgb(245 57 57 / var(--tw-bg-opacity));
+  margin-right: 0px !important;
+}
+
+.mapboxgl-ctrl-group button {
+  height: 3rem !important;
+  width: 3rem !important;
 }
 
 .dark\:prose-invert:is(.dark *) {

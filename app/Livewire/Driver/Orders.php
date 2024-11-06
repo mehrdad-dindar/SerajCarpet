@@ -20,42 +20,19 @@ class Orders extends Component
 {
     public Collection $routeTypes;
     public $opRoute;
+    public $shift;
 
     public $orders = [];
     public function mount(ShiftSettings $shiftSettings)
     {
-        $this->opRoute = $this->getDriverRoute($shiftSettings);
+        $this->getShift($shiftSettings);
+        $this->opRoute = $this->getDriverRoute();
         $this->getOrders();
     }
-    private function getDriverRoute($shiftSettings)
+    private function getDriverRoute()
     {
-        $shiftHours = $shiftSettings->shift_hours;
-        $now = Verta::now();
-
-        $dayShift = array_filter($shiftHours, fn ($item) => $item['day'] == $now->dayOfWeek);
-        $shiftDetails = reset($dayShift);
-
-        $shift = null;
-        if ($shiftDetails) {
-
-            $morningStart = Verta::createFromFormat('H:i', $shiftDetails['morning_start']);
-            $morningEnd = Verta::createFromFormat('H:i', $shiftDetails['morning_end']);
-            $afternoonStart = Verta::createFromFormat('H:i', $shiftDetails['afternoon_start']);
-            $afternoonEnd = Verta::createFromFormat('H:i', $shiftDetails['afternoon_end']);
-
-            if ($now->between($morningStart,$morningEnd)) {
-                $shift = OptimizedRoute::MORNING_SHIFT;
-            } elseif ($now->between($afternoonStart,$afternoonEnd)) {
-                $shift = OptimizedRoute::AFTERNOON_SHIFT;
-            }
-        }
-
-        if (is_null($shift)) {
-            return null;
-        }
-
         $driver = auth('driver')->user();
-        return $driver->optimizedRoutes()->whereShift($shift)->first();
+        return $driver->optimizedRoutes()->whereShift($this->shift)->first();
     }
     private function getOrders(): void
     {
@@ -69,5 +46,28 @@ class Orders extends Component
     public function render()
     {
         return view('livewire.driver.orders');
+    }
+
+    private function getShift($shiftSettings)
+    {
+        $this->shift = null;
+
+        $shiftHours = $shiftSettings->shift_hours;
+        $now = Verta::now();
+
+        $dayShift = array_filter($shiftHours, fn ($item) => $item['day'] == $now->dayOfWeek);
+        $shiftDetails = reset($dayShift);
+        if ($shiftDetails) {
+            $morningStart = Verta::createFromFormat('H:i', $shiftDetails['morning_start']);
+            $morningEnd = Verta::createFromFormat('H:i', $shiftDetails['morning_end']);
+            $afternoonStart = Verta::createFromFormat('H:i', $shiftDetails['afternoon_start']);
+            $afternoonEnd = Verta::createFromFormat('H:i', $shiftDetails['afternoon_end']);
+
+            if ($now->between($morningStart, $morningEnd)) {
+                 $this->shift = OptimizedRoute::MORNING_SHIFT;
+            } elseif ($now->between($afternoonStart, $afternoonEnd)) {
+                $this->shift = OptimizedRoute::AFTERNOON_SHIFT;
+            }
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DriverLocationController;
 use App\Http\Controllers\PropertyController;
 use App\Livewire\Auth\Login;
 use App\Livewire\Customer\Panel as CustomerPanel;
@@ -59,9 +60,7 @@ Route::middleware(['guest'])->group(function () {
     //    Route::get('verify', [AuthController::class, 'verify'])->name('verify');
     //    Route::post('doVerify', [AuthController::class, 'doVerify'])->name('doVerify');
 });
-Route::middleware('guest')->group(function () {
-    Route::get('/login', Login::class)->name('login');
-});
+Route::get('/login', Login::class)->name('login');
 Route::middleware(['auth:customer'])->prefix('panel')->group(function () {
     Route::get('/', CustomerPanel::class)->name('customer.panel.index');
     Route::get('/profile', CustomerProfile::class)->name('customer.panel.profile');
@@ -74,6 +73,7 @@ Route::middleware(['auth:customer'])->prefix('panel')->group(function () {
     Route::get('/orders/{order}', CustomerOrderShow::class)->name('customer.panel.orders.show');
 });
 Route::middleware(['auth:driver'])->prefix('dashboard')->group(function () {
+    Route::post('/update-location', [DriverLocationController::class, 'updateLocation']);
     Route::get('/', DriverPanel::class)->name('driver.panel.index');
     Route::get('/orders', DriverOrders::class)->name('driver.orders');
     Route::get('/orders/{order}/edit', EditOrder::class)->name('driver.orders.edit');

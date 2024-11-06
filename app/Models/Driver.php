@@ -10,10 +10,11 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class Driver extends Authenticatable
 {
-    use SoftDeletes,HasFactory, Notifiable;
+    use SoftDeletes,HasFactory, Notifiable, HasApiTokens;
     protected $guarded;
 
     // order relationship
@@ -45,7 +46,7 @@ class Driver extends Authenticatable
         }
     }
 
-    public function locations(): HasOne
+    public function location(): HasOne
     {
         return $this->hasOne(DriverLocation::class);
     }

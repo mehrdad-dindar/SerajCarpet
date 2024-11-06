@@ -7,7 +7,7 @@
         "preview": "vite preview",
         "build:customer": "TAILWIND_CONFIG=./resources/css/client/tailwind.client.config.js postcss resources/css/client/client.css -o public/panel/css/client.css"
     },
-    "main": "resources/js/main.js",
+    "main": "resources/js/driver.js",
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.7",
         "@tailwindcss/typography": "^0.5.13",
