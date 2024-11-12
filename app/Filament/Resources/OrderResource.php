@@ -555,6 +555,7 @@ class OrderResource extends Resource
                             ->schema([
                                 Forms\Components\Select::make('status_id')
                                     ->relationship('status', 'label')
+                                    ->default(OrderStatus::whereName(OrderStatus::RESERVED)->pluck('id')->toArray())
                                     ->hiddenLabel()
                                     ->live()
                                     ->required()
@@ -574,6 +575,7 @@ class OrderResource extends Resource
                                             ->translateLabel()
                                             ->reactive()
                                             ->displayFormat('Y-m-d')
+                                            ->default(Carbon::tomorrow())
                                             ->columnSpanFull()
                                             ->required()
                                             ->jalali(),
