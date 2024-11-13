@@ -54,7 +54,7 @@ class OrderResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('id')
-                    ->label('ID')
+                    ->label('Order ID')
                     ->searchable()
                     ->translateLabel(),
                 Tables\Columns\TextColumn::make('customer.name')
@@ -64,6 +64,7 @@ class OrderResource extends Resource
                     ->url(function (Model $record): string {
                         return route('filament.admin.resources.customers.edit', $record->customer_id);
                     })
+                    ->description(fn (Model $record): ?string => $record->customer->phone)
                     ->alignCenter()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
@@ -74,30 +75,15 @@ class OrderResource extends Resource
                     ->color(fn (OrderStatus $state): string => $state->color)
                     ->toggleable()
                     ->formatStateUsing(fn (OrderStatus $state): string => $state->label),
-                Tables\Columns\TextColumn::make('items_count')
-                    ->sortable()
-                    ->translateLabel()
-                    ->label('Order Item Count')
-                    ->toggleable()
-                    ->alignCenter()
-                    ->counts('items'),
                 Tables\Columns\TextColumn::make('area')
                     ->badge()->color(fn ($state, $record): string => $record->address ? 'info' : 'danger')
-                    ->getStateUsing(fn ($record) => $record->address ? 'منطقه '.$record->address->municipality_zone : 'X')
-                    ->description(fn ($record) => $record->address ? 'محله '.$record->address->neighbourhood : 'فاقد آدرس')
+                    ->getStateUsing(fn ($record) => $record->address ? $record->address->getArea() : 'X')
+                    ->description(fn ($record) => $record->address ? $record->address->getFullAddress(): 'فاقد آدرس')
                     ->sortable()
                     ->translateLabel()
                     ->toggleable()
                     ->alignCenter()
                     ->counts('items'),
-                Tables\Columns\TextColumn::make('total')
-                    ->formatStateUsing(function ($state) {
-                        return number_format($state, 0).' تومان';
-                    })
-                    ->badge()
-                    ->translateLabel()
-                    ->sortable()
-                    ->toggleable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->translateLabel()
                     ->sortable()
@@ -108,6 +94,7 @@ class OrderResource extends Resource
                     ->sortable()
                     ->toggleable(),
                 Tables\Columns\SelectColumn::make('driver_id')
+                    ->label(__("Assign Driver"))
                     ->options(Driver::all()->pluck('name', 'id')->toArray())
                     ->translateLabel()
                     ->sortable()
@@ -568,6 +555,7 @@ class OrderResource extends Resource
                             ->schema([
                                 Forms\Components\Select::make('status_id')
                                     ->relationship('status', 'label')
+                                    ->default(OrderStatus::whereName(OrderStatus::RESERVED)->pluck('id')->toArray())
                                     ->hiddenLabel()
                                     ->live()
                                     ->required()
@@ -587,6 +575,7 @@ class OrderResource extends Resource
                                             ->translateLabel()
                                             ->reactive()
                                             ->displayFormat('Y-m-d')
+                                            ->default(Carbon::tomorrow())
                                             ->columnSpanFull()
                                             ->required()
                                             ->jalali(),

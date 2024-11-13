@@ -38,6 +38,11 @@ class Address extends Model
     {
         return $this->addressService->getFullAddress($this);
     }
+
+    public function getArea(): string
+    {
+        return $this->addressService->getArea($this);
+    }
     public function updateAddressGeo($location): void
     {
         $this->addressService->updateAddressGeo($this, $location);
