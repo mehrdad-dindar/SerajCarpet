@@ -1,0 +1,15 @@
+parameters:
+    # سطح تحلیل (بین 0 تا 9 که بالاترین سطح دقیق‌تر است)
+    level: 5
+
+    # نادیده گرفتن خطاهای خاص
+    ignoreErrors:
+        - '#Some known issue pattern#'
+
+    # آنالیز فریم‌ورک‌های خاص (مانند لاراول یا داکترین)
+    paths:
+        - app
+        - database
+
+    # محدود کردن تعداد گزارش‌ها در یک دسته خطا
+    reportUnmatchedIgnoredErrors: true
