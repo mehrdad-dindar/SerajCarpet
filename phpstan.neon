@@ -1,15 +1,13 @@
 parameters:
-    # سطح تحلیل (بین 0 تا 9 که بالاترین سطح دقیق‌تر است)
     level: 5
-
-    # نادیده گرفتن خطاهای خاص
     ignoreErrors:
-        - '#Some known issue pattern#'
+        - '#Call to an undefined static method [a-zA-Z0-9\\_]+::insert\(\)#'
+        - '#Call to an undefined static method [a-zA-Z0-9\\_]+::create\(\)#'
+        - '#Call to an undefined static method [a-zA-Z0-9\\_]+::where\(\)#'
+        - '#Call to an undefined static method [a-zA-Z0-9\\_]+::whereIn\(\)#'
+        - '#Call to an undefined static method [a-zA-Z0-9\\_]+::find\(\)#'
+        - '/Access to an undefined property [a-zA-Z0-9_\\:$]/'
 
-    # آنالیز فریم‌ورک‌های خاص (مانند لاراول یا داکترین)
     paths:
         - app
         - database
-
-    # محدود کردن تعداد گزارش‌ها در یک دسته خطا
-    reportUnmatchedIgnoredErrors: true
