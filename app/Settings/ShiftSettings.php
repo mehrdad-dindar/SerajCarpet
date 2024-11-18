@@ -6,7 +6,7 @@ use Spatie\LaravelSettings\Settings;
 
 class ShiftSettings extends Settings
 {
-    public array $shift_hours;
+    public array $shifts;
 
     public static function group(): string
     {
