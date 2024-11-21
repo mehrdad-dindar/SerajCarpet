@@ -24,7 +24,7 @@ class ShiftManager extends SettingsPage
     {
         return $form
             ->schema([
-                Forms\Components\Repeater::make('shift_hours')
+                Forms\Components\Repeater::make('shifts')
                     ->label('Shift Hours by Day')
                     ->translateLabel()
                     ->schema([
@@ -38,51 +38,41 @@ class ShiftManager extends SettingsPage
                                     ->translateLabel()
                                     ->columnSpan(1)
                                     ->schema([
-                                        Forms\Components\TimePicker::make('morning_start')
-                                            ->label(__('Start Time'))
-                                            ->seconds(false)
-                                            ->datalist([
-                                                '09:00',
-                                                '09:30',
-                                                '10:00',
-                                                '10:30',
-                                            ])
-                                            ->required(),
-                                        Forms\Components\TimePicker::make('morning_end')
-                                            ->label(__('End Time'))
-                                            ->seconds(false)
-                                            ->datalist([
-                                                '12:00',
-                                                '12:30',
-                                                '13:00',
-                                                '13:30',
-                                            ])
-                                            ->required(),
+                                        Forms\Components\Repeater::make('morning_shift_hours')
+                                            ->label('Shift Hours')
+                                            ->translateLabel()
+                                            ->columnSpanFull()
+                                            ->columns()
+                                            ->schema([
+                                                Forms\Components\TimePicker::make('morning_start')
+                                                    ->label(__('Start Time'))
+                                                    ->seconds(false)
+                                                    ->required(),
+                                                Forms\Components\TimePicker::make('morning_end')
+                                                    ->label(__('End Time'))
+                                                    ->seconds(false)
+                                                    ->required(),
+                                            ]),
                                     ]),
                                 Forms\Components\Fieldset::make('Afternoon Shift')
                                     ->translateLabel()
                                     ->columnSpan(1)
                                     ->schema([
-                                        Forms\Components\TimePicker::make('afternoon_start')
-                                            ->label(__('Start Time'))
-                                            ->seconds(false)
-                                            ->datalist([
-                                                '14:00',
-                                                '14:30',
-                                                '15:00',
-                                                '15:30',
-                                            ])
-                                            ->required(),
-                                        Forms\Components\TimePicker::make('afternoon_end')
-                                            ->label(__('End Time'))
-                                            ->seconds(false)
-                                            ->datalist([
-                                                '18:00',
-                                                '18:30',
-                                                '19:00',
-                                                '19:30',
-                                            ])
-                                            ->required(),
+                                        Forms\Components\Repeater::make('afternoon_shift_hours')
+                                            ->label('Shift Hours')
+                                            ->translateLabel()
+                                            ->columnSpanFull()
+                                            ->columns()
+                                            ->schema([
+                                                Forms\Components\TimePicker::make('afternoon_start')
+                                                    ->label(__('Start Time'))
+                                                    ->seconds(false)
+                                                    ->required(),
+                                                Forms\Components\TimePicker::make('afternoon_end')
+                                                    ->label(__('End Time'))
+                                                    ->seconds(false)
+                                                    ->required(),
+                                            ]),
                                     ]),
                             ])
                             ->columnSpanFull()
@@ -95,7 +85,7 @@ class ShiftManager extends SettingsPage
             ]);
     }
 
-    private function getDaysOption()
+    private function getDaysOption(): array
     {
         $now = Verta::now();
         $weekDays = [];

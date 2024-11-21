@@ -7,7 +7,8 @@ parameters:
         - '#Call to an undefined static method [a-zA-Z0-9\\_]+::whereIn\(\)#'
         - '#Call to an undefined static method [a-zA-Z0-9\\_]+::find\(\)#'
         - '/Access to an undefined property [a-zA-Z0-9_\\:$]/'
-
+    bootstrapFiles:
+        - vendor/autoload.php
     paths:
         - app
         - database
