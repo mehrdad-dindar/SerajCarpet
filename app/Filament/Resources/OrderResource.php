@@ -213,15 +213,16 @@ class OrderResource extends Resource
                                         ->label(__('Reservation Date'))
                                         ->translateLabel()
                                         ->reactive()
+                                        ->default(null)
                                         ->displayFormat('Y-m-d')
                                         ->required()
                                         ->jalali(),
                                     Select::make('reservation_time')
+                                        ->visible(
+                                            fn (Get $get): bool => !is_null($get('reservation_date'))
+                                        )
                                         ->label(__('Shift'))
-                                        ->options([
-                                            '09:00:00' => __('Morning'),
-                                            '15:00:00' => __('Afternoon'),
-                                        ])
+                                        ->options(fn (Get $get): array => ShiftSettings::getDayShifts($get('reservation_date')))
                                         ->reactive()
                                         ->required(),
                                 ]),
