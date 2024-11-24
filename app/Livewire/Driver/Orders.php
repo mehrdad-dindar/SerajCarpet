@@ -7,7 +7,10 @@ use App\Models\Order;
 use App\Models\OrderStatus;
 use App\Settings\ShiftSettings;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Foundation\Application;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -23,9 +26,9 @@ class Orders extends Component
     public $shift;
 
     public $orders = [];
-    public function mount(ShiftSettings $shiftSettings)
+    public function mount()
     {
-        $this->getShift($shiftSettings);
+        $this->shift = shiftSettings()->getCurrentShift();
         $this->opRoute = $this->getDriverRoute();
         $this->getOrders();
     }
@@ -43,28 +46,29 @@ class Orders extends Component
         }
     }
     #[Layout('driver.layouts.app')]
-    public function render()
+    public function render(): Application|Factory|View|\Illuminate\View\View
     {
         return view('livewire.driver.orders');
     }
 
-    private function getShift($shiftSettings)
+    private function getShift()
     {
         $this->shift = null;
+        //        dd(shiftSettings()->getCurrentShift());
 
-        $shiftHours = $shiftSettings->shift_hours;
+        $shiftHours = shiftSettings()->shifts;
         $now = Verta::now();
-
         $dayShift = array_filter($shiftHours, fn ($item) => $item['day'] == $now->dayOfWeek);
         $shiftDetails = reset($dayShift);
         if ($shiftDetails) {
             $morningStart = Verta::createFromFormat('H:i', $shiftDetails['morning_start']);
+            dd($shiftDetails);
             $morningEnd = Verta::createFromFormat('H:i', $shiftDetails['morning_end']);
             $afternoonStart = Verta::createFromFormat('H:i', $shiftDetails['afternoon_start']);
             $afternoonEnd = Verta::createFromFormat('H:i', $shiftDetails['afternoon_end']);
 
             if ($now->between($morningStart, $morningEnd)) {
-                 $this->shift = OptimizedRoute::MORNING_SHIFT;
+                $this->shift = OptimizedRoute::MORNING_SHIFT;
             } elseif ($now->between($afternoonStart, $afternoonEnd)) {
                 $this->shift = OptimizedRoute::AFTERNOON_SHIFT;
             }

@@ -8,12 +8,26 @@ use Spatie\LaravelSettings\Settings;
 class ShiftSettings extends Settings
 {
     public array $shifts;
+    public string $current;
 
     public static function group(): string
     {
         return 'shift';
     }
 
+    public function getCurrentShift(): string
+    {
+        $currentTime = date('H:i:s');
+        $shifts = self::getShiftHoursToArray(self::getDay(Carbon::today()));
+        foreach ($shifts as $range) {
+            [$rangeStart, $rangeEnd] = explode(' - ', $range);
+
+            if ($currentTime >= $rangeStart && $currentTime <= $rangeEnd) {
+                return $range;
+            }
+        }
+        return "";
+    }
     public static function getDayShifts(string $date): array
     {
         return self::getShiftHours(self::getDay($date));
