@@ -17,7 +17,8 @@
                 <x-srj-mini-badge class="bg-gradient-fuchsia ms-4" rounded :label="\App\Models\OptimizedRoute::getOrdersCount(shift: $shift)" danger/>
             </div>
             <div class="flex-auto p-4 pt-0 pb-2">
-                @livewire('driver.order.list-orders',['orders'=>$orders])
+                {{--@livewire('driver.order.list-orders',['orders'=>$orders])--}}
+                @livewire('driver.order.grid',['orders'=>$orders])
             </div>
         </div>
     @else

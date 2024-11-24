@@ -148,7 +148,7 @@ class ListOrders extends Component implements HasForms, HasTable
         return view('livewire.driver.order.list-orders');
     }
 
-    private function tableQuery(): Builder
+    private function tableQuery(): Order
     {
         return Order::whereIn('id', $this->orders)
             ->whereHas(
