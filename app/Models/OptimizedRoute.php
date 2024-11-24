@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Settings\ShiftSettings;
 use App\Traits\Neshan;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -58,9 +59,9 @@ class OptimizedRoute extends Model
             if (! $driver) {
                 continue;
             }
-
-            $this->processDriverOrdersForShift($driver, 'morning');
-            $this->processDriverOrdersForShift($driver, 'afternoon');
+            foreach (ShiftSettings::getTodayShifts() as $shift) {
+                $this->processDriverOrdersForShift($driver, $shift);
+            }
         }
     }
 
@@ -72,19 +73,14 @@ class OptimizedRoute extends Model
 
     private function getOrders(Driver $driver, $shift)
     {
+        $shiftTimeFrame = explode(' - ', $shift);
         $orders = $driver->orders()
             ->whereDate('time_apply_status', Carbon::today());
 
-        return match ($shift) {
-            'morning' => $orders
-                ->whereTime('time_apply_status', '>=', '09:00:00')
-                ->whereTime('time_apply_status', '<=', '14:00:00')
-                ->get(),
-            'afternoon' => $orders
-                ->whereTime('time_apply_status', '>=', '14:00:01')
-                ->whereTime('time_apply_status', '<=', '19:00:00')
-                ->get(),
-        };
+        return $orders
+            ->whereTime('time_apply_status', '>=', $shiftTimeFrame[0])
+            ->whereTime('time_apply_status', '<', $shiftTimeFrame[1])
+            ->get();
     }
 
     private function updateOptimizedRoutes(Driver $driver, $orders, $shift): void
@@ -99,9 +95,7 @@ class OptimizedRoute extends Model
                 $driver->optimizedRoutes()->updateOrCreate(
                     [
                         'driver_id' => $driver->id,
-                        'shift' => $shift === 'morning' ?
-                            OptimizedRoute::MORNING_SHIFT :
-                            OptimizedRoute::AFTERNOON_SHIFT,
+                        'shift' => $shift,
                     ],
                     [
                         'orders' => $orderIds,
@@ -110,7 +104,7 @@ class OptimizedRoute extends Model
             }
         } else {
             $driver->optimizedRoutes()
-                ->whereShift($shift === 'morning' ? OptimizedRoute::MORNING_SHIFT : OptimizedRoute::AFTERNOON_SHIFT)
+                ->whereShift($shift)
                 ->delete();
         }
     }

@@ -13,6 +13,7 @@ use App\Models\Option;
 use App\Models\Order;
 use App\Models\OrderStatus;
 use App\Models\Property;
+use App\Settings\ShiftSettings;
 use Carbon\Carbon;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms;
@@ -188,7 +189,7 @@ class OrderResource extends Resource
                                 'time_apply_status' => $time_apply_status ?? DB::raw('time_apply_status'),
                             ]);
                             if ($orders) {
-                                event(new BulkOrderUpdated($records,$data['status_id']));
+                                event(new BulkOrderUpdated($records, $data['status_id']));
                             }
                         })
                         ->form([
@@ -212,15 +213,16 @@ class OrderResource extends Resource
                                         ->label(__('Reservation Date'))
                                         ->translateLabel()
                                         ->reactive()
+                                        ->default(null)
                                         ->displayFormat('Y-m-d')
                                         ->required()
                                         ->jalali(),
                                     Select::make('reservation_time')
+                                        ->visible(
+                                            fn (Get $get): bool => !is_null($get('reservation_date'))
+                                        )
                                         ->label(__('Shift'))
-                                        ->options([
-                                            '09:00:00' => __('Morning'),
-                                            '15:00:00' => __('Afternoon'),
-                                        ])
+                                        ->options(fn (Get $get): array => ShiftSettings::getDayShifts($get('reservation_date')))
                                         ->reactive()
                                         ->required(),
                                 ]),
@@ -575,16 +577,16 @@ class OrderResource extends Resource
                                             ->translateLabel()
                                             ->reactive()
                                             ->displayFormat('Y-m-d')
-                                            ->default(Carbon::tomorrow())
+                                            ->default(Carbon::now()->addDays(2))
                                             ->columnSpanFull()
                                             ->required()
                                             ->jalali(),
                                         Select::make('reservation_time')
+                                            ->visible(
+                                                fn (Get $get): bool => !is_null($get('reservation_date'))
+                                            )
                                             ->label(__('Shift'))
-                                            ->options([
-                                                '09:00:00' => __('Morning'),
-                                                '15:00:00' => __('Afternoon'),
-                                            ])
+                                            ->options(fn (Get $get): array => ShiftSettings::getDayShifts($get('reservation_date')))
                                             ->reactive()
                                             ->required(),
                                     ]),

@@ -229,5 +229,6 @@ return new class extends SettingsMigration
                 ],
             ],
         ]);
+        $this->migrator->add('shift.current',"");
     }
 };
