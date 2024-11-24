@@ -16,9 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('driver_id')->constrained();
             $table->json('orders');
-            $table->tinyInteger('shift')
-                ->default(OptimizedRoute::MORNING_SHIFT)
-                ->comment('1 = Morning, 2 = Afternoon');
+            $table->string('shift');
             $table->timestamps();
         });
     }

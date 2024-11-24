@@ -24,8 +24,9 @@ class LogOrdersStatusChange
      */
     public function handle(BulkOrderUpdated $event): void
     {
-        if (is_null($event->statusId))
+        if (is_null($event->statusId)) {
             return;
+        }
 
         $status = OrderStatus::findOrFail($event->statusId);
 

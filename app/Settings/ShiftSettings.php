@@ -2,6 +2,7 @@
 
 namespace App\Settings;
 
+use Carbon\Carbon;
 use Spatie\LaravelSettings\Settings;
 
 class ShiftSettings extends Settings
@@ -18,16 +19,12 @@ class ShiftSettings extends Settings
         return self::getShiftHours(self::getDay($date));
     }
 
-    private static function getDay(string $date): int
-    {
-        return verta($date)->dayOfWeek;
-    }
-
     private static function getShiftHours(int $getDay): array
     {
         $shifts = shiftSettings()->shifts;
         return self::transformShiftArray($shifts[$getDay]);
     }
+
     private static function transformShiftArray($shiftArray): array
     {
         $result = [];
@@ -49,6 +46,37 @@ class ShiftSettings extends Settings
                     $endTime = $shift[$endTimeKey];
                     $result[$translatedKey][$startTime] = "$shift[$startTimeKey] - $endTime";
                 }
+            }
+        }
+
+        return $result;
+    }
+
+    private static function getDay(string $date): int
+    {
+        return verta($date)->dayOfWeek;
+    }
+
+    public static function getTodayShifts(): array
+    {
+        return self::getShiftHoursToArray(self::getDay(Carbon::today()));
+    }
+
+    private static function getShiftHoursToArray(int $getDay): array
+    {
+        $shifts = shiftSettings()->shifts;
+        $allShifts = $shifts[$getDay];
+        unset($allShifts['day']);
+        $result = [];
+
+        foreach ($allShifts as $shifts) {
+            foreach ($shifts as $shift) {
+                $startTimeKey = array_key_exists('morning_start', $shift) ? 'morning_start' : 'afternoon_start';
+                $endTimeKey = array_key_exists('morning_end', $shift) ? 'morning_end' : 'afternoon_end';
+
+                $startTime = $shift[$startTimeKey] . ':00';
+                $endTime = $shift[$endTimeKey] . ':00';
+                $result[$startTime] = "$startTime - $endTime";
             }
         }
 
