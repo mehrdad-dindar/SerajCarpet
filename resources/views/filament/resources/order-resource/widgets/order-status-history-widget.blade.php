@@ -3,7 +3,7 @@
         <h3 class="text-lg font-bold mb-4">{{ __("Order Status History") }}</h3>
         <ul>
             @foreach ($activities as $activity)
-                @if($activity->properties['attributes'])
+                @if(isset($activity->properties['attributes']))
                     <li class="mb-2">
                         @if($activity->event !== "created")
                             @if(isset($activity->properties['old']['status_id']))
@@ -36,6 +36,8 @@
                             <strong>{{ __("At:") }}</strong> {{ verta($activity->created_at)->format('d F Y - H:i') }}
                         </div>
                     </li>
+                @else
+                    {{-- TODO: will complate --}}
                 @endif
             @endforeach
         </ul>

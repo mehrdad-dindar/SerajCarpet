@@ -23,6 +23,9 @@ class UpdateDirectionsAfterLogCreated
      */
     public function handle(OrderLogCreated $event): void
     {
+        if (!$event->updateDirection){
+            return;
+        }
         $oldValues = $event->activity->properties['old'] ?? [];
         $newValues = $event->activity->properties['attributes'] ?? [];
         $order = $event->activity->subject;

@@ -2,11 +2,6 @@
 
 namespace App\Livewire\Driver;
 
-use App\Models\OptimizedRoute;
-use App\Models\Order;
-use App\Models\OrderStatus;
-use App\Settings\ShiftSettings;
-use Carbon\Carbon;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -14,9 +9,6 @@ use Illuminate\Foundation\Application;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
-use Livewire\WithPagination;
-use Verta;
-use function Psy\sh;
 
 #[Title("سفارشات")]
 class Orders extends Component
@@ -24,13 +16,22 @@ class Orders extends Component
     public Collection $routeTypes;
     public $opRoute;
     public $shift;
+    public $shiftTitle;
 
     public $orders = [];
+
+    protected $listeners = ['refreshOrderList'];
     public function mount()
     {
         $this->shift = shiftSettings()->getCurrentShift();
+        $this->shiftTitle = shiftSettings()->getCurrentShiftTitle();
         $this->opRoute = $this->getDriverRoute();
         $this->getOrders();
+    }
+
+    public function refreshOrderList()
+    {
+        $this->mount();
     }
     private function getDriverRoute()
     {
@@ -49,29 +50,5 @@ class Orders extends Component
     public function render(): Application|Factory|View|\Illuminate\View\View
     {
         return view('livewire.driver.orders');
-    }
-
-    private function getShift()
-    {
-        $this->shift = null;
-        //        dd(shiftSettings()->getCurrentShift());
-
-        $shiftHours = shiftSettings()->shifts;
-        $now = Verta::now();
-        $dayShift = array_filter($shiftHours, fn ($item) => $item['day'] == $now->dayOfWeek);
-        $shiftDetails = reset($dayShift);
-        if ($shiftDetails) {
-            $morningStart = Verta::createFromFormat('H:i', $shiftDetails['morning_start']);
-            dd($shiftDetails);
-            $morningEnd = Verta::createFromFormat('H:i', $shiftDetails['morning_end']);
-            $afternoonStart = Verta::createFromFormat('H:i', $shiftDetails['afternoon_start']);
-            $afternoonEnd = Verta::createFromFormat('H:i', $shiftDetails['afternoon_end']);
-
-            if ($now->between($morningStart, $morningEnd)) {
-                $this->shift = OptimizedRoute::MORNING_SHIFT;
-            } elseif ($now->between($afternoonStart, $afternoonEnd)) {
-                $this->shift = OptimizedRoute::AFTERNOON_SHIFT;
-            }
-        }
     }
 }

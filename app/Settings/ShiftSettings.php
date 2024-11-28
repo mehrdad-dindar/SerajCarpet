@@ -28,6 +28,21 @@ class ShiftSettings extends Settings
         }
         return "";
     }
+
+    public function getCurrentShiftTitle()
+    {
+        $currentTime = date('H:i:s');
+        $shifts = self::getShiftHours(self::getDay(Carbon::today()));
+        foreach ($shifts as $key => $hourRanges) {
+            foreach ($hourRanges as $range) {
+                [$rangeStart, $rangeEnd] = explode(' - ', $range);
+                if ($currentTime >= $rangeStart && $currentTime <= $rangeEnd) {
+                    return $key. " ($rangeStart - $rangeEnd)";
+                }
+            }
+        }
+        return "";
+    }
     public static function getDayShifts(string $date): array
     {
         return self::getShiftHours(self::getDay($date));
