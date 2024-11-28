@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Settings\SystemSettings;
+use App\Traits\Neshan;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Actions\Action;
@@ -16,7 +17,7 @@ use Livewire\Attributes\Title;
 
 class SystemManager extends SettingsPage
 {
-    use HasPageShield;
+    use HasPageShield,Neshan;
 
     protected static ?string $navigationLabel = 'مدیریت سیستم';
     protected static ?string $title = "مدیریت سیستم";
@@ -50,11 +51,11 @@ class SystemManager extends SettingsPage
                                 'lng' => 51.38900000000000
                             ])
                             ->afterStateUpdated(function (Set $set, ?array $state): void {
-                                $set('location_latitude', $state['lat']);
-                                $set('location_longitude', $state['lng']);
+                                $set('factory_location.0', $state['lat']);
+                                $set('factory_location.1', $state['lng']);
                             })
                             ->afterStateHydrated(function (Get $get, Set $set): void {
-                                $set('location', ['lat' => $get('location_latitude'), 'lng' => $get('location_longitude')]);
+                                $set('location', ['lat' => $get('factory_location.0'), 'lng' => $get('factory_location.1')]);
                             })
                             ->extraStyles([
                                 'min-height: 50vh',
@@ -78,11 +79,17 @@ class SystemManager extends SettingsPage
                         Forms\Components\Fieldset::make('تنظیم ')
                             ->schema([
                                 Forms\Components\Placeholder::make('lat')
+                                    ->translateLabel()
                                     ->content( fn(Get $get) => $get('location.lat')),
                                 Forms\Components\Placeholder::make('lng')
+                                    ->translateLabel()
                                     ->content(fn(Get $get) => $get('location.lng')),
-                                Forms\Components\Hidden::make('location_latitude'),
-                                Forms\Components\Hidden::make('location_longitude')
+                                Forms\Components\Placeholder::make('address')
+                                    ->translateLabel()
+                                    ->columnSpanFull()
+                                    ->content(fn(Get $get) => self::reverseGeocoding($get('location.lat'),$get('location.lng'))->getData(true)['formatted_address']),
+                                Forms\Components\Hidden::make('factory_location.0'),
+                                Forms\Components\Hidden::make('factory_location.1')
                             ])->columnSpan(1),
                     ])->columns(),
             ]);
