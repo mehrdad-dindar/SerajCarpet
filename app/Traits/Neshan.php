@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Http;
 
 trait Neshan
 {
+    public array $driverLocation = [];
+
     public static function reverseGeocoding($latitude, $longitude)
     {
         $apiKey = 'service.18c25979b1a74a46a31ddfe28a9bd8d8';
@@ -44,17 +46,24 @@ trait Neshan
         }
     }
 
-    protected function getFormattedCoordinates($points)
+    protected function getFormattedCoordinates($points): string
     {
-        $factoryLocation = '';
-        if (isset(settings()->location_latitude) && isset(settings()->location_longitude)) {
-            $factoryLocation = settings()->location_latitude.','.settings()->location_longitude.'|';
-        }
         $formattedCoordinates = $points->map(function ($point) {
             return "{$point['latitude']},{$point['longitude']}";
         })->implode('|');
 
-        return $factoryLocation.$formattedCoordinates;
+        return $this->getStartLocation().$formattedCoordinates;
+    }
+
+    protected function getStartLocation(): string
+    {
+        $location = settings()->factory_location;
+
+        if ($this->driverLocation != []) {
+            $location = $this->driverLocation;
+        }
+
+        return implode(',', $location).'|';
     }
 
     public function showMap()
