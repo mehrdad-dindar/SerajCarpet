@@ -4,12 +4,13 @@ namespace App\Livewire\Driver\Order;
 
 use App\Models\Order;
 use App\Models\OrderStatus;
-use Illuminate\Support\Collection;
+use Carbon\Carbon;
 use Livewire\Component;
 
 class Grid extends Component
 {
     public $orders;
+    protected $listeners = ['refreshOrderList' => '$refresh'];
 
     public function render()
     {
@@ -29,6 +30,7 @@ class Grid extends Component
                     OrderStatus::REVISITING_DRIVER
                 ])
             )
+            ->whereDate('time_apply_status', Carbon::today())
             ->orderByRaw('FIELD(id, ' . implode(',', $this->orders) . ')')->get();
     }
 }

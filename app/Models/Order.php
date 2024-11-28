@@ -19,7 +19,7 @@ class Order extends Model
     use HasFactory;
     use LogsActivity;
 
-    protected static bool $isBulkUpdate = false;
+    public bool $updateDirection = true;
     protected OrderService $orderService;
     protected $guarded;
 
@@ -29,8 +29,13 @@ class Order extends Model
 
         static::updated(function ($order) {
             $activity = Activity::forSubject($order)->latest()->first();
-            event(new OrderLogCreated($activity));
+            event(new OrderLogCreated($activity,$order->updateDirection));
         });
+    }
+
+    public function setUpdateDirection(bool $value): void
+    {
+        $this->updateDirection = $value;
     }
 
     public function customer(): BelongsTo
@@ -67,13 +72,6 @@ class Order extends Model
     {
         return $this->belongsTo(Driver::class);
     }
-
-    /*protected function reservedFor(): Attribute
-    {
-        return Attribute::make(
-            get: fn (?string $value) => !is_null($value) ? verta($value)->format('d F Y - H:i') : '',
-        );
-    }*/
 
     public function getStatusLabel(): ?string
     {
@@ -116,9 +114,12 @@ class Order extends Model
             ->logOnlyDirty();
     }
 
-    public function updateOrderStatus(string $CARPETS_RECEIVED): void
+    public function updateOrderStatus(string $carpets_received, $apply_time = false): void
     {
-        $this->status_id = (OrderStatus::firstWhere('name', $CARPETS_RECEIVED))->id;
+        $this->status_id = (OrderStatus::firstWhere('name', $carpets_received))->id;
+        if ($apply_time){
+            $this->time_apply_status = $apply_time;
+        }
         $this->save();
     }
 
