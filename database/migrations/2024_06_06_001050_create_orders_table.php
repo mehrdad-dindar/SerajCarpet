@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('total')->nullable();
             $table->foreignId('status_id')->constrained("order_statuses")->nullable();
             $table->dateTime('time_apply_status')->nullable();
+            $table->dateTime('collected_at')->nullable();
             $table->timestamps();
         });
         DB::statement('ALTER TABLE orders AUTO_INCREMENT = 10001;');
