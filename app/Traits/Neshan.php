@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use Exception;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
 
@@ -10,7 +11,7 @@ trait Neshan
 {
     public array $driverLocation = [];
 
-    public static function reverseGeocoding($latitude, $longitude)
+    public static function reverseGeocoding($latitude, $longitude): JsonResponse
     {
         $apiKey = 'service.18c25979b1a74a46a31ddfe28a9bd8d8';
         $url = "https://api.neshan.org/v5/reverse?lat={$latitude}&lng={$longitude}";
@@ -25,6 +26,32 @@ trait Neshan
         } catch (Exception $e) {
             return response()->json(['error'.$e->getCode() => $e->getMessage()]);
         }
+    }
+
+    /**
+     * Geocoding : Convert Address To Location
+     *
+     * @param string $address
+     * @return array|null
+     * @throws ConnectionException
+     */
+    public function geocoding(string $address): ?array
+    {
+        $apiKey = 'service.18c25979b1a74a46a31ddfe28a9bd8d8';
+        $url = "https://api.neshan.org/v6/geocoding?address=" . urlencode($address);
+
+        $response = Http::withHeaders([
+            'Api-Key' => $apiKey,
+        ])->get($url);
+
+        if ($response->successful() && isset($response['location'])) {
+            return [
+                'latitude' => $response['location']['y'],
+                'longitude' => $response['location']['x'],
+            ];
+        }
+
+        return null;
     }
 
     public function salesman($points): JsonResponse
