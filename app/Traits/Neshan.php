@@ -3,9 +3,12 @@
 namespace App\Traits;
 
 use Exception;
+use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 trait Neshan
 {
@@ -24,7 +27,7 @@ trait Neshan
 
             return response()->json($data);
         } catch (Exception $e) {
-            return response()->json(['error'.$e->getCode() => $e->getMessage()]);
+            return response()->json(['error' . $e->getCode() => $e->getMessage()]);
         }
     }
 
@@ -33,33 +36,52 @@ trait Neshan
      *
      * @param string $address
      * @return array|null
-     * @throws ConnectionException
      */
-    public function geocoding(string $address): ?array
+    public static function geocoding(string $address): ?array
     {
         $apiKey = 'service.18c25979b1a74a46a31ddfe28a9bd8d8';
         $url = "https://api.neshan.org/v6/geocoding?address=" . urlencode($address);
+        try {
+            $response = self::sendRequest($url, $apiKey);
+            if (self::isValidResponse($response)) {
+                return self::extractLocation($response);
+            }
+            return null;
+        } catch (Exception $e) {
+            Log::error('Geocoding failed: ' . $e->getMessage(), ['address' => $address]);
+            return null;
+        }
+    }
 
-        $response = Http::withHeaders([
+    /**
+     * @throws ConnectionException
+     */
+    protected static function sendRequest(string $url, string $apiKey): PromiseInterface|Response
+    {
+        return Http::withHeaders([
             'Api-Key' => $apiKey,
         ])->get($url);
+    }
 
-        if ($response->successful() && isset($response['location'])) {
-            return [
-                'latitude' => $response['location']['y'],
-                'longitude' => $response['location']['x'],
-            ];
-        }
+    protected static function isValidResponse($response): bool
+    {
+        return $response->successful() && isset($response['location']['x'], $response['location']['y']);
+    }
 
-        return null;
+    protected static function extractLocation($response): array
+    {
+        return [
+            'latitude' => $response['location']['y'],
+            'longitude' => $response['location']['x'],
+        ];
     }
 
     public function salesman($points): JsonResponse
     {
         $apiKey = 'service.18c25979b1a74a46a31ddfe28a9bd8d8';
         $url = 'https://api.neshan.org/v3/trip?waypoints='
-            .urlencode($this->getFormattedCoordinates($points))
-            .'&sourceIsAnyPoint=false';
+            . urlencode($this->getFormattedCoordinates($points))
+            . '&sourceIsAnyPoint=false';
         try {
             $response = Http::withHeaders([
                 'Api-Key' => $apiKey,
@@ -69,7 +91,7 @@ trait Neshan
 
             return response()->json($data);
         } catch (Exception $e) {
-            return response()->json(['error'.$e->getCode() => $e->getMessage()]);
+            return response()->json(['error' . $e->getCode() => $e->getMessage()]);
         }
     }
 
@@ -79,7 +101,7 @@ trait Neshan
             return "{$point['latitude']},{$point['longitude']}";
         })->implode('|');
 
-        return $this->getStartLocation().$formattedCoordinates;
+        return $this->getStartLocation() . $formattedCoordinates;
     }
 
     protected function getStartLocation(): string
@@ -90,7 +112,7 @@ trait Neshan
             $location = $this->driverLocation;
         }
 
-        return implode(',', $location).'|';
+        return implode(',', $location) . '|';
     }
 
     public function showMap()

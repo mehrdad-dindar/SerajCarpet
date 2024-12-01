@@ -20,7 +20,7 @@ class CreateOrder extends CreateRecord
     /**
      * After creating the order, send an SMS to the customer
      */
-    protected function afterCreate()
+    protected function afterCreate(): void
     {
         $this->sendConfirmationSms($this->record);
     }
