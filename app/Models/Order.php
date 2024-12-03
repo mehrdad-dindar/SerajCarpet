@@ -23,13 +23,13 @@ class Order extends Model
     protected OrderService $orderService;
     protected $guarded;
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 
         static::updated(function ($order) {
             $activity = Activity::forSubject($order)->latest()->first();
-            event(new OrderLogCreated($activity,$order->updateDirection));
+            event(new OrderLogCreated($activity, $order->updateDirection));
         });
     }
 
@@ -63,7 +63,7 @@ class Order extends Model
         return 200;
     }
 
-    public function status()
+    public function status(): BelongsTo
     {
         return $this->belongsTo(OrderStatus::class, "status_id");
     }
@@ -117,7 +117,7 @@ class Order extends Model
     public function updateOrderStatus(string $carpets_received, $apply_time = false): void
     {
         $this->status_id = (OrderStatus::firstWhere('name', $carpets_received))->id;
-        if ($apply_time){
+        if ($apply_time) {
             $this->time_apply_status = $apply_time;
         }
         $this->save();

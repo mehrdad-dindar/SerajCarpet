@@ -6,6 +6,7 @@ use App\Events\BulkOrderUpdated;
 use App\Filament\Resources\CustomerResource\RelationManagers\AddressRelationManager;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\Widgets\OrderStatusHistoryWidget;
+use App\Forms\Components\AddressForm;
 use App\Models\Address;
 use App\Models\Customer;
 use App\Models\Driver;
@@ -17,6 +18,7 @@ use App\Settings\ShiftSettings;
 use Carbon\Carbon;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
@@ -290,108 +292,15 @@ class OrderResource extends Resource
                                         ->where('customer_id', $get('customer_id'))
                                         ->pluck('address', 'id'))
                                     ->createOptionForm([
-                                        Forms\Components\Grid::make('Address')->schema([
-                                            Forms\Components\TextInput::make('state')
-                                                ->required()
-                                                ->columnSpan(2)
-                                                ->helperText(fn (Get $get) => AddressResource::getHint('state', $get))
-                                                ->label(__('State')),
-                                            Forms\Components\TextInput::make('city')
-                                                ->required()
-                                                ->columnSpan(2)
-                                                ->helperText(fn (Get $get) => AddressResource::getHint('city', $get))
-                                                ->label(__('City')),
-                                            Forms\Components\TextInput::make('address')
-                                                ->required()
-                                                ->columnSpan(6)
-                                                ->helperText(fn (Get $get) => AddressResource::getHint('address', $get))
-                                                ->label(__('Full Address')),
-                                            Forms\Components\Toggle::make('is_suggested')
-                                                ->onIcon('heroicon-s-sparkles')
-                                                ->offIcon('heroicon-o-star')
-                                                ->inline(false)
-                                                ->reactive()
-                                                ->default(false)
-                                                ->translateLabel()
-                                                ->columnSpan(2)
-                                                ->afterStateUpdated(function (Get $get, Set $set, $state) {
-                                                    if ($state) {
-                                                        $latitude = $get('latitude');
-                                                        $longitude = $get('longitude');
-                                                        if ($latitude && $longitude) {
-                                                            $neshan = AddressResource::reverseGeocoding($latitude, $longitude)->getData();
-                                                            $set('address', $neshan->formatted_address);
-                                                            $set('state', $neshan->state);
-                                                            $set('city', $neshan->city);
-                                                            $set('municipality_zone', $neshan->municipality_zone);
-                                                            $set('neighbourhood', $neshan->neighbourhood);
-                                                        }
-                                                    }
-                                                }),
-                                            Forms\Components\TextInput::make('no')
-                                                ->required()
-                                                ->columnSpan(2)
-                                                ->label(__('No.')),
-                                            Forms\Components\TextInput::make('floor')
-                                                ->required()
-                                                ->columnSpan(2)
-                                                ->label(__('Floor')),
-                                            Forms\Components\TextInput::make('unit')
-                                                ->columnSpan(2)
-                                                ->label(__('Unit')),
-                                            Forms\Components\Hidden::make('latitude')
-                                                ->required()
-                                                ->label(__('Latitude')),
-                                            Forms\Components\Hidden::make('longitude')
-                                                ->required()
-                                                ->label(__('longitude')),
-                                            Forms\Components\Hidden::make('neighbourhood'),
-                                            Forms\Components\Hidden::make('municipality_zone'),
-                                        ])->columns(12),
-
-                                        Forms\Components\Checkbox::make('is_active')
-                                            ->label(__('Active'))
-                                            ->default(true),
-                                        Map::make('location')
-                                            ->hint('با کشیدن و اسکرول موقعیت مورد نظر را انتخاب کنید')
-                                            ->label(__('Location'))
-                                            ->columnSpanFull()
-                                            ->default([
-                                                'lat' => 35.699741844984004,
-                                                'lng' => 51.33805990219117,
-                                            ])
-                                            ->afterStateUpdated(function (Get $get, Set $set, string|array|null $old, ?array $state): void {
-                                                $set('latitude', $state['lat']);
-                                                $set('longitude', $state['lng']);
-                                                if ($get('is_suggested')) {
-                                                    $set('state', AddressResource::getHint('state', $get));
-                                                    $set('city', AddressResource::getHint('city', $get));
-                                                    $set('address', AddressResource::getHint('address', $get));
-                                                }
-                                            })
-                                            ->afterStateHydrated(function ($state, $record, Set $set): void {
-                                                is_null($record) ?: $set('location', ['lat' => $record->latitude, 'lng' => $record->longitude]);
-                                            })
-                                            ->extraStyles([
-                                                'min-height: 50vh',
-                                                'border-radius: 16px',
-                                            ])
-                                            ->liveLocation()
-                                            ->showMarker()
-                                            ->markerColor('#40E0D0')
-                                            ->showFullscreenControl()
-                                            ->showZoomControl()
-                                            ->draggable()
-                                            ->detectRetina()
-                                            ->showMyLocationButton()
-                                            ->zoom(11)
-                                            ->tilesUrl('http://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}'),
+                                        Forms\Components\Grid::make('آدرس')
+                                            ->schema(AddressForm::schema()),
                                     ])
                                     ->createOptionUsing(function (array $data, Get $get): int {
                                         $customer = Customer::findOrFail($get('customer_id'));
-
+                                        $data = AddressForm::mutate($data);
                                         return $customer->addresses()->create($data)->getKey();
                                     })
+                                    ->visible(fn (Get $get) => $get('customer_id'))
                                     ->searchable()
                                     ->preload(),
                             ])->columns()->icon('heroicon-o-user'),
