@@ -16,20 +16,16 @@ use App\Models\OrderStatus;
 use App\Models\Property;
 use App\Settings\ShiftSettings;
 use Carbon\Carbon;
-use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms;
-use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\ActionSize;
 use Filament\Support\RawJs;
 use Filament\Tables;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -81,7 +77,7 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('area')
                     ->badge()->color(fn ($state, $record): string => $record->address ? 'info' : 'danger')
                     ->getStateUsing(fn ($record) => $record->address ? $record->address->getArea() : 'X')
-                    ->description(fn ($record) => $record->address ? $record->address->getFullAddress(): 'فاقد آدرس')
+                    ->description(fn ($record) => $record->address ? $record->address->getFullAddress() : 'فاقد آدرس')
                     ->sortable()
                     ->translateLabel()
                     ->toggleable()
@@ -97,7 +93,7 @@ class OrderResource extends Resource
                     ->sortable()
                     ->toggleable(),
                 Tables\Columns\SelectColumn::make('driver_id')
-                    ->label(__("Assign Driver"))
+                    ->label(__('Assign Driver'))
                     ->options(Driver::all()->pluck('name', 'id')->toArray())
                     ->translateLabel()
                     ->sortable()
@@ -116,7 +112,7 @@ class OrderResource extends Resource
                             ->toArray());
                     })
                     ->query(function ($query, $state) {
-                        if (!$state['value']) {
+                        if (! $state['value']) {
                             return $query;
                         }
 
@@ -144,7 +140,7 @@ class OrderResource extends Resource
                                 $data['created_until'],
                                 fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
                             );
-                    })
+                    }),
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
@@ -221,7 +217,7 @@ class OrderResource extends Resource
                                         ->jalali(),
                                     Select::make('reservation_time')
                                         ->visible(
-                                            fn (Get $get): bool => !is_null($get('reservation_date'))
+                                            fn (Get $get): bool => ! is_null($get('reservation_date'))
                                         )
                                         ->label(__('Shift'))
                                         ->options(fn (Get $get): array => ShiftSettings::getDayShifts($get('reservation_date')))
@@ -313,84 +309,104 @@ class OrderResource extends Resource
                                     ->reorderable()
                                     ->defaultItems(1)
                                     ->hiddenLabel()
-                                    ->columns(12)
                                     ->schema([
-                                        Forms\Components\Select::make('property_id')
-                                            ->label(__('Select Service'))
-                                            ->translateLabel()
-                                            ->required()
-                                            ->reactive()
-                                            ->helperText(fn (Get $get) => Property::find($get('property_id'))->helperText ?? '')
-                                            ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                                $set('sub_total', ((int) $get('dimensions') ?? 1) * $get('quantity') * Property::find($state)->price);
-                                                $set('unit_price', Property::find($state)->price);
-                                            })
-                                            ->relationship('property', 'fullTitle')
-                                            ->getOptionLabelFromRecordUsing(function (Property $property) {
-                                                return $property->fullTitle;
-                                            })
-                                            ->columnSpan(3),
-                                        Forms\Components\Select::make('dimensions')
-                                            ->options(function ($state, Get $get) {
-                                                if ($propertyId = $get('property_id')) {
-                                                    $dimensions = Property::find($propertyId)->dimensions ?? [];
+                                        Forms\Components\Grid::make()
+                                            ->schema([
+                                                Forms\Components\Select::make('property_id')
+                                                    ->label(__('Select Service'))
+                                                    ->translateLabel()
+                                                    ->required()
+                                                    ->reactive()
+                                                    ->helperText(fn (Get $get) => Property::find($get('property_id'))->helperText ?? '')
+                                                    ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                                        $set('sub_total', ((int) $get('dimensions') ?? 1) * $get('quantity') * Property::find($state)->price);
+                                                        $set('unit_price', Property::find($state)->price);
+                                                    })
+                                                    ->relationship('property', 'fullTitle')
+                                                    ->getOptionLabelFromRecordUsing(function (Property $property) {
+                                                        return $property->fullTitle;
+                                                    })
+                                                    ->columnSpan(3),
+                                                Forms\Components\Select::make('dimensions')
+                                                    ->options(function ($state, Get $get) {
+                                                        if ($propertyId = $get('property_id')) {
+                                                            $dimensions = Property::find($propertyId)->dimensions ?? [];
 
-                                                    return array_combine($dimensions, $dimensions);
-                                                }
+                                                            return array_combine($dimensions, $dimensions);
+                                                        }
 
-                                                return [];
-                                            })
-                                            ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                                $set('sub_total', ((int) $get('dimensions') ?? 1) * $get('quantity') * Property::find($get('property_id'))->price);
-                                                $set('unit_price', Property::find($get('property_id'))->price);
-                                            })
-                                            ->translateLabel()
-                                            ->live()
-                                            ->hidden(function ($get, $set) {
-                                                $propertyId = $get('property_id');
-                                                $property = $propertyId ? Property::find($propertyId) : null;
+                                                        return [];
+                                                    })
+                                                    ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                                        $set('sub_total', ((int) $get('dimensions') ?? 1) * $get('quantity') * Property::find($get('property_id'))->price);
+                                                        $set('unit_price', Property::find($get('property_id'))->price);
+                                                    })
+                                                    ->translateLabel()
+                                                    ->live()
+                                                    ->hidden(function ($get, $set) {
+                                                        $propertyId = $get('property_id');
+                                                        $property = $propertyId ? Property::find($propertyId) : null;
 
-                                                if (! $propertyId || ! $property || ! $property->dimensions) {
-                                                    $set('dimensions', 1);
+                                                        if (! $propertyId || ! $property || ! $property->dimensions) {
+                                                            $set('dimensions', 1);
 
-                                                    return true;
-                                                }
+                                                            return true;
+                                                        }
 
-                                                return false;
-                                            })
-                                            ->columnSpan(2),
-                                        Forms\Components\TextInput::make('quantity')
-                                            ->label(__('Quantity'))
-                                            ->translateLabel()
-                                            ->numeric()
-                                            ->default(1)
-                                            ->minValue(1)
-                                            ->reactive()
-                                            ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                                if ($get('property_id') !== null) {
-                                                    $price = Property::find($get('property_id'))->price;
-                                                    $set('sub_total', ((int) $get('dimensions') ?? 1) * $state * $price);
-                                                    $set('unit_price', $price);
-                                                }
-                                            })
-                                            ->columnSpan(2)
-                                            ->required(),
-                                        Forms\Components\Hidden::make('unit_price'),
-                                        Forms\Components\TextInput::make('sub_total')
-                                            ->label(__('Sub Total Price'))
-                                            ->readOnly()
-                                            ->dehydrated()
-                                            ->translateLabel()
-                                            ->integer()
-                                            ->required()
-                                            ->columnSpan(4)
-                                            ->mask(RawJs::make('$money($input)'))
-                                            ->suffix('تومان')
-                                            ->stripCharacters('.')
-                                            ->mutateStateForValidationUsing(fn ($state) => str_replace(',', '', $state))
-                                            ->mutateDehydratedStateUsing(fn ($state) => str_replace(',', '', $state)),
+                                                        return false;
+                                                    })
+                                                    ->columnSpan(2),
+                                                Forms\Components\TextInput::make('quantity')
+                                                    ->label(__('Quantity'))
+                                                    ->translateLabel()
+                                                    ->numeric()
+                                                    ->default(1)
+                                                    ->minValue(1)
+                                                    ->reactive()
+                                                    ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                                        if ($get('property_id') !== null) {
+                                                            $price = Property::find($get('property_id'))->price;
+                                                            $set('sub_total', ((int) $get('dimensions') ?? 1) * $state * $price);
+                                                            $set('unit_price', $price);
+                                                        }
+                                                    })
+                                                    ->columnSpan(2)
+                                                    ->required(),
+                                                Forms\Components\Hidden::make('unit_price'),
+                                                Forms\Components\TextInput::make('sub_total')
+                                                    ->label(__('Sub Total Price'))
+                                                    ->readOnly()
+                                                    ->dehydrated()
+                                                    ->translateLabel()
+                                                    ->integer()
+                                                    ->required()
+                                                    ->columnSpan(4)
+                                                    ->mask(RawJs::make('$money($input)'))
+                                                    ->suffix('تومان')
+                                                    ->stripCharacters('.')
+                                                    ->mutateStateForValidationUsing(fn ($state) => str_replace(',', '', $state))
+                                                    ->mutateDehydratedStateUsing(fn ($state) => str_replace(',', '', $state)),
+                                                Forms\Components\Actions::make([
+                                                    Forms\Components\Actions\Action::make('Other')
+                                                        ->label(false)
+                                                        ->icon('heroicon-o-squares-plus')
+                                                        ->iconButton()
+                                                        ->size(ActionSize::Medium)
+                                                        ->form([
+                                                            Forms\Components\Grid::make('options')
+                                                                ->schema([
+                                                                    Forms\Components\ColorPicker::make('color')
+                                                                        ->translateLabel()
+                                                                        ->required(),
+                                                                    Forms\Components\SpatieMediaLibraryFileUpload::make('Attachment')
+                                                                        ->label(false),
+                                                                ])
+                                                                ->columns(),
+                                                        ]),
+                                                ])->verticallyAlignCenter()
+                                            ])->columns(12),
                                     ])
-                                    ->columnSpanFull(),
+                                    ->columns(1),
                                 Forms\Components\Repeater::make('otherItems')
                                     ->label(__('Other Items'))
                                     ->translateLabel()
@@ -492,7 +508,7 @@ class OrderResource extends Resource
                                             ->jalali(),
                                         Select::make('reservation_time')
                                             ->visible(
-                                                fn (Get $get): bool => !is_null($get('reservation_date'))
+                                                fn (Get $get): bool => ! is_null($get('reservation_date'))
                                             )
                                             ->label(__('Shift'))
                                             ->options(fn (Get $get): array => ShiftSettings::getDayShifts($get('reservation_date')))
