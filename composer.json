@@ -15,6 +15,7 @@
         "dotswan/filament-map-picker": "^1.2",
         "filament/filament": "^3.2",
         "filament/notifications": "^3.2",
+        "filament/spatie-laravel-media-library-plugin": "^3.2",
         "filament/spatie-laravel-settings-plugin": "^3.2",
         "hashids/hashids": "^5.0",
         "hekmatinasser/verta": "^8.4",
@@ -29,6 +30,7 @@
         "mokhosh/filament-jalali": "^3.5",
         "spatie/laravel-activitylog": "^4.8",
         "spatie/laravel-livewire-wizard": "^2.3",
+        "spatie/laravel-medialibrary": "^11.10",
         "wireui/breadcrumbs": "^3.1",
         "wireui/phosphoricons": "^2.3",
         "wireui/wireui": "^2.0"

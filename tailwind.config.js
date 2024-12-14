@@ -7,7 +7,7 @@ import themer from "@tailus/themer";
 /** @type {import('tailwindcss').Config} */
 export default {
     presets: [preset],
-    content: [
+        content: [
         './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
         './vendor/laravel/jetstream/**/*.blade.php',
         './storage/framework/views/*.php',
@@ -16,25 +16,25 @@ export default {
         './app/Filament/**/*.php',
         './resources/views/filament/**/*.blade.php',
         './vendor/filament/**/*.blade.php',
-    ],
+        ],
 
-    theme: {
-        extend: {
-            fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
-                iranSans : ['IRANSansX', ...defaultTheme.fontFamily.sans],
-            },
-            keyframes: {
-                loop: {
-                    to: {
-                        "offset-distance": "100%",
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                    iranSans : ['IRANSansX', ...defaultTheme.fontFamily.sans],
+                },
+                keyframes: {
+                    loop: {
+                        to: {
+                            "offset-distance": "100%",
+                        },
                     },
                 },
+                backgroundImage: {
+                    'gradient-radial': 'radial-gradient(circle, rgba(22,96,159,1) 6%, rgba(31,45,81,1) 38%, rgba(9,8,22,1) 77%)',
+                }
             },
-            backgroundImage: {
-                'gradient-radial': 'radial-gradient(circle, rgba(22,96,159,1) 6%, rgba(31,45,81,1) 38%, rgba(9,8,22,1) 77%)',
-            }
-        },
     },
 
     plugins: [
@@ -55,4 +55,4 @@ export default {
             }
         })
     ],
-};
+    };
