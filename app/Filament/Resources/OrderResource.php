@@ -98,6 +98,15 @@ class OrderResource extends Resource
                     ->sortable()
                     ->toggleable(),
             ])
+            ->recordClasses(function (Model $record) {
+                // TODO: سفارشات درب مغازه با رنگ متفاوت نمایش داده شود
+                return match ($record->id) {
+                    10001 => 'opacity-30',
+                    10002 => 'border-s-2 border-orange-600 dark:border-orange-300',
+                    10003 => 'border-s-2 border-green-600 dark:border-green-300',
+                    default => 'border-s-4 border-red-600 dark:border-red-300',
+                };
+            })
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->relationship('status', 'label')
