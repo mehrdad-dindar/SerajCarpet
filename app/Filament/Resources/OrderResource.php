@@ -30,7 +30,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 
 class OrderResource extends Resource
@@ -284,15 +283,18 @@ class OrderResource extends Resource
                                     ->prefixIcon('heroicon-o-map-pin')
                                     ->label(__("Customer's Address"))
                                     ->translateLabel()
-                                    ->options(fn (Get $get): SupportCollection => Address::query()
-                                        ->where('customer_id', $get('customer_id'))
-                                        ->pluck('address', 'id'))
+                                    ->options(fn (Get $get) => Address::query()
+                                            ->where('customer_id', $get('customer_id'))
+                                            ->whereNotNull('address')
+                                            ->pluck('address', 'id')
+                                            ->sortKeysDesc())
                                     ->createOptionForm([
                                         Forms\Components\Grid::make('آدرس')
                                             ->schema(AddressForm::schema()),
                                     ])
                                     ->createOptionUsing(function (array $data, Get $get): int {
                                         $customer = Customer::findOrFail($get('customer_id'));
+                                        $data['customer_id'] = $customer->id;
                                         $data = AddressForm::mutate($data);
                                         return $customer->addresses()->create($data)->getKey();
                                     })
@@ -403,7 +405,7 @@ class OrderResource extends Resource
                                                                 ])
                                                                 ->columns(),
                                                         ]),
-                                                ])->verticallyAlignCenter()
+                                                ])->verticallyAlignCenter(),
                                             ])->columns(12),
                                     ])
                                     ->columns(1),
