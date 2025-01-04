@@ -30,7 +30,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 
 class OrderResource extends Resource
@@ -99,6 +98,15 @@ class OrderResource extends Resource
                     ->sortable()
                     ->toggleable(),
             ])
+            ->recordClasses(function (Model $record) {
+                // TODO: سفارشات درب مغازه با رنگ متفاوت نمایش داده شود
+                return match ($record->id) {
+                    10001 => 'opacity-30',
+                    10002 => 'border-s-2 border-orange-600 dark:border-orange-300',
+                    10003 => 'border-s-2 border-green-600 dark:border-green-300',
+                    default => 'border-s-4 border-red-600 dark:border-red-300',
+                };
+            })
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->relationship('status', 'label')
@@ -284,15 +292,18 @@ class OrderResource extends Resource
                                     ->prefixIcon('heroicon-o-map-pin')
                                     ->label(__("Customer's Address"))
                                     ->translateLabel()
-                                    ->options(fn (Get $get): SupportCollection => Address::query()
-                                        ->where('customer_id', $get('customer_id'))
-                                        ->pluck('address', 'id'))
+                                    ->options(fn (Get $get) => Address::query()
+                                            ->where('customer_id', $get('customer_id'))
+                                            ->whereNotNull('address')
+                                            ->pluck('address', 'id')
+                                            ->sortKeysDesc())
                                     ->createOptionForm([
                                         Forms\Components\Grid::make('آدرس')
                                             ->schema(AddressForm::schema()),
                                     ])
                                     ->createOptionUsing(function (array $data, Get $get): int {
                                         $customer = Customer::findOrFail($get('customer_id'));
+                                        $data['customer_id'] = $customer->id;
                                         $data = AddressForm::mutate($data);
                                         return $customer->addresses()->create($data)->getKey();
                                     })
@@ -403,7 +414,7 @@ class OrderResource extends Resource
                                                                 ])
                                                                 ->columns(),
                                                         ]),
-                                                ])->verticallyAlignCenter()
+                                                ])->verticallyAlignCenter(),
                                             ])->columns(12),
                                     ])
                                     ->columns(1),

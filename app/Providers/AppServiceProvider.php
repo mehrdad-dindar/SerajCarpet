@@ -7,6 +7,8 @@ use App\Livewire\Driver\Order\Steps\AddItemsStepComponent;
 use App\Livewire\Driver\Order\Steps\ConfirmStepComponent;
 use App\Livewire\Driver\Order\Steps\CustomerInfoStepComponent;
 use App\Services\ShiftSchedulerService;
+use Filament\Support\Facades\FilamentView;
+use Hekmatinasser\Verta\Verta;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -38,5 +40,10 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('customer-info', CustomerInfoStepComponent::class);
         Livewire::component('select-items', AddItemsStepComponent::class);
         Livewire::component('confirm-order', ConfirmStepComponent::class);
+
+        FilamentView::registerRenderHook(
+            'panels::global-search.before',
+            fn (): string => Verta::now()->format('l, d M Y'),
+        );
     }
 }

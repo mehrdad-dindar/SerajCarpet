@@ -39,6 +39,7 @@ class AddressResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\IconColumn::make('is_active')
                     ->label(__('Active'))

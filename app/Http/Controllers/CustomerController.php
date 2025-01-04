@@ -30,11 +30,11 @@ class CustomerController extends Controller
             ->orderBy('id_name')
             ->get();
         return $data;
-            /*->map(function (Customer $customer) {
-                $customer->profile_image = "https://picsum.photos/300?id={$customer->id}";
+        /*->map(function (Customer $customer) {
+            $customer->profile_image = "https://picsum.photos/300?id={$customer->id}";
 
-                return $customer;
-            })*/
+            return $customer;
+        })*/
     }
     public function getFullAddress(Request $request)
     {
@@ -46,10 +46,10 @@ class CustomerController extends Controller
 
     public function createAddress(Request $request)
     {
-        $hashid = new Hashids('',6);
-        $customerID = $hashid->decode($request->id)[0];
+        $hashId = new Hashids('', 6);
+        $customerID = $hashId->decode($request->id)[0];
         $customer = Customer::findOrFail($customerID);
-        if ($customer){
+        if ($customer) {
             $customer->addresses()->create([
                 'state' => $request->state,
                 'city' => $request->city,
