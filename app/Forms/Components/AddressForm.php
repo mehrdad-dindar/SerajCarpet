@@ -2,64 +2,109 @@
 
 namespace App\Forms\Components;
 
+use App\Enums\SmsPattern;
+use App\Jobs\SendSmsJob;
+use App\Models\Customer;
 use App\Traits\Neshan;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Cache;
 
 class AddressForm
 {
     use Neshan;
 
+    const AUTO = 0;
+
+    const DRIVER = 1;
+
+    const CUSTOMER = 2;
+
+    const MANUAL = 3;
+
     public static function schema(): array
     {
         return [
-            Forms\Components\Grid::make('Address')->schema([
-                Forms\Components\TextInput::make('address')
-                    ->required()
-                    ->columnSpan(7)
-                    ->helperText(fn (Get $get, $state) => self::getHint('address', $get) ?? $state)
-                    ->label(__('Full Address'))
-                    ->hintAction(
-                        Action::make('is_suggested')
-                            ->translateLabel()
-                            ->icon('heroicon-s-sparkles')
-                            ->action(function (Get $get, Set $set) {
-                                $address = self::getHint(field: null, get: $get);
-                                $set('address', $address['formatted_address']);
-                                $set('municipality_zone', $address['municipality_zone']);
-                                $set('neighbourhood', $address['neighbourhood']);
-                            })
-                    ),
-                Forms\Components\TextInput::make('no')
-                    ->required()
-                    ->columnSpan(1)
-                    ->label(__('No.')),
-                Forms\Components\TextInput::make('floor')
-                    ->columnSpan(1)
-                    ->label(__('Floor')),
-                Forms\Components\TextInput::make('unit')
-                    ->columnSpan(1)
-                    ->label(__('Unit')),
-                Forms\Components\Hidden::make('latitude')
-                    ->required()
-                    ->label(__('Latitude')),
-                Forms\Components\Hidden::make('longitude')
-                    ->required()
-                    ->label(__('longitude')),
-                Forms\Components\Toggle::make('is_active')
-                    ->inline(false)
-                    ->onColor('success')
-                    ->offColor('danger')
-                    ->label(__('Active'))
-                    ->default(true),
-                Forms\Components\Hidden::make('municipality_zone'),
-                Forms\Components\Hidden::make('neighbourhood'),
-            ])->columns(12),
+            Forms\Components\ToggleButtons::make('location_type')
+                ->label(__('Location registration type'))
+                ->options([
+                    self::AUTO => __('Auto'),
+                    self::DRIVER => __('Driver'),
+                    self::CUSTOMER => __('Customer'),
+                    self::MANUAL => __('Manual'),
+                ])
+                ->icons([
+                    self::AUTO => 'heroicon-o-sparkles',
+                    self::DRIVER => 'heroicon-o-truck',
+                    self::CUSTOMER => 'heroicon-o-user',
+                    self::MANUAL => 'heroicon-o-check-circle',
+                ])
+                ->helperText(function ($state) {
+                    return match ((int) $state) {
+                        self::AUTO => __('Record customer location based on entered address'),
+                        self::DRIVER => __("Recording the driver's location at the customer's location"),
+                        self::CUSTOMER => __('Location registration by the customer'),
+                        self::MANUAL => __('Manually record customer location'),
+                    };
+                })
+                ->live()
+                ->default(self::AUTO)
+                ->grouped(),
+            Forms\Components\Grid::make('Address')
+                ->visible(fn (Get $get) => $get('location_type') != self::CUSTOMER)
+                ->schema([
+                    Forms\Components\TextInput::make('address')
+                        ->required(fn (Get $get) => $get('location_type') != self::CUSTOMER)
+                        ->columnSpan(7)
+                        ->helperText(function (Get $get, $state) {
+                            if ($get('location_type') == self::MANUAL) {
+                                return self::getHint('address', $get) ?? $state;
+                            }
+
+                            return null;
+                        })
+                        ->label(__('Full Address'))
+                        ->hintAction(
+                            Action::make('is_suggested')
+                                ->translateLabel()
+                                ->visible(fn (Get $get) => $get('location_type') == self::MANUAL)
+                                ->icon('heroicon-s-sparkles')
+                                ->action(function (Get $get, Set $set) {
+                                    $address = self::getHint(field: null, get: $get);
+                                    $set('address', $address['formatted_address']);
+                                    $set('municipality_zone', $address['municipality_zone']);
+                                    $set('neighbourhood', $address['neighbourhood']);
+                                })
+                        ),
+                    Forms\Components\TextInput::make('no')
+                        ->required(fn (Get $get) => $get('location_type') != self::CUSTOMER)
+                        ->columnSpan(1)
+                        ->label(__('No.')),
+                    Forms\Components\TextInput::make('floor')
+                        ->columnSpan(1)
+                        ->label(__('Floor')),
+                    Forms\Components\TextInput::make('unit')
+                        ->columnSpan(1)
+                        ->label(__('Unit')),
+                    Forms\Components\Hidden::make('latitude')
+                        ->label(__('Latitude')),
+                    Forms\Components\Hidden::make('longitude')
+                        ->label(__('longitude')),
+                    Forms\Components\Toggle::make('is_active')
+                        ->inline(false)
+                        ->onColor('success')
+                        ->offColor('danger')
+                        ->label(__('Active'))
+                        ->default(true),
+                    Forms\Components\Hidden::make('municipality_zone'),
+                    Forms\Components\Hidden::make('neighbourhood'),
+                ])->columns(12),
             Map::make('location')
+                ->visible(fn (Get $get) => $get('location_type') == self::MANUAL)
                 ->hint('با کشیدن و اسکرول موقعیت مورد نظر را انتخاب کنید')
                 ->label(__('Location'))
                 ->columnSpanFull()
@@ -116,6 +161,7 @@ class AddressForm
         $neshan['longitude'] = $longitude;
 
         self::setAddressTemp($neshan);
+        $neshan = self::renderAddress($neshan);
 
         return is_null($field) ? $neshan : self::getFieldValue($field, $neshan);
     }
@@ -137,29 +183,80 @@ class AddressForm
         };
     }
 
-    private static function setAddressTemp(array $data): void
+    private static function setAddressTemp(array $data): array
     {
         Cache::put('address_temp', $data, now()->addMinutes(10));
+
+        return $data;
+    }
+
+    private static function renderAddress(array $data): array
+    {
+        if (isset($data['formatted_address']) && str_starts_with($data['formatted_address'], 'تهران')) {
+            $data['formatted_address'] = trim(mb_substr($data['formatted_address'], mb_strlen('تهران')), '،');
+        }
+
+        return $data;
     }
 
     public static function mutate(array $data): array
     {
-        if (abs($data['latitude'] - 35.699686301252) < 0.000000000001 &&
-            abs($data['longitude'] - 51.337738037109) < 0.000000000001) {
-            if ($data['address']) {
-                $location = self::geocoding($data['address'].' پلاک '.$data['no']);
-                if (! is_null($location)) {
-                    $data['latitude'] = $location['latitude'];
-                    $data['longitude'] = $location['longitude'];
-                    $addressData = self::reverseGeocoding($data['latitude'], $data['longitude'])->getData(true);
-                    if (isset($addressData["status"]) && $addressData["status"] == "OK") {
-                        $data['municipality_zone'] = $addressData['municipality_zone'];
-                        $data['neighbourhood'] = $addressData['neighbourhood'];
-                    }
-                }
-            }
-        }
+        $data = match ((int) $data['location_type']) {
+            self::CUSTOMER => self::getAddressFromCustomer($data),
+            default => self::getAddressLocation($data),
+        };
+
         unset($data['location']);
+
+        return $data;
+    }
+
+    private static function getAddressFromCustomer(array $data): array
+    {
+        $data['address'] = '** منتظر ثبت توسط مشتری **';
+        $customer = Customer::find($data['customer_id']);
+        SendSmsJob::dispatch(
+            $customer->phone,
+            SmsPattern::SET_LOCATION,
+            [
+                $customer->name,
+                $customer->getHashedId(),
+            ]
+        );
+
+        return $data;
+    }
+
+    private static function getAddressLocation(array $data): array
+    {
+        $location = self::geocoding('تهران '.$data['address'].' پلاک '.$data['no']);
+        if (empty($location)) {
+            Notification::make()
+                ->title('سیستم قادر به شناسایی آدرس نشد!')
+                ->danger()
+                ->send();
+
+            return $data;
+        }
+
+        return self::getAddressInfo($data, $location);
+    }
+
+    private static function getAddressInfo($data, array $location): array
+    {
+        $data['latitude'] = $location['latitude'];
+        $data['longitude'] = $location['longitude'];
+        $addressData = self::reverseGeocoding($data['latitude'], $data['longitude'])->getData(true);
+
+        if (isset($addressData['status']) && $addressData['status'] == 'OK') {
+            $data['municipality_zone'] = $addressData['municipality_zone'];
+            $data['neighbourhood'] = $addressData['neighbourhood'];
+        } else {
+            Notification::make()
+                ->title('منطقه و محله شناسایی نشد!')
+                ->danger()
+                ->send();
+        }
 
         return $data;
     }
