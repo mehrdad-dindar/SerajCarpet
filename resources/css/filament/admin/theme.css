@@ -1,0 +1,7 @@
+@import '/vendor/filament/filament/resources/css/theme.css';
+
+@config 'tailwind.config.js';
+
+.in_person_delivery {
+    @apply bg-cyan-100 hover:!bg-cyan-200;
+}

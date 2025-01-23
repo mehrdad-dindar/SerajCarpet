@@ -129,6 +129,12 @@ class Order extends Model
             get: fn (string $value) => verta($value)->format('d F Y - H:i'),
         );
     }
+    protected function collectedAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => $value ? verta($value)->format('d F Y - H:i') : null,
+        );
+    }
 
     protected function updatedAt(): Attribute
     {

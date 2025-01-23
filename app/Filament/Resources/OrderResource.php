@@ -50,6 +50,7 @@ class OrderResource extends Resource
     {
         return $table
             ->defaultSort('created_at', 'desc')
+            ->paginationPageOptions([10, 25, 50])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('Order ID')
@@ -86,28 +87,23 @@ class OrderResource extends Resource
                     ->translateLabel()
                     ->sortable()
                     ->toggleable(),
-                Tables\Columns\TextColumn::make('reserved_for')
-                    ->translateLabel()
-                    ->jalaliDateTime()
+                Tables\Columns\TextColumn::make('collected_at')
+                    ->label(__('Collection date'))
                     ->sortable()
                     ->toggleable(),
                 Tables\Columns\SelectColumn::make('driver_id')
                     ->label(__('Assign Driver'))
+                    ->disabled(fn ($record) => $record ? $record->in_person_delivery : false)
                     ->options(Driver::all()->pluck('name', 'id')->toArray())
                     ->translateLabel()
                     ->sortable()
                     ->toggleable(),
             ])
             ->recordClasses(function (Model $record) {
-                // TODO: سفارشات درب مغازه با رنگ متفاوت نمایش داده شود
-                return match ($record->id) {
-                    10001 => 'opacity-30',
-                    10002 => 'border-s-2 border-orange-600 dark:border-orange-300',
-                    10003 => 'border-s-2 border-green-600 dark:border-green-300',
-                    default => 'border-s-4 border-red-600 dark:border-red-300',
-                };
+                return $record->in_person_delivery ? 'in_person_delivery' : '';
             })
             ->filters([
+                Tables\Filters\Filter::make('in_person_delivery'),
                 Tables\Filters\SelectFilter::make('status')
                     ->relationship('status', 'label')
                     ->searchable()
@@ -164,7 +160,7 @@ class OrderResource extends Resource
                         ->form([
                             Forms\Components\Select::make('driver_id')
                                 ->label('Driver')
-                                ->relationship('driver', 'name') // رابطه صحیح باید استفاده شود
+                                ->relationship('driver', 'name')
                                 ->required(),
                         ]),
                     Tables\Actions\ViewAction::make(),
@@ -293,10 +289,10 @@ class OrderResource extends Resource
                                     ->label(__("Customer's Address"))
                                     ->translateLabel()
                                     ->options(fn (Get $get) => Address::query()
-                                            ->where('customer_id', $get('customer_id'))
-                                            ->whereNotNull('address')
-                                            ->pluck('address', 'id')
-                                            ->sortKeysDesc())
+                                        ->where('customer_id', $get('customer_id'))
+                                        ->whereNotNull('address')
+                                        ->pluck('address', 'id')
+                                        ->sortKeysDesc())
                                     ->createOptionForm([
                                         Forms\Components\Grid::make('آدرس')
                                             ->schema(AddressForm::schema()),
@@ -305,6 +301,7 @@ class OrderResource extends Resource
                                         $customer = Customer::findOrFail($get('customer_id'));
                                         $data['customer_id'] = $customer->id;
                                         $data = AddressForm::mutate($data);
+
                                         return $customer->addresses()->create($data)->getKey();
                                     })
                                     ->visible(fn (Get $get) => $get('customer_id'))
@@ -491,15 +488,27 @@ class OrderResource extends Resource
                             ]),
                         Forms\Components\Section::make('وضعیت سفارش')
                             ->schema([
+                                Forms\Components\Checkbox::make('in_person_delivery')
+                                    ->live()
+                                    ->afterStateUpdated(function (Set $set) {
+                                        $set(
+                                            'status_id',
+                                            OrderStatus::whereName(OrderStatus::CARPETS_RECEIVED)->pluck('id')->toArray()
+                                        );
+                                    })
+                                    ->reactive()
+                                    ->dehydrated()
+                                    ->label(__('Delivery by customer')),
                                 Forms\Components\Select::make('status_id')
                                     ->relationship('status', 'label')
                                     ->default(OrderStatus::whereName(OrderStatus::RESERVED)->pluck('id')->toArray())
                                     ->hiddenLabel()
-                                    ->live()
+                                    ->reactive()
                                     ->required()
                                     ->label(__('Order Status')),
                                 Forms\Components\Fieldset::make('reservation setting')
                                     ->label(__('Reservation setting for'))
+                                    ->live()
                                     ->visible(
                                         fn (Get $get): bool => OrderStatus::where(
                                             'id',
