@@ -33,8 +33,6 @@ class AddressService
     public function getFullAddress(Address $address): string
     {
         $parts = [
-            $address->state,
-            $address->city,
             $address->address,
             $address->no ? 'پلاک ' . $address->no : null,
             $address->floor ? 'طبقه ' . $address->floor : null,
@@ -43,6 +41,17 @@ class AddressService
 
         $filteredParts = array_filter($parts);
 
+        return implode(' - ', $filteredParts);
+    }
+
+    public function getArea(Address $address): string
+    {
+        $parts = [
+            $address->municipality_zone ? 'منطقه '.$address->municipality_zone : null,
+            $address->neighbourhood ?? null,
+        ];
+
+        $filteredParts = array_filter($parts);
         return implode(' - ', $filteredParts);
     }
 

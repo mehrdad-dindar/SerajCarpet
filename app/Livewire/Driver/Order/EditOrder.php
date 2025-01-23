@@ -3,6 +3,7 @@
 namespace App\Livewire\Driver\Order;
 
 use App\Events\OrderReceivedByDriver;
+use App\Models\Comment;
 use App\Models\Option;
 use App\Models\Order;
 use App\Models\OrderStatus;
@@ -10,6 +11,7 @@ use App\Models\Property;
 use App\Traits\Neshan;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
@@ -28,6 +30,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use function Laravel\Prompts\alert;
 
 class EditOrder extends Component implements HasForms
 {
@@ -41,7 +44,7 @@ class EditOrder extends Component implements HasForms
     public function mount(Order $order)
     {
         $status_ids = [2, 3, 4];
-        if (!in_array($this->order->status_id, $status_ids)) {
+        if (! in_array($this->order->status_id, $status_ids)) {
             abort(404);
         }
         $this->order = $order;
@@ -76,9 +79,23 @@ class EditOrder extends Component implements HasForms
                         ->schema([
                             Fieldset::make('customer_address')
                                 ->schema([
-                                    Placeholder::make('Full Address')
-                                        ->content(fn (Order $order): string => $order->address->getFullAddress())
-                                        ->label(__('Full Address')),
+                                    Group::make([
+                                        Placeholder::make('Full Address')
+                                            ->content(fn (Order $order): string => $order->address->getFullAddress())
+                                            ->label(__('Full Address')),
+                                        Placeholder::make('Comment')
+                                            ->content(function (Order $order) {
+                                                $comment = $order->address->customerComments()
+                                                    ->orderBy('created_at', 'desc')->first();
+                                                if ($comment) {
+                                                    return $comment->body;
+                                                }
+                                                return null;
+                                            })
+                                            ->visible(fn(Order $order) => $order->address->customerComments()
+                                                ->orderBy('created_at', 'desc')->first())
+                                            ->label(__('Customer comment for address')),
+                                    ]),
                                     Map::make('current_location')
                                         ->label(__('Location'))
                                         ->defaultLocation(latitude: 40.4168, longitude: -3.7038)
@@ -107,41 +124,35 @@ class EditOrder extends Component implements HasForms
                             Toggle::make('edit_address')
                                 ->live()
                                 ->label(__('Need to edit?')),
-                            Fieldset::make('Address')->schema([
+                            Fieldset::make('Address')
+                                ->relationship('address')
+                                ->schema([
                                 TextInput::make('state')
-                                    ->formatStateUsing(fn (Order $order) => $order->address->state)
                                     ->required()
                                     ->helperText(fn (Get $get) => self::getHint('state', $get))
                                     ->label(__('State')),
                                 TextInput::make('city')
-                                    ->formatStateUsing(fn (Order $order) => $order->address->city)
                                     ->required()
                                     ->helperText(fn (Get $get) => self::getHint('city', $get))
                                     ->label(__('City')),
                                 Textarea::make('address')
-                                    ->formatStateUsing(fn (Order $order) => $order->address->address)
                                     ->autosize()
                                     ->required()
                                     ->columnSpanFull()
                                     ->helperText(fn (Get $get) => self::getHint('address', $get))
                                     ->label(__('Full Address')),
                                 TextInput::make('no')
-                                    ->formatStateUsing(fn (Order $order) => $order->address->no)
                                     ->required()
                                     ->label(__('No.')),
                                 TextInput::make('floor')
-                                    ->formatStateUsing(fn (Order $order) => $order->address->floor)
                                     ->required()
                                     ->label(__('Floor')),
                                 TextInput::make('unit')
-                                    ->formatStateUsing(fn (Order $order) => $order->address->unit)
                                     ->label(__('Unit')),
                                 Hidden::make('latitude')
-                                    ->required()
-                                    ->label(__('Latitude')),
+                                    ->required(),
                                 Hidden::make('longitude')
-                                    ->required()
-                                    ->label(__('longitude')),
+                                    ->required(),
                                 Hidden::make('municipality_zone'),
                                 Hidden::make('neighbourhood'),
                                 Map::make('location')
@@ -157,19 +168,21 @@ class EditOrder extends Component implements HasForms
                                         $set('longitude', $state['lng']);
                                         if ($get('is_suggested')) {
                                             $data = self::getHint(field: null, get: $get, all: true);
-                                            if ($data->status == 'OK') {
+                                            if ($data && $data->status == 'OK') {
                                                 $set('state', $data->state);
                                                 $set('city', $data->city);
                                                 $set('address', $data->formatted_address);
                                                 $set('municipality_zone', $data->municipality_zone);
                                                 $set('neighbourhood', $data->neighbourhood);
+                                            } else {
+                                                alert('Error');
                                             }
                                         }
                                     })
-                                    ->afterStateHydrated(function ($state, Order $order, Set $set): void {
+                                    ->afterStateHydrated(function (Get $get, Order $order, Set $set): void {
                                         $set('location', [
-                                            'lat' => $order->address->latitude,
-                                            'lng' => $order->address->longitude,
+                                            'lat' => $get('latitude'),
+                                            'lng' => $get('longitude'),
                                         ]);
                                     })
                                     ->extraStyles([
@@ -208,7 +221,7 @@ class EditOrder extends Component implements HasForms
                             ])
                                 ->columns()
                                 ->reactive()
-                                ->visible(fn ($state) => $state['edit_address']),
+                                ->visible(fn (Get $get) => $get('edit_address')),
                         ]),
                     Wizard\Step::make('Order Items')
                         ->icon('heroicon-o-list-bullet')
@@ -369,7 +382,6 @@ class EditOrder extends Component implements HasForms
                         ]),
                     Wizard\Step::make('Special services')
                         ->icon('heroicon-o-sparkles')
-                        ->columns()
                         ->translateLabel()
                         ->description(__('Application of ancillary services'))
                         ->schema([
@@ -380,6 +392,9 @@ class EditOrder extends Component implements HasForms
                                 ->default(Option::where('is_default', true)->pluck('id')->toArray())
                                 ->native()
                                 ->required(),
+                            Textarea::make('comment')
+                                ->label(__('Order Description'))
+                            ->autosize()
                         ]),
                 ])
                     ->submitAction(new HtmlString(Blade::render(
@@ -438,10 +453,25 @@ BLADE
     {
         $data = $this->form->getState();
 
+        if ($data['comment']) {
+            $this->submitOrderComment($data['comment']);
+        }
         $data['status_id'] = OrderStatus::whereName(OrderStatus::CARPETS_RECEIVED)->first()->id;
 
-        unset($data['current_location'], $data['edit_address']);
+        unset(
+            $data['current_location'],
+            $data['edit_address'],
+            $data['comment']
+        );
 
         return $data;
+    }
+
+    private function submitOrderComment($commentBody)
+    {
+        $comment = new Comment();
+        $comment->body = $commentBody;
+        $comment->commenter()->associate(auth('driver')->user());
+        $this->order->comments()->save($comment);
     }
 }

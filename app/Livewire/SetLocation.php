@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use App\Models\Address;
+use App\Models\Comment;
 use App\Models\Customer;
 use App\Traits\Neshan;
 use Hashids\Hashids;
@@ -23,6 +25,8 @@ class SetLocation extends Component
     public $longitude;
 
     public Customer $customer;
+    public $addressData;
+    public $commentBody;
 
     public function mount($id)
     {
@@ -47,13 +51,12 @@ class SetLocation extends Component
     {
         $this->latitude = $latitude;
         $this->longitude = $longitude;
-        $this->submit();
+        $this->getAddressData();
     }
 
     public function submit()
     {
-        $addressData = $this->reverseGeocoding($this->latitude, $this->longitude)->getData();
-        if ($addressData && $addressData->status === 'OK') {
+        if (!empty($this->addressData)) {
             $this->customer->addresses()->update(['is_active' => false]);
 
             $address = $this->customer->addresses()->updateOrCreate(
@@ -62,15 +65,18 @@ class SetLocation extends Component
                 'longitude' => $this->longitude,
                 ],
                 [
-                'state' => $addressData->state,
-                'city' => $addressData->city,
-                'address' => $addressData->formatted_address,
-                'municipality_zone' => $addressData->municipality_zone,
-                'neighbourhood' => $addressData->neighbourhood,
+                'state' => $this->addressData['state'],
+                'city' => $this->addressData['city'],
+                'address' => $this->addressData['formatted_address'],
+                'municipality_zone' => $this->addressData['municipality_zone'],
+                'neighbourhood' => $this->addressData['neighbourhood'],
                 'is_active' => true,
                 'is_suggested' => true,
                 ]
             );
+            if ($address and $this->commentBody) {
+                $this->submitAddressComment($address);
+            }
             // get latest order of this customer
             $order = $this->customer->orders()->latest()->first();
             if ($order) {
@@ -95,5 +101,30 @@ class SetLocation extends Component
                 );
             }
         }
+    }
+
+    private function getAddressData()
+    {
+        $addressData = $this->reverseGeocoding($this->latitude, $this->longitude)->getData();
+        if ($addressData && $addressData->status === 'OK') {
+            $this->addressData = [
+                'state' => $addressData->state,
+                'city' => $addressData->city,
+                'formatted_address' => $addressData->formatted_address,
+                'municipality_zone' => $addressData->municipality_zone,
+                'neighbourhood' => $addressData->neighbourhood,
+                'area' => 'منطقه '.$addressData->municipality_zone.' - '.$addressData->neighbourhood
+            ];
+        } else {
+            $this->addressData = [];
+        }
+    }
+
+    private function submitAddressComment(Address $address)
+    {
+        $comment = new Comment();
+        $comment->body = $this->commentBody;
+        $comment->commenter()->associate($this->customer);
+        $address->comments()->save($comment);
     }
 }

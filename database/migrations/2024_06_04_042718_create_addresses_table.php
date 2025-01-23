@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('addresses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->constrained()->onDelete("cascade");
-            $table->string('state');
-            $table->string('city');
-            $table->string('address');
+            $table->string('state')->default("تهران");
+            $table->string('city')->default("تهران");
+            $table->string('address')->nullable();
             $table->string('no')->nullable();
             $table->string('floor')->nullable();
             $table->string('unit')->nullable();
@@ -25,6 +25,7 @@ return new class extends Migration
             $table->text('note')->nullable();
             $table->double('latitude')->nullable();
             $table->double('longitude')->nullable();
+            $table->tinyInteger('location_type')->default(0);
             $table->boolean('is_suggested')->default(false);
             $table->boolean('is_active')->default(false);
             $table->timestamps();

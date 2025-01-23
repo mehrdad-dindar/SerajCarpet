@@ -38,6 +38,8 @@ class Login extends Component
     {
         if (auth('customer')->check()) {
             return redirect()->route('customer.panel.index');
+        } elseif (auth('driver')->check()){
+            return redirect()->route('driver.panel.index');
         }
         return null;
     }
@@ -45,10 +47,7 @@ class Login extends Component
     public function sendCode()
     {
         $user = $this->getUser($this->phone);
-        /*$customer = Customer::firstOrCreate([
-            'phone' => $this->phone
-        ]);*/
-//dd(get_class($user));
+
         $token = Token::create([
             'tokenable_type' => get_class($user),
             'tokenable_id' => $user->id

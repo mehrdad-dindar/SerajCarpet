@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Customer;
-use App\Models\Order;
 use Illuminate\Contracts\Auth\Authenticatable;
 
 class OrderService
@@ -22,13 +21,13 @@ class OrderService
         }
     }
 
-    public function getCustomerOrders()
-    {
-        return $this->orders;
-    }
-
     public function getCustomer(): Customer|Authenticatable|null
     {
         return auth('customer')->user();
+    }
+
+    public function getCustomerOrders()
+    {
+        return $this->orders;
     }
 }

@@ -7,6 +7,7 @@ use App\Filament\Resources\OrderResource;
 use App\Jobs\SendSmsJob;
 use App\Models\Order;
 use App\Traits\Sms;
+use Carbon\Carbon;
 use Filament\Resources\Pages\CreateRecord;
 use Hashids\Hashids;
 
@@ -19,7 +20,7 @@ class CreateOrder extends CreateRecord
     /**
      * After creating the order, send an SMS to the customer
      */
-    protected function afterCreate()
+    protected function afterCreate(): void
     {
         $this->sendConfirmationSms($this->record);
     }
@@ -36,7 +37,7 @@ class CreateOrder extends CreateRecord
         if ($customer) {
             try {
                 $hashedID = $customer->getHashedId();
-                SendSmsJob::dispatch($customer->phone, SmsPattern::SET_LOCATION, [$customer->name, $hashedID]);
+                // SendSmsJob::dispatch($customer->phone, SmsPattern::SET_LOCATION, [$customer->name, $hashedID]);
             } catch (\Exception $e) {
                 info($e->getMessage()); // Log the error if SMS fails
             }
@@ -63,7 +64,7 @@ class CreateOrder extends CreateRecord
     {
         // Combine date and time into a single Carbon instance
         if (isset($data['reservation_date'], $data['reservation_time'])) {
-            $data['time_apply_status'] = \Carbon\Carbon::parse("{$data['reservation_date']} {$data['reservation_time']}");
+            $data['time_apply_status'] = Carbon::parse("{$data['reservation_date']} {$data['reservation_time']}");
         }
 
         // Convert options to integers

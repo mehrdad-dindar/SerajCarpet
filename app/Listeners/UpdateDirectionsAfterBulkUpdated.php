@@ -31,8 +31,7 @@ class UpdateDirectionsAfterBulkUpdated
         $uniqueOldDriverIds = $oldOrders->pluck('driver_id')->filter()->unique();
         $uniqueDriverIds = $orders->pluck('driver_id')->filter()->unique();
 
-        $allUniqueDriverIds = $uniqueOldDriverIds->merge($uniqueDriverIds)->unique();
-
+        $allUniqueDriverIds = $uniqueOldDriverIds->merge($uniqueDriverIds)->unique()->toArray();
         $optimizedRoute = new OptimizedRoute();
         $optimizedRoute->calculateRoute($allUniqueDriverIds);
     }

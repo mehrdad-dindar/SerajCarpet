@@ -9,4 +9,14 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateProperty extends CreateRecord
 {
     protected static string $resource = PropertyResource::class;
+
+    /**
+     * Get the redirect URL after the order creation.
+     *
+     * @return string
+     */
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

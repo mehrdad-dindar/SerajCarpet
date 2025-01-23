@@ -7,8 +7,10 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/css/client/client.css',
+                'resources/css/filament/admin/theme.css',
                 'resources/js/app.js',
-                'resources/js/main.js',
+                'resources/js/driver.js',
+                'resources/js/customer.js',
             ],
             refresh: [
                 ...refreshPaths,

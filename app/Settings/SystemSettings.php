@@ -8,8 +8,7 @@ class SystemSettings extends Settings
 {
     public string $sms_panel_username;
     public string $sms_panel_password;
-    public string $location_latitude;
-    public string $location_longitude;
+    public array $factory_location;
     public static function group(): string
     {
         return 'system';

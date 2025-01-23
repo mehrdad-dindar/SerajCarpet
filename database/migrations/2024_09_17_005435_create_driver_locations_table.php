@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('driver_locations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('driver_id')->constrained('drivers')->onDelete('cascade');
-            $table->decimal('latitude', 10, 8);
-            $table->decimal('longitude', 11, 8);
+            $table->decimal('latitude', 14, 12);
+            $table->decimal('longitude', 14, 12);
             $table->timestamps();
         });
     }

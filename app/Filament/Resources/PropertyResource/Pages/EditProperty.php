@@ -16,4 +16,14 @@ class EditProperty extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    /**
+     * Get the redirect URL after the order creation.
+     *
+     * @return string
+     */
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

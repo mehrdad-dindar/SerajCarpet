@@ -2,48 +2,52 @@
 
 namespace App\Livewire\Driver;
 
-use App\Models\OptimizedRoute;
-use App\Models\Order;
-use App\Models\OrderStatus;
-use Carbon\Carbon;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Foundation\Application;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
-use Livewire\WithPagination;
-use function Psy\sh;
 
 #[Title("سفارشات")]
 class Orders extends Component
 {
     public Collection $routeTypes;
     public $opRoute;
+    public $shift;
+    public $shiftTitle;
 
-    public Collection $orders;
+    public $orders = [];
+
+    protected $listeners = ['refreshOrderList'];
     public function mount()
     {
+        $this->shift = shiftSettings()->getCurrentShift();
+        $this->shiftTitle = shiftSettings()->getCurrentShiftTitle();
         $this->opRoute = $this->getDriverRoute();
         $this->getOrders();
     }
+
+    public function refreshOrderList()
+    {
+        $this->mount();
+    }
     private function getDriverRoute()
     {
-        $currentHour = Carbon::now()->hour;
-        $shift = $currentHour <= 14 ? OptimizedRoute::MORNING_SHIFT : OptimizedRoute::AFTERNOON_SHIFT;
-
-        return auth('driver')->user()->optimizedRoutes()
-            ->whereShift($shift)
-            ->first();
+        $driver = auth('driver')->user();
+        return $driver->optimizedRoutes()->whereShift($this->shift)->first();
     }
     private function getOrders(): void
     {
         if (!is_null($this->opRoute)) {
-            $this->orders = $this->opRoute->orders();
+            $this->orders = $this->opRoute->orders;
         } else {
-            $this->reset('orders');
+            $this->orders = [];
         }
     }
     #[Layout('driver.layouts.app')]
-    public function render()
+    public function render(): Application|Factory|View|\Illuminate\View\View
     {
         return view('livewire.driver.orders');
     }

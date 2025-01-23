@@ -53,21 +53,21 @@ class PropertySeeder extends Seeder
                 "service_item_id" => 2,
                 "parent_id" => 5,
                 "name" => "کوجک (۱.۵ متری)",
-                "dimensions" => json_encode([1.5]),
+                "dimensions" => null,
                 "unit" => "takhte",
                 "price" => 100000
             ], [
                 "service_item_id" => 2,
                 "parent_id" => 5,
                 "name" => "متوسط (۲ متری)",
-                "dimensions" => json_encode([2]),
+                "dimensions" => null,
                 "unit" => "takhte",
                 "price" => 150000
             ], [
                 "service_item_id" => 2,
                 "parent_id" => 5,
                 "name" => "بزرگ (۳ متری)",
-                "dimensions" => json_encode([3]),
+                "dimensions" => null,
                 "unit" => "takhte",
                 "price" => 200000
             ], [
