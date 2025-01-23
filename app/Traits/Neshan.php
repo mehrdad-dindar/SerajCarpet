@@ -81,7 +81,7 @@ trait Neshan
         $apiKey = 'service.18c25979b1a74a46a31ddfe28a9bd8d8';
         $url = 'https://api.neshan.org/v3/trip?waypoints='
             . urlencode($this->getFormattedCoordinates($points))
-            . '&sourceIsAnyPoint=false';
+            . '&roundTrip=false&sourceIsAnyPoint=false';
         try {
             $response = Http::withHeaders([
                 'Api-Key' => $apiKey,
