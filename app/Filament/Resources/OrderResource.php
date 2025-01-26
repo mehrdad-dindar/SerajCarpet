@@ -583,7 +583,7 @@ class OrderResource extends Resource
                                     ->label(__('Delivery by customer')),
                                 Forms\Components\Select::make('status_id')
                                     ->relationship('status', 'label')
-                                    ->default(OrderStatus::whereName(OrderStatus::RESERVED)->pluck('id')->toArray())
+                                    ->default(OrderStatus::whereName(OrderStatus::RESERVED)->pluck('id')->first())
                                     ->hiddenLabel()
                                     ->reactive()
                                     ->required()
