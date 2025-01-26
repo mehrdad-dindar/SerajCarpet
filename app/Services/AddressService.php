@@ -21,11 +21,11 @@ class AddressService
         return Attribute::make(
             get: fn (mixed $value, array $attributes) => [
                 'latitude' => $attributes['latitude'],
-                'longitude' => $attributes['longitude'],
+                'longitude' => $attributes['longitude']
             ],
             set: fn (array $value) => [
-                'latitude' => $value['lat'],
-                'longitude' => $value['lng'],
+                'latitude' => $value['latitude'],
+                'longitude' => $value['longitude']
             ],
         );
     }

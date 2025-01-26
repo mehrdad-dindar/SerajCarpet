@@ -7,8 +7,8 @@ use Spatie\LaravelSettings\Settings;
 
 class ShiftSettings extends Settings
 {
-    public array $shifts;
-    public string $current;
+    public array $shifts = [];
+    public string $current = "";
 
     public static function group(): string
     {

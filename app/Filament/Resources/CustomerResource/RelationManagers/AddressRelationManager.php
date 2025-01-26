@@ -45,15 +45,22 @@ class AddressRelationManager extends RelationManager
                                 Forms\Components\Grid::make()
                                     ->schema([
                                         Forms\Components\TextInput::make('name')
+                                            ->prefixIcon('heroicon-o-user')
                                             ->label(__('Customer Name'))
                                             ->required(),
                                         Forms\Components\TextInput::make('phone')
                                             ->label(__('Customer Phone'))
+                                            ->prefixIcon('heroicon-o-phone')
                                             ->unique()
                                             ->required(),
+                                        Forms\Components\TextInput::make('phone2')
+                                            ->prefixIcon('heroicon-o-phone')
+                                            ->label(__('Customer\'s second contact number')),
                                     ])
-                                    ->columns(),
+
+                                    ->columns(1),
                             ])
+                            ->createOptionAction(fn ($action) => $action->modalWidth('sm'))
                             ->required(),
                     ]),
                 Forms\Components\Section::make('آدرس')

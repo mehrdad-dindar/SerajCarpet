@@ -13,7 +13,7 @@
                     <x-srj-input :label="__('No.')" class="[&>label]:ring-accent-600"/>
                     <x-srj-input :label="__('Floor')" class="[&>label]:ring-accent-600"/>
                     <x-srj-input :label="__('Unit')" class="[&>label]:ring-accent-600"/>
-                    <x-srj-textarea wire:model="commentBody" :label="__('Address Description')" :placeholder="__('message.address_description')" class="col-span-full [&>label]:ring-accent-600"/>
+                    <x-srj-textarea wire:model="commentBody" :label="__('Address description')" :placeholder="__('message.address_description')" class="col-span-full [&>label]:ring-accent-600"/>
                 </div>
             @endif
             <x-slot name="footer" class="flex justify-between gap-x-4">
