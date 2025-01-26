@@ -575,7 +575,7 @@ class OrderResource extends Resource
                                     ->afterStateUpdated(function (Set $set) {
                                         $set(
                                             'status_id',
-                                            OrderStatus::whereName(OrderStatus::CARPETS_RECEIVED)->pluck('id')->toArray()
+                                            OrderStatus::whereName(OrderStatus::CARPETS_RECEIVED)->pluck('id')->first()
                                         );
                                     })
                                     ->reactive()
