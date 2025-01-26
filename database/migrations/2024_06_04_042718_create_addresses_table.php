@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('unit')->nullable();
             $table->string('municipality_zone')->nullable();
             $table->string('neighbourhood')->nullable();
-            $table->text('note')->nullable();
+            $table->text('description')->nullable();
             $table->double('latitude')->nullable();
             $table->double('longitude')->nullable();
             $table->tinyInteger('location_type')->default(0);

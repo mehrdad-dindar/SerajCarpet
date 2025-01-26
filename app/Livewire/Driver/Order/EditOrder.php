@@ -68,6 +68,9 @@ class EditOrder extends Component implements HasForms
                             Placeholder::make('customer.phone')
                                 ->label(__('Customer Phone'))
                                 ->content(fn (Order $order): string => $order->customer->phone),
+                            Placeholder::make('customer.phone2')
+                                ->label(__('Customer\'s second contact number'))
+                                ->content(fn (Order $order): string => $order->customer->phone),
                             Placeholder::make('customer_id')
                                 ->label(__('Customer ID'))
                                 ->content(fn (Order $order): string => '#'.$order->customer->id),

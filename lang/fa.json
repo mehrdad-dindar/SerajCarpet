@@ -38,6 +38,7 @@
     "Order ID" : "شماره سفارش",
     "Customer Name" : "نام مشتری",
     "Customer Phone" : "شماره تماس",
+    "Customer's second contact number" : "شماره تماس دوم",
     "Phone" : "موبایل",
     "phone" : "موبایل",
     "Call" : "تماس",
@@ -62,8 +63,9 @@
     "Ready for delivery to customer" : "اماده تحویل به مشتری",
     "Sent to factory for washing" : "ارسال به کارخانه جهت شستشو",
     "Delivered and paid" : "تحویل و تسویه شده",
-    "Created from" : "ایجاد شده از",
-    "Created until" : "ایجاد شده تا",
+    "from" : "از",
+    "until" : "تا",
+    "Sent to Factory" : "تاریخ ارسال به کارخانه",
     "Reserved for" : "رزرو برای",
     "pending" : "در حال بررسی",
     "State" : "استان",
@@ -193,7 +195,7 @@
     "Comment" : "دیدگاه",
     "Order Description" : "توضیحات سفارش",
     "Customer comment for address" : "توضیحات مشتری برای آدرس سفارش",
-    "Address Description" : "توضیحات آدرس",
+    "Address description" : "توضیحات آدرس",
     "There are currently no orders." : "در حال حاضر سفارشی وجود ندارد.",
     "Customer" : "مشتری"
 }

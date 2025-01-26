@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string("name")->nullable();
             $table->string('id_name')->nullable();
             $table->string("phone")->unique();
+            $table->string("phone2")->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

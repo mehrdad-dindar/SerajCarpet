@@ -14,7 +14,7 @@ class ShiftSchedulerService
      */
     public function __construct()
     {
-        $shifts = shiftSettings()->shifts;
+        $shifts = shiftSettings()->shifts ?? [];
         $shifts[] = array_shift($shifts);
         $this->shifts = $shifts ?? [];
     }

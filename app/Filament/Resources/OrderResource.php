@@ -91,6 +91,10 @@ class OrderResource extends Resource
                     ->label(__('Collection date'))
                     ->sortable()
                     ->toggleable(),
+                Tables\Columns\TextColumn::make('sent_to_factory_at')
+                    ->label(__('Sent to Factory'))
+                    ->sortable()
+                    ->toggleable(true,true),
                 Tables\Columns\SelectColumn::make('driver_id')
                     ->label(__('Assign Driver'))
                     ->disabled(fn ($record) => $record ? $record->in_person_delivery : false)
@@ -103,7 +107,9 @@ class OrderResource extends Resource
                 return $record->in_person_delivery ? 'in_person_delivery' : '';
             })
             ->filters([
-                Tables\Filters\Filter::make('in_person_delivery'),
+                Tables\Filters\Filter::make('in_person_delivery')
+                    ->query(fn (Builder $query): Builder => $query->where('in_person_delivery', true))
+                    ->label(__('Delivery by customer')),
                 Tables\Filters\SelectFilter::make('status')
                     ->relationship('status', 'label')
                     ->searchable()
@@ -127,12 +133,16 @@ class OrderResource extends Resource
                     ->translateLabel(),
                 Tables\Filters\Filter::make('created_at')
                     ->form([
-                        DatePicker::make('created_from')
-                            ->translateLabel()
-                            ->jalali(),
-                        DatePicker::make('created_until')
-                            ->translateLabel()
-                            ->jalali(),
+                        Forms\Components\Fieldset::make('created_at')
+                            ->label(__('Created at'))
+                            ->schema([
+                                DatePicker::make('created_from')
+                                    ->label(__('from'))
+                                    ->jalali(),
+                                DatePicker::make('created_until')
+                                    ->label(__('until'))
+                                    ->jalali(),
+                            ]),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -145,6 +155,54 @@ class OrderResource extends Resource
                                 fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
                             );
                     }),
+                Tables\Filters\Filter::make('collected_at')
+                    ->form([
+                        Forms\Components\Fieldset::make('collected_at')
+                            ->label(__('Collection date'))
+                            ->schema([
+                                DatePicker::make('collected_from')
+                                    ->label(__('from'))
+                                    ->jalali(),
+                                DatePicker::make('collected_until')
+                                    ->label(__('until'))
+                                    ->jalali(),
+                            ]),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['collected_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('collected_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['collected_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('collected_at', '<=', $date),
+                            );
+                    }),
+                Tables\Filters\Filter::make('sent_to_factory_at')
+                    ->form([
+                        Forms\Components\Fieldset::make('sent_to_factory_at')
+                            ->label(__('Sent to Factory'))
+                            ->schema([
+                                DatePicker::make('sent_to_factory_from')
+                                    ->label(__('from'))
+                                    ->jalali(),
+                                DatePicker::make('sent_to_factory_until')
+                                    ->label(__('until'))
+                                    ->jalali(),
+                            ]),
+                    ])
+                    /*->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['sent_to_factory_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('sent_to_factory_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['sent_to_factory_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('sent_to_factory_at', '<=', $date),
+                            );
+                    }),*/
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
@@ -274,15 +332,21 @@ class OrderResource extends Resource
                                         Forms\Components\Grid::make()
                                             ->schema([
                                                 Forms\Components\TextInput::make('name')
+                                                    ->prefixIcon('heroicon-o-user')
                                                     ->label(__('Customer Name'))
                                                     ->required(),
                                                 Forms\Components\TextInput::make('phone')
                                                     ->label(__('Customer Phone'))
+                                                    ->prefixIcon('heroicon-o-phone')
                                                     ->unique()
                                                     ->required(),
+                                                Forms\Components\TextInput::make('phone2')
+                                                    ->prefixIcon('heroicon-o-phone')
+                                                    ->label(__('Customer\'s second contact number')),
                                             ])
-                                            ->columns(),
+                                            ->columns(1),
                                     ])
+                                    ->createOptionAction(fn ($action) => $action->modalWidth('sm'))
                                     ->required(),
                                 Forms\Components\Select::make('address_id')
                                     ->prefixIcon('heroicon-o-map-pin')
