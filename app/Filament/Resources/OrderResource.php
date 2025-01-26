@@ -19,6 +19,7 @@ use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Tabs;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -94,7 +95,7 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('sent_to_factory_at')
                     ->label(__('Sent to Factory'))
                     ->sortable()
-                    ->toggleable(true,true),
+                    ->toggleable(true, true),
                 Tables\Columns\SelectColumn::make('driver_id')
                     ->label(__('Assign Driver'))
                     ->disabled(fn ($record) => $record ? $record->in_person_delivery : false)
@@ -191,18 +192,19 @@ class OrderResource extends Resource
                                     ->label(__('until'))
                                     ->jalali(),
                             ]),
-                    ])
-                    /*->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['sent_to_factory_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('sent_to_factory_at', '>=', $date),
-                            )
-                            ->when(
-                                $data['sent_to_factory_until'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('sent_to_factory_at', '<=', $date),
-                            );
-                    }),*/
+                    ]),
+                // TODO: sent_to_factory bayad takmil beshe;
+                /*->query(function (Builder $query, array $data): Builder {
+                    return $query
+                        ->when(
+                            $data['sent_to_factory_from'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('sent_to_factory_at', '>=', $date),
+                        )
+                        ->when(
+                            $data['sent_to_factory_until'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('sent_to_factory_at', '<=', $date),
+                        );
+                }),*/
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
@@ -359,7 +361,23 @@ class OrderResource extends Resource
                                         ->sortKeysDesc())
                                     ->createOptionForm([
                                         Forms\Components\Grid::make('آدرس')
-                                            ->schema(AddressForm::schema()),
+                                            ->schema([
+                                                Tabs::make('Tabs')
+                                                    ->tabs([
+                                                        Tabs\Tab::make('Address Info')
+                                                            ->icon('heroicon-o-map')
+                                                            ->translateLabel()
+                                                            ->schema(AddressForm::schema()),
+                                                        Tabs\Tab::make('Description')
+                                                            ->icon('heroicon-o-bookmark')
+                                                            ->translateLabel()
+                                                            ->schema([
+                                                                Forms\Components\Textarea::make('description')
+                                                                    ->rows(5)
+                                                                    ->label(__('Address description')),
+                                                            ]),
+                                                    ]),
+                                            ]),
                                     ])
                                     ->createOptionUsing(function (array $data, Get $get): int {
                                         $customer = Customer::findOrFail($get('customer_id'));
@@ -557,7 +575,7 @@ class OrderResource extends Resource
                                     ->afterStateUpdated(function (Set $set) {
                                         $set(
                                             'status_id',
-                                            OrderStatus::whereName(OrderStatus::CARPETS_RECEIVED)->pluck('id')->toArray()
+                                            OrderStatus::whereName(OrderStatus::CARPETS_RECEIVED)->pluck('id')->first()
                                         );
                                     })
                                     ->reactive()
