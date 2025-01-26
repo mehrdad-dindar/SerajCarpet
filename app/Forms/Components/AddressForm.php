@@ -41,7 +41,7 @@ class AddressForm
                     self::AUTO => 'heroicon-o-sparkles',
                     self::DRIVER => 'heroicon-o-truck',
                     self::CUSTOMER => 'heroicon-o-user',
-                    self::MANUAL => 'heroicon-o-check-circle',
+                    self::MANUAL => 'heroicon-o-map-pin',
                 ])
                 ->helperText(function ($state) {
                     return match ((int) $state) {
@@ -59,7 +59,7 @@ class AddressForm
                 ->schema([
                     Forms\Components\TextInput::make('address')
                         ->required(fn (Get $get) => $get('location_type') != self::CUSTOMER)
-                        ->columnSpan(7)
+                        ->columnSpan(5)
                         ->helperText(function (Get $get, $state) {
                             if ($get('location_type') == self::MANUAL) {
                                 return self::getHint('address', $get) ?? $state;
@@ -102,28 +102,19 @@ class AddressForm
                         ->default(true),
                     Forms\Components\Hidden::make('municipality_zone'),
                     Forms\Components\Hidden::make('neighbourhood'),
-                ])->columns(12),
+                ])->columns(9),
             Map::make('location')
                 ->visible(fn (Get $get) => $get('location_type') == self::MANUAL)
                 ->hint('با کشیدن و اسکرول موقعیت مورد نظر را انتخاب کنید')
                 ->label(__('Location'))
                 ->columnSpanFull()
-                ->default([
-                    'lat' => 35.699741844984004,
-                    'lng' => 51.33805990219117,
-                ])
+                ->defaultLocation(latitude: 35.699741844984004, longitude: 51.33805990219117)
                 ->afterStateUpdated(function (Get $get, Set $set, $old, $state): void {
                     $set('latitude', $state['lat']);
                     $set('longitude', $state['lng']);
                 })
-                ->afterStateHydrated(function ($state, $record, Set $set): void {
-                    is_null($record) ?: $set(
-                        'location',
-                        [
-                            'lat' => $record->latitude,
-                            'lng' => $record->longitude,
-                        ]
-                    );
+                ->afterStateHydrated(function ($state, $record, Set $set, Get $get): void {
+                    $set('location', ['lat' => $record?->latitude, 'lng' => $record?->longitude]);
                 })
                 ->extraStyles([
                     'min-height: 50vh',
@@ -138,7 +129,7 @@ class AddressForm
                 ->detectRetina()
                 ->showMyLocationButton()
                 ->zoom(11)
-                ->tilesUrl('http://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}'),
+                ->tilesUrl('https://tile.openstreetmap.org/{z}/{x}/{y}.png'),
         ];
     }
 

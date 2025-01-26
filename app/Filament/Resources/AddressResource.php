@@ -10,16 +10,11 @@ use App\Models\Address;
 use App\Traits\Neshan;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms;
-use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
-use Filament\Infolists\Components\ImageEntry;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
 
 class AddressResource extends Resource
 {
@@ -62,7 +57,7 @@ class AddressResource extends Resource
                     ->translateLabel(),
                 Tables\Columns\TextColumn::make('full_address')
                     ->label(__('Full Address'))
-                    ->getStateUsing(fn ($record) => $record->getFullAddress())
+                    ->getStateUsing(fn ($record) => $record->getFullAddress()),
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_active')
@@ -146,42 +141,54 @@ class AddressResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('مشتری')
-                    ->icon('heroicon-o-user')
-                    ->schema([
-                        Forms\Components\Select::make('customer_id')
-                            ->translateLabel()
-                            ->label('customer')
-                            ->prefixIcon('heroicon-o-user')
-                            ->relationship('customer', 'id_name')
-                            ->searchable()
-                            ->preload()
-                            ->live()
-                            ->createOptionForm([
-                                Forms\Components\Grid::make()
-                                    ->schema([
-                                        Forms\Components\TextInput::make('name')
-                                            ->prefixIcon('heroicon-o-user')
-                                            ->label(__('Customer Name'))
-                                            ->required(),
-                                        Forms\Components\TextInput::make('phone')
-                                            ->label(__('Customer Phone'))
-                                            ->prefixIcon('heroicon-o-phone')
-                                            ->unique()
-                                            ->required(),
-                                        Forms\Components\TextInput::make('phone2')
-                                            ->prefixIcon('heroicon-o-phone')
-                                            ->label(__('Customer\'s second contact number')),
-                                    ])
-
-                                    ->columns(1),
-                            ])
-                            ->createOptionAction(fn ($action) => $action->modalWidth('sm'))
-                            ->required(),
-                    ]),
-                Forms\Components\Section::make('آدرس')
-                    ->icon('heroicon-o-map-pin')
-                    ->schema(AddressForm::schema()),
+                Forms\Components\Split::make([
+                    Forms\Components\Section::make('آدرس')
+                        ->icon('heroicon-o-map-pin')
+                        ->schema(AddressForm::schema()),
+                    Forms\Components\Grid::make()
+                        ->schema([
+                            Forms\Components\Section::make('مشتری')
+                                ->icon('heroicon-o-user')
+                                ->schema([
+                                    Forms\Components\Select::make('customer_id')
+                                        ->translateLabel()
+                                        ->label('customer')
+                                        ->prefixIcon('heroicon-o-user')
+                                        ->relationship('customer', 'id_name')
+                                        ->searchable()
+                                        ->preload()
+                                        ->live()
+                                        ->createOptionForm([
+                                            Forms\Components\Grid::make()
+                                                ->schema([
+                                                    Forms\Components\TextInput::make('name')
+                                                        ->prefixIcon('heroicon-o-user')
+                                                        ->label(__('Customer Name'))
+                                                        ->required(),
+                                                    Forms\Components\TextInput::make('phone')
+                                                        ->label(__('Customer Phone'))
+                                                        ->prefixIcon('heroicon-o-phone')
+                                                        ->unique()
+                                                        ->required(),
+                                                    Forms\Components\TextInput::make('phone2')
+                                                        ->prefixIcon('heroicon-o-phone')
+                                                        ->label(__('Customer\'s second contact number')),
+                                                ])
+                                                ->columns(1),
+                                        ])
+                                        ->createOptionAction(fn ($action) => $action->modalWidth('sm'))
+                                        ->required(),
+                                ]),
+                            Forms\Components\Section::make('توضیحات آدرس')
+                                ->icon('heroicon-o-information-circle')
+                                ->schema([
+                                    Forms\Components\Textarea::make('description')
+                                        ->label(false)
+                                        ->rows(4)
+                                        ->helperText('در صورت نیاز لطفا توضیحات آدرس را در این قسمت وارد نمایید'),
+                                ]),
+                        ])->grow(false),
+                ])->columnSpanFull(),
             ]);
     }
 
