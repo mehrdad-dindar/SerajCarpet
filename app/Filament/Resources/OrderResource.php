@@ -91,6 +91,10 @@ class OrderResource extends Resource
                     ->label(__('Collection date'))
                     ->sortable()
                     ->toggleable(),
+                Tables\Columns\TextColumn::make('sent_to_factory_at')
+                    ->label(__('Sent to Factory'))
+                    ->sortable()
+                    ->toggleable(true,true),
                 Tables\Columns\SelectColumn::make('driver_id')
                     ->label(__('Assign Driver'))
                     ->disabled(fn ($record) => $record ? $record->in_person_delivery : false)
@@ -175,6 +179,30 @@ class OrderResource extends Resource
                                 fn (Builder $query, $date): Builder => $query->whereDate('collected_at', '<=', $date),
                             );
                     }),
+                Tables\Filters\Filter::make('sent_to_factory_at')
+                    ->form([
+                        Forms\Components\Fieldset::make('sent_to_factory_at')
+                            ->label(__('Sent to Factory'))
+                            ->schema([
+                                DatePicker::make('sent_to_factory_from')
+                                    ->label(__('from'))
+                                    ->jalali(),
+                                DatePicker::make('sent_to_factory_until')
+                                    ->label(__('until'))
+                                    ->jalali(),
+                            ]),
+                    ])
+                    /*->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['sent_to_factory_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('sent_to_factory_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['sent_to_factory_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('sent_to_factory_at', '<=', $date),
+                            );
+                    }),*/
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
