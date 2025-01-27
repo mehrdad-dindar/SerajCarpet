@@ -51,7 +51,6 @@ class OrderResource extends Resource
     {
         return $table
             ->defaultSort('created_at', 'desc')
-            ->paginationPageOptions([10, 25, 50])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('Order ID')
@@ -78,6 +77,7 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('area')
                     ->badge()->color(fn ($state, $record): string => $record->address ? 'info' : 'danger')
                     ->getStateUsing(fn ($record) => $record->address ? $record->address->getArea() : 'X')
+                    ->wrap()
                     ->description(fn ($record) => $record->address ? $record->address->getFullAddress() : 'فاقد آدرس')
                     ->sortable()
                     ->translateLabel()
