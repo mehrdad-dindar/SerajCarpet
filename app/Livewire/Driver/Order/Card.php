@@ -74,7 +74,6 @@ class Card extends Component
             $address->longitude
         );
         $this->dispatch('openLink', ['url' => $url]);
-
     }
 
     public function cancel()
@@ -99,5 +98,21 @@ class Card extends Component
         $comment->body = $this->reason;
         $comment->commenter()->associate(auth('driver')->user());
         $this->order->comments()->save($comment);
+    }
+
+    public function carpetsReceived()
+    {
+        $this->order->status_id = OrderStatus::where('name', OrderStatus::CARPETS_RECEIVED)->first()->id;
+        $this->order->save();
+    }
+    public function revisitingDriver()
+    {
+        $this->order->status_id = OrderStatus::where('name', OrderStatus::REVISITING_DRIVER)->first()->id;
+        $this->order->save();
+    }
+    public function deliveredAndPaid()
+    {
+        $this->order->status_id = OrderStatus::where('name', OrderStatus::DELIVERED_AND_PAID)->first()->id;
+        $this->order->save();
     }
 }

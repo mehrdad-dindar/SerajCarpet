@@ -34,9 +34,15 @@ class CustomerResource extends Resource
                     ->required(),
                 Forms\Components\TextInput::make("phone")
                     ->label(__("Customer Phone"))
-                    ->unique()
+                    ->unique(
+                        table: 'customers',
+                        column: 'phone',
+                        ignorable: fn ($record) => $record
+                    )
                     ->required(),
-            ]);
+                Forms\Components\TextInput::make("phone2")
+                    ->label(__("Customer's second contact number")),
+            ])->columns(3);
     }
 
     public static function table(Table $table): Table
