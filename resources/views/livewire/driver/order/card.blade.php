@@ -1,43 +1,60 @@
 <div
     class="max-w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 relative">
-    <a href="{{sprintf('https://nshn.ir/?lat=%s&lng=%s',$order->address->latitude,$order->address->longitude)}}">
-        <img class="rounded-t-lg object-cover w-full max-h-60" src="{{$mapUrl}}" alt=""/>
-    </a>
     <div class="p-4">
         <a href="tel:+98{{intval($order->customer->phone)}}" class="flex justify-start items-center">
-        <x-srj-avatar xl icon="user" border="thick" class="me-2 bg-gradient-fuchsia"/>
+            <x-srj-avatar xl icon="user" border="thick" class="me-2 bg-gradient-fuchsia"/>
             <div class="flex flex-col gap-2">
                 <span class="font-semibold text-lg text-gray-900 dark:text-white">{{$order->customer->name}}</span>
-                <span>{{$order->customer->phone}}</span>
+                <span class="flex justify-between gap-4">
+                    <span>{{$order->customer->phone}}</span>
+                    <span>{{$order->customer?->phone2}}</span>
+                </span>
             </div>
         </a>
         <hr class="h-[1px] bg-gray-600">
 
-        <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">{{$order->address->getFullAddress()}}</p>
+        <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+            <x-phosphor.icons::duotone.map-pin-area class="w-5 h-5 ml-1" />
+            {{$order->address->getFullAddress()}}</p>
+        <p class="border p-2 rounded-lg mb-3 font-normal text-gray-700 dark:text-gray-400">
+            <x-phosphor.icons::duotone.chat-circle-dots class="w-5 h-5 ml-1" />
+            {{$order->address->description}}</p>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
-            <x-srj-button wire:click="updateInvoice({{$order}})" spinner="updateInvoice" label="ثبت فاکتور" class="bg-gradient-fuchsia sm:col-span-full">
+            {{--            <x-srj-button wire:click="updateInvoice({{$order}})" spinner="updateInvoice" label="ثبت فاکتور" class="bg-gradient-fuchsia sm:col-span-full">--}}
+            {{--                <x-slot name="prepend">--}}
+            {{--                    <x-phosphor.icons::duotone.invoice class="w-5 h-5" />--}}
+            {{--                </x-slot>--}}
+            {{--            </x-srj-button>--}}
+            <x-srj-button wire:click="customerCall({{$order->customer->phone}})" spinner="customerCall" label="تماس"
+                          rounded-lg light green hover:outline.green focus:solid.green>
                 <x-slot name="prepend">
-                    <x-phosphor.icons::duotone.invoice class="w-5 h-5" />
+                    <x-phosphor.icons::regular.phone-call class="w-5 h-5"/>
                 </x-slot>
             </x-srj-button>
-            <x-srj-button wire:click="customerCall({{$order->customer->phone}})" spinner="customerCall" label="تماس" rounded-lg light green hover:outline.green focus:solid.green>
+            <x-srj-button wire:click="direction({{$order->address}})" spinner="direction" rounded-lg light primary
+                          hover:outline.primary focus:solid.primary label="مسیریابی">
                 <x-slot name="prepend">
-                    <x-phosphor.icons::regular.phone-call class="w-5 h-5" />
+                    <x-phosphor.icons::regular.path class="w-5 h-5"/>
                 </x-slot>
             </x-srj-button>
-            <x-srj-button wire:click="direction({{$order->address}})" spinner="direction" rounded-lg light primary hover:outline.primary focus:solid.primary label="مسیریابی">
-                <x-slot name="prepend">
-                    <x-phosphor.icons::regular.path class="w-5 h-5" />
+            <x-srj-dropdown>
+                <x-slot name="trigger">
+                    <x-srj-button rounded-lg outline primary hover:outline.info focus:solid.info label="عملیات"/>
                 </x-slot>
-            </x-srj-button>
-            <x-srj-button x-on:click="$openModal('cancel-{{$order->id}}')" rounded-lg outline negative hover:outline.negative focus:solid.negative label="کنسل">
+
+                <x-srj-dropdown.item wire:click="carpetsReceived()" icon="check" label="تحویل گرفته شد"/>
+                <x-srj-dropdown.item wire:click="revisitingDriver()" separator icon="arrow-path" label="مراجعه مجدد راننده"/>
+                <x-srj-dropdown.item wire:click="deliveredAndPaid()" separator icon="clipboard-document-check" label="تحویل و تسویه"/>
+                <x-srj-dropdown.item separator icon="x-circle" x-on:click="$openModal('cancel-{{$order->id}}')" rounded-lg outline negative hover:outline.negative focus:solid.negative label="کنسل"/>
+            </x-srj-dropdown>
+            {{--<x-srj-button x-on:click="$openModal('cancel-{{$order->id}}')" rounded-lg outline negative hover:outline.negative focus:solid.negative label="کنسل">
                 <x-slot name="prepend">
                     <x-phosphor.icons::regular.x-circle class="w-5 h-5" />
                 </x-slot>
-            </x-srj-button>
+            </x-srj-button>--}}
         </div>
     </div>
-    <x-srj-badge :label="$order->getStatusLabel()" :class="$order->getStatusColor() . ' absolute top-1 start-1'"
+    <x-srj-badge :label="$order->getStatusLabel()" :class="$order->getStatusColor() . ' absolute top-1 end-1'"
                  icon="tag"/>
     <x-srj-modal-card
         title="کنسل کردن سفارش"
@@ -60,9 +77,9 @@
         </div>
         <x-slot name="footer" class="flex justify-between gap-x-4">
             <div class="flex gap-x-4">
-                <x-srj-button negative label="کنسل شود" wire:click="cancel" />
+                <x-srj-button negative label="کنسل شود" wire:click="cancel"/>
 
-                <x-srj-button outline primary label="بیخیال" x-on:click="close" />
+                <x-srj-button outline primary label="بیخیال" x-on:click="close"/>
             </div>
         </x-slot>
     </x-srj-modal-card>
