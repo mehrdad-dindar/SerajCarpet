@@ -51,7 +51,6 @@ class OrderResource extends Resource
     {
         return $table
             ->defaultSort('created_at', 'desc')
-            ->paginationPageOptions([10, 25, 50])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('Order ID')
