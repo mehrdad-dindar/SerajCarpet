@@ -78,6 +78,7 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('area')
                     ->badge()->color(fn ($state, $record): string => $record->address ? 'info' : 'danger')
                     ->getStateUsing(fn ($record) => $record->address ? $record->address->getArea() : 'X')
+                    ->wrap()
                     ->description(fn ($record) => $record->address ? $record->address->getFullAddress() : 'فاقد آدرس')
                     ->sortable()
                     ->translateLabel()
