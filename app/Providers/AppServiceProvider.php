@@ -31,8 +31,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
 
-        $shiftScheduler = app(ShiftSchedulerService::class);
-        $shiftScheduler->registerSchedules($schedule);
+//        $shiftScheduler = app(ShiftSchedulerService::class);
+//        $shiftScheduler->registerSchedules($schedule);
 
 
         Livewire::component('create-order-wizard', CreateWizard::class);
