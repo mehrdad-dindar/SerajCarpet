@@ -583,7 +583,7 @@ class OrderResource extends Resource
                                     ->label(__('Delivery by customer')),
                                 Forms\Components\Select::make('status_id')
                                     ->relationship('status', 'label')
-                                    ->default(OrderStatus::whereName(OrderStatus::RESERVED)->pluck('id')->first())
+                                    ->default(OrderStatus::whereName(OrderStatus::IN_COLLECTIVE_LIST)->pluck('id')->first())
                                     ->hiddenLabel()
                                     ->reactive()
                                     ->required()
@@ -604,7 +604,7 @@ class OrderResource extends Resource
                                             ->translateLabel()
                                             ->reactive()
                                             ->displayFormat('Y-m-d')
-                                            ->default(Carbon::now()->addDays(2))
+                                            ->default(Carbon::now())
                                             ->columnSpanFull()
                                             ->required()
                                             ->jalali(),
