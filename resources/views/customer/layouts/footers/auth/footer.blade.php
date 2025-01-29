@@ -4,8 +4,12 @@
             <div class="w-full max-w-full px-3 mt-0 mb-6 shrink-0 lg:mb-0 lg:w-1/2 lg:flex-none">
                 <div class="leading-normal text-center text-size-sm text-slate-500 lg:text-right">
                     Copyright ©
+                    <span id="year"></span>
+
                     <script>
-                        document.write(new Date().getFullYear() + " - " + {{verta(now())->format("Y")}});
+                        const currentYear = new Date().getFullYear();
+                        const serverYear = {{ verta(now())->format('Y') }};
+                        document.getElementById('year').textContent = `${currentYear} - ${serverYear}`;
                     </script>
                     تمامی حقوق برای <a class="font-semibold text-transparent bg-gradient-cyan bg-clip-text" href="https://serajcarpet.com" target="_blank">قالیشویی سراج</a> محفوظ است.
                     {{ __("made with")}} <i class="fa fa-heart"></i>

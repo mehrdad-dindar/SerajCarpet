@@ -11,7 +11,8 @@ import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 
 // تابع برای به‌روزرسانی موقعیت مکانی راننده
-function updateDriverLocation() {
+function updateDriverLocation()
+{
     if (navigator.geolocation) {
         navigator.geolocation.watchPosition(
             (position) => {
@@ -60,4 +61,4 @@ function updateDriverLocation() {
 }
 setInterval(() => {
 updateDriverLocation();
-    },10000);
+    },600000);
