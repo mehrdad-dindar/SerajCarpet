@@ -124,7 +124,7 @@ class AddressResource extends Resource
                             ->detectRetina()
                             ->showMyLocationButton()
                             ->zoom(15)
-                            ->tilesUrl('http://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}'),
+                            ->tilesUrl('https://tile.openstreetmap.org/{z}/{x}/{y}.png'),
                     ])
                     ->disabledForm()
                     ->icon('heroicon-o-map-pin'),
