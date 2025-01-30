@@ -59,6 +59,6 @@ function updateDriverLocation()
         console.error("مرورگر شما از موقعیت‌یاب پشتیبانی نمی‌کند.");
     }
 }
-setInterval(() => {
+/*setInterval(() => {
 updateDriverLocation();
-    },600000);
+    },600000);*/
