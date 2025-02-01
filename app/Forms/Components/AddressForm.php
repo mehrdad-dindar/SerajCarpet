@@ -113,6 +113,7 @@ class AddressForm
                     $set('latitude', $state['lat']);
                     $set('longitude', $state['lng']);
                 })
+                ->live(debounce: 5000)
                 ->afterStateHydrated(function ($state, $record, Set $set, Get $get): void {
                     $set('location', ['lat' => $record?->latitude, 'lng' => $record?->longitude]);
                 })
@@ -120,7 +121,7 @@ class AddressForm
                     'min-height: 50vh',
                     'border-radius: 16px',
                 ])
-                ->liveLocation()
+                ->liveLocation(false)
                 ->showMarker()
                 ->markerColor('#40E0D0')
                 ->showFullscreenControl()
@@ -194,6 +195,7 @@ class AddressForm
     {
         $data = match ((int) $data['location_type']) {
             self::CUSTOMER => self::getAddressFromCustomer($data),
+            self::MANUAL => self::getAddressInfo($data, ['latitude' => $data['latitude'], 'longitude' => $data['longitude']]),
             default => self::getAddressLocation($data),
         };
 
@@ -218,21 +220,6 @@ class AddressForm
         return $data;
     }
 
-    private static function getAddressLocation(array $data): array
-    {
-        $location = self::geocoding('تهران '.$data['address'].' پلاک '.$data['no']);
-        if (empty($location)) {
-            Notification::make()
-                ->title('سیستم قادر به شناسایی آدرس نشد!')
-                ->danger()
-                ->send();
-
-            return $data;
-        }
-
-        return self::getAddressInfo($data, $location);
-    }
-
     private static function getAddressInfo($data, array $location): array
     {
         $data['latitude'] = $location['latitude'];
@@ -250,5 +237,20 @@ class AddressForm
         }
 
         return $data;
+    }
+
+    private static function getAddressLocation(array $data): array
+    {
+        $location = self::geocoding('تهران '.$data['address'].' پلاک '.$data['no']);
+        if (empty($location)) {
+            Notification::make()
+                ->title('سیستم قادر به شناسایی آدرس نشد!')
+                ->danger()
+                ->send();
+
+            return $data;
+        }
+
+        return self::getAddressInfo($data, $location);
     }
 }
