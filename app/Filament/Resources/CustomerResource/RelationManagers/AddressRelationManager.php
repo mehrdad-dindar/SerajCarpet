@@ -6,6 +6,7 @@ use App\Forms\Components\AddressForm;
 use App\Traits\Neshan;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms;
+use Filament\Forms\Components\Tabs;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
@@ -32,10 +33,6 @@ class AddressRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('customer.name')
                     ->label(__('Customer Name'))
                     ->searchable(),
-                Tables\Columns\TextColumn::make('state')
-                    ->toggleable()
-                    ->toggledHiddenByDefault()
-                    ->translateLabel(),
                 Tables\Columns\TextColumn::make('area')
                     ->badge()->color(fn ($state, $record): string => $record ? 'info' : 'danger')
                     ->getStateUsing(fn ($record) => $record ? 'منطقه '.$record->municipality_zone : 'X')
@@ -139,18 +136,24 @@ class AddressRelationManager extends RelationManager
     public function form(Form $form): Form
     {
         return $form
-            ->schema(array_merge(
-                AddressForm::schema(),
-                [
-                    Forms\Components\Section::make('توضیحات آدرس')
-                        ->icon('heroicon-o-information-circle')
-                        ->schema([
-                            Forms\Components\Textarea::make('description')
-                                ->label(false)
-                                ->rows(4)
-                                ->helperText('در صورت نیاز لطفا توضیحات آدرس را در این قسمت وارد نمایید'),
-                        ]),
-                ]
-            ));
+            ->schema([
+                Tabs::make('Tabs')
+                    ->columnSpanFull()
+                    ->tabs([
+                        Tabs\Tab::make('Address Info')
+                            ->icon('heroicon-o-map')
+                            ->translateLabel()
+                            ->schema(AddressForm::schema()),
+                        Tabs\Tab::make('Description')
+                            ->icon('heroicon-o-bookmark')
+                            ->translateLabel()
+                            ->schema([
+                                Forms\Components\Textarea::make('description')
+                                    ->rows(5)
+                                    ->label(__('Address description'))
+                                    ->helperText('در صورت نیاز لطفا توضیحات آدرس را در این قسمت وارد نمایید'),
+                            ]),
+                    ]),
+            ]);
     }
 }
