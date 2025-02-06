@@ -27,13 +27,9 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(Schedule $schedule): void
+    public function boot(): void
     {
         Schema::defaultStringLength(191);
-
-//        $shiftScheduler = app(ShiftSchedulerService::class);
-//        $shiftScheduler->registerSchedules($schedule);
-
 
         Livewire::component('create-order-wizard', CreateWizard::class);
 
