@@ -91,6 +91,11 @@ class ShiftSettings extends Settings
         return self::getShiftHoursToArray(self::getDay(Carbon::today()));
     }
 
+    public static function getTomorrowShifts(): array
+    {
+        return self::getShiftHoursToArray(self::getDay(Carbon::tomorrow()));
+    }
+
     private static function getShiftHoursToArray(int $getDay): array
     {
         $shifts = shiftSettings()->shifts;

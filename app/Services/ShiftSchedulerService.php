@@ -42,7 +42,7 @@ class ShiftSchedulerService
 
             if ($endOfShift) {
                 $schedule
-                    ->job(new MoveOrdersToNextShift)
+                    ->job(new MoveOrdersToNextShift($endOfShift))
                     ->days($key)
                     ->at($endOfShift);
             }
