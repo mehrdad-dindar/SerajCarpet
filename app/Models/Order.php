@@ -103,13 +103,25 @@ class Order extends Model
 
     public function getDescriptionForEvent(string $eventName): string
     {
-        return __('order.' . $eventName);
+        return match ($eventName) {
+            "created" => __('order.created'),
+            "updated" => __('order.updated', ['status' => $this->status->label]),
+            "deleted" => __('order.deleted'),
+        };
+//        return __('order.' . $eventName);
     }
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['status_id', 'time_apply_status', 'address_id', 'driver_id'])
+            ->logOnly([
+                'status_id',
+                'time_apply_status',
+                'address_id',
+                'driver_id',
+                'collected_at',
+                'sent_to_factory_at',
+            ])
             ->useLogName('order')
             ->logOnlyDirty();
     }
