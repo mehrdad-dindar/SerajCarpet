@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Jobs\MoveOrdersToNextShift;
-use Illuminate\Console\Scheduling\Schedule;
 
 class ShiftSchedulerService
 {
@@ -22,9 +21,12 @@ class ShiftSchedulerService
     /**
      * Register all shift schedules dynamically.
      */
-    public function registerSchedules(Schedule $schedule): void
+    public function registerSchedules($schedule): void
     {
         foreach ($this->shifts as $key => $shift) {
+            if (is_null($shift)) {
+                continue;
+            }
             $this->scheduleShift($schedule, $shift, $key);
         }
     }
@@ -32,7 +34,7 @@ class ShiftSchedulerService
     /**
      * Schedule a single shift.
      */
-    private function scheduleShift(Schedule $schedule, array $shift, $key): void
+    private function scheduleShift($schedule, array $shift, $key): void
     {
         $shiftHours = array_merge($shift['morning_shift_hours'], $shift['afternoon_shift_hours']);
         foreach ($shiftHours as $hour) {
@@ -40,7 +42,7 @@ class ShiftSchedulerService
 
             if ($endOfShift) {
                 $schedule
-                    ->job(new MoveOrdersToNextShift())
+                    ->job(new MoveOrdersToNextShift($endOfShift))
                     ->days($key)
                     ->at($endOfShift);
             }

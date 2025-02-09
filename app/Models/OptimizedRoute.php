@@ -74,10 +74,8 @@ class OptimizedRoute extends Model
     private function getOrders(Driver $driver, $shift)
     {
         $shiftTimeFrame = explode(' - ', $shift);
-        $orders = $driver->orders()
-            ->whereDate('time_apply_status', Carbon::today());
-
-        return $orders
+        return $driver->orders()
+            ->whereDate('time_apply_status', Carbon::today())
             ->whereTime('time_apply_status', '>=', $shiftTimeFrame[0])
             ->whereTime('time_apply_status', '<', $shiftTimeFrame[1])
             ->get();

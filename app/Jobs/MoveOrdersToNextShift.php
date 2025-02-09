@@ -3,24 +3,36 @@
 namespace App\Jobs;
 
 use App\Models\Order;
-use App\Models\User;
+use App\Models\OrderStatus;
+use App\Settings\ShiftSettings;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class MoveOrdersToNextShift implements ShouldQueue
 {
     use Queueable;
+//    public $tries = 5;
+
+    protected string $endOfShift;
+
+    protected array $timeSlots;
+
+    public function failed(Exception $exception): void
+    {
+        Log::warning($exception->getMessage());
+    }
+
 
     /**
      * Create a new job instance.
      */
-    public function __construct()
+    public function __construct($endOfShift)
     {
-        //
+        $this->endOfShift = $endOfShift;
+        $this->timeSlots = ShiftSettings::getTodayShifts();
     }
 
     /**
@@ -29,25 +41,61 @@ class MoveOrdersToNextShift implements ShouldQueue
     public function handle(): void
     {
         $orders = $this->getPendingOrders();
-//        $this->moveOrdersToNextShift($orders);
+
+        if ($orders->count()) {
+            $this->moveOrdersToNextShift($orders);
+        }
     }
 
     private function getPendingOrders()
     {
-        // TODO: Will Complete
-        $user = User::find(1);
-        $user->name = "asdfghjkl";
-        $user->save();
-        info('Shifts order Moved');
-        return 1;
-//        return Order::whereTime('day', $this->currentDay)
-//            ->where('shift', $this->shiftType)
-//            ->whereNull('collected_at')
-//            ->get();
+        return Order::whereDate('time_apply_status', Carbon::today())
+            ->whereTime('time_apply_status', '<', $this->endOfShift)
+            ->whereIn('status_id', OrderStatus::whereIn(
+                'name',
+                [
+                    OrderStatus::IN_COLLECTIVE_LIST,
+                    OrderStatus::REVISITING_DRIVER,
+                ]
+            )->pluck('id'))
+            ->whereNull('collected_at')
+            ->get();
     }
 
-//    private function moveOrdersToNextShift(null $orders)
-//    {
-//        return $orders;
-//    }
+    private function moveOrdersToNextShift($orders): void
+    {
+        $nextShiftStartAt = $this->getNextShiftStartAt();
+        foreach ($orders as $order) {
+            $order->time_apply_status = $nextShiftStartAt ?? $order->time_apply_status;
+            $order->save();
+        }
+    }
+
+    private function getNextShiftStartAt()
+    {
+        $nextKey = null;
+
+        foreach ($this->timeSlots as $key => $value) {
+            if (strpos($value, $this->endOfShift) !== false) {
+                next($this->timeSlots);
+                $nextKey = key($this->timeSlots);
+                break;
+            }
+            next($this->timeSlots);
+        }
+
+        if ($nextKey !== null) {
+            $nextShift = Carbon::today()->setTime(explode(':', $nextKey)[0], explode(':', $nextKey)[1]);
+
+            return $nextShift;
+        } else {
+            $tomorrowShiftStart = array_key_first(ShiftSettings::getTomorrowShifts());
+            $nextShift = Carbon::tomorrow()->setTime(
+                explode(':', $tomorrowShiftStart)[0],
+                explode(':', $tomorrowShiftStart)[1]
+            );
+
+            return $nextShift;
+        }
+    }
 }

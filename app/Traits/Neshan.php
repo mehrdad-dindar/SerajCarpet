@@ -16,7 +16,8 @@ trait Neshan
 
     public static function reverseGeocoding($latitude, $longitude): JsonResponse
     {
-        $apiKey = 'service.18c25979b1a74a46a31ddfe28a9bd8d8';
+        $apiKey = env('NESHAN_API_KEY', 'service.df64f13754cc4cde9c69362bed1a62c4');
+
         $url = "https://api.neshan.org/v5/reverse?lat={$latitude}&lng={$longitude}";
         try {
             $response = Http::withHeaders([
@@ -39,7 +40,7 @@ trait Neshan
      */
     public static function geocoding(string $address): ?array
     {
-        $apiKey = 'service.18c25979b1a74a46a31ddfe28a9bd8d8';
+        $apiKey = env('NESHAN_API_KEY', 'service.df64f13754cc4cde9c69362bed1a62c4');
         $url = "https://api.neshan.org/v6/geocoding?address=" . urlencode($address);
         try {
             $response = self::sendRequest($url, $apiKey);
@@ -78,7 +79,7 @@ trait Neshan
 
     public function salesman($points): JsonResponse
     {
-        $apiKey = 'service.18c25979b1a74a46a31ddfe28a9bd8d8';
+        $apiKey = env('NESHAN_API_KEY', 'service.df64f13754cc4cde9c69362bed1a62c4');
         $url = 'https://api.neshan.org/v3/trip?waypoints='
             . urlencode($this->getFormattedCoordinates($points))
             . '&roundTrip=false&sourceIsAnyPoint=false';
