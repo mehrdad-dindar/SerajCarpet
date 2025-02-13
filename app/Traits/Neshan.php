@@ -16,7 +16,7 @@ trait Neshan
 
     public static function reverseGeocoding($latitude, $longitude): JsonResponse
     {
-        $apiKey = env('NESHAN_API_KEY', 'service.df64f13754cc4cde9c69362bed1a62c4');
+        $apiKey = env('NESHAN_API_KEY', 'service.b678b4849abe4a11894fd71093094bbe');
 
         $url = "https://api.neshan.org/v5/reverse?lat={$latitude}&lng={$longitude}";
         try {
@@ -40,7 +40,7 @@ trait Neshan
      */
     public static function geocoding(string $address): ?array
     {
-        $apiKey = env('NESHAN_API_KEY', 'service.df64f13754cc4cde9c69362bed1a62c4');
+        $apiKey = env('NESHAN_API_KEY', 'service.b678b4849abe4a11894fd71093094bbe');
         $url = "https://api.neshan.org/v6/geocoding?address=" . urlencode($address);
         try {
             $response = self::sendRequest($url, $apiKey);
@@ -79,7 +79,7 @@ trait Neshan
 
     public function salesman($points): JsonResponse
     {
-        $apiKey = env('NESHAN_API_KEY', 'service.df64f13754cc4cde9c69362bed1a62c4');
+        $apiKey = env('NESHAN_API_KEY', 'service.b678b4849abe4a11894fd71093094bbe');
         $url = 'https://api.neshan.org/v3/trip?waypoints='
             . urlencode($this->getFormattedCoordinates($points))
             . '&roundTrip=false&sourceIsAnyPoint=false';
@@ -102,7 +102,7 @@ trait Neshan
             return "{$point['latitude']},{$point['longitude']}";
         })->implode('|');
 
-        return $this->getStartLocation() . $formattedCoordinates;
+        return $this->getStartLocation().$formattedCoordinates;
     }
 
     protected function getStartLocation(): string
@@ -113,12 +113,12 @@ trait Neshan
             $location = $this->driverLocation;
         }
 
-        return implode(',', $location) . '|';
+        return implode(',', $location).'|';
     }
 
     public function showMap()
     {
-        $apiKey = env('NESHAN_API_KEY', 'service.df64f13754cc4cde9c69362bed1a62c4');
+        $apiKey = env('NESHAN_API_KEY', 'service.b678b4849abe4a11894fd71093094bbe');
         $url = "https://api.neshan.org/v4/static?key=$apiKey&type=neshan&width=500&height=500&zoom=12&center=32.657307%2C51.677579&markerToken=101139.nRmybq5";
     }
 }

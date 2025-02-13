@@ -103,6 +103,7 @@ class Card extends Component
     public function carpetsReceived()
     {
         $this->order->status_id = OrderStatus::where('name', OrderStatus::CARPETS_RECEIVED)->first()->id;
+        $this->order->collected_at = Carbon::now();
         $this->order->save();
     }
     public function revisitingDriver()

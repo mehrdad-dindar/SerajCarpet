@@ -54,7 +54,7 @@ class AddressForm
                 ->live()
                 ->default(self::AUTO)
                 ->grouped(),
-            Forms\Components\Grid::make('Address')
+            Forms\Components\Grid::make('AddressGrid')
                 ->visible(fn (Get $get) => $get('location_type') != self::CUSTOMER)
                 ->schema([
                     Forms\Components\TextInput::make('address')
@@ -62,7 +62,8 @@ class AddressForm
                         ->columnSpan(5)
                         ->helperText(function (Get $get, $state) {
                             if ($get('location_type') == self::MANUAL) {
-                                return self::getHint('address', $get) ?? $state;
+                                $address = self::getHint($get) ?? $state;
+                                return $address['formatted_address'];
                             }
 
                             return null;
@@ -74,11 +75,15 @@ class AddressForm
                                 ->visible(fn (Get $get) => $get('location_type') == self::MANUAL)
                                 ->icon('heroicon-s-sparkles')
                                 ->action(function (Get $get, Set $set) {
-                                    $address = self::getHint(field: null, get: $get);
-                                    $set('address', $address['formatted_address']);
-                                    $set('municipality_zone', $address['municipality_zone']);
-                                    $set('neighbourhood', $address['neighbourhood']);
-                                })
+                                    $address = self::getHint($get);
+                                    if (! empty($address)) {
+                                        $set('address', $address['formatted_address']);
+                                        $set('municipality_zone', $address['municipality_zone']);
+                                        $set('neighbourhood', $address['neighbourhood']);
+                                        $set('latitude', $address['latitude']);
+                                        $set('longitude', $address['longitude']);
+                                    }
+                                }),
                         ),
                     Forms\Components\TextInput::make('no')
                         ->required(fn (Get $get) => $get('location_type') != self::CUSTOMER)
@@ -91,8 +96,10 @@ class AddressForm
                         ->columnSpan(1)
                         ->label(__('Unit')),
                     Forms\Components\Hidden::make('latitude')
+                        ->default(35.69974184)
                         ->label(__('Latitude')),
                     Forms\Components\Hidden::make('longitude')
+                        ->default(51.33805990)
                         ->label(__('longitude')),
                     Forms\Components\Toggle::make('is_active')
                         ->inline(false)
@@ -108,13 +115,13 @@ class AddressForm
                 ->hint('با کشیدن و اسکرول موقعیت مورد نظر را انتخاب کنید')
                 ->label(__('Location'))
                 ->columnSpanFull()
-                ->defaultLocation(latitude: 35.699741844984004, longitude: 51.33805990219117)
-                ->afterStateUpdated(function (Get $get, Set $set, $old, $state): void {
+                ->defaultLocation(latitude: 35.69974184, longitude: 51.33805990)
+                ->afterStateUpdated(function (Set $set, $state): void {
                     $set('latitude', $state['lat']);
                     $set('longitude', $state['lng']);
                 })
                 ->live(debounce: 5000)
-                ->afterStateHydrated(function ($state, $record, Set $set, Get $get): void {
+                ->afterStateHydrated(function ($state, $record, Set $set): void {
                     $set('location', ['lat' => $record?->latitude, 'lng' => $record?->longitude]);
                 })
                 ->extraStyles([
@@ -134,7 +141,7 @@ class AddressForm
         ];
     }
 
-    public static function getHint(?string $field, Get $get)
+    public static function getHint($get)
     {
         $latitude = $get('latitude');
         $longitude = $get('longitude');
@@ -144,35 +151,25 @@ class AddressForm
         }
         if ($cachedAddress = self::getAddressTemp()) {
             if ($cachedAddress['latitude'] == $latitude && $cachedAddress['longitude'] == $longitude) {
-                return is_null($field) ? $cachedAddress : self::getFieldValue($field, $cachedAddress);
+                return $cachedAddress;
             }
         }
 
         $neshan = self::reverseGeocoding($latitude, $longitude)->getData(true);
-        $neshan['latitude'] = $latitude;
-        $neshan['longitude'] = $longitude;
 
-        self::setAddressTemp($neshan);
-        $neshan = self::renderAddress($neshan);
+        if (is_array($neshan) && $neshan !== [] && ($neshan['status'] ?? null) === 'OK') {
+            $neshan['latitude'] = $latitude;
+            $neshan['longitude'] = $longitude;
 
-        return is_null($field) ? $neshan : self::getFieldValue($field, $neshan);
+            return self::renderAddress($neshan);
+        }
+
+        return [];
     }
 
     protected static function getAddressTemp(): ?array
     {
         return Cache::get('address_temp');
-    }
-
-    private static function getFieldValue(string $field, array $neshan): string
-    {
-        return match ($field) {
-            'address' => $neshan['formatted_address'] ?? '',
-            'state' => $neshan['state'] ?? '',
-            'city' => $neshan['city'] ?? '',
-            'municipality_zone' => $neshan['municipality_zone'] ?? '',
-            'neighbourhood' => $neshan['neighbourhood'] ?? '',
-            default => '',
-        };
     }
 
     private static function setAddressTemp(array $data): array
@@ -185,8 +182,13 @@ class AddressForm
     private static function renderAddress(array $data): array
     {
         if (isset($data['formatted_address']) && str_starts_with($data['formatted_address'], 'تهران')) {
-            $data['formatted_address'] = trim(mb_substr($data['formatted_address'], mb_strlen('تهران')), '،');
+            $tehranPrefix = "تهران،";
+            if (str_starts_with($data['formatted_address'], $tehranPrefix)) {
+                $data['formatted_address'] = trim(substr($data['formatted_address'], strlen($tehranPrefix)));
+            }
         }
+
+        self::setAddressTemp($data);
 
         return $data;
     }

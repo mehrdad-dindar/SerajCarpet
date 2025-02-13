@@ -3,7 +3,9 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Dashboard;
+use App\Filament\Resources\AddressResource;
 use App\Filament\Resources\CustomerResource;
+use App\Filament\Resources\DriverResource;
 use App\Filament\Resources\OrderResource;
 use App\Filament\Resources\UserResource;
 use Awcodes\Overlook\OverlookPlugin;
@@ -38,7 +40,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
-//            ->spa()
+            ->spa()
             ->font('iranSans')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -79,6 +81,7 @@ class AdminPanelProvider extends PanelProvider
                     ->includes([
                         UserResource::class,
                         CustomerResource::class,
+                        DriverResource::class,
                         OrderResource::class,
 //                        ProductResource::class,
 //                        UserResource::class,
@@ -112,6 +115,6 @@ class AdminPanelProvider extends PanelProvider
                 return __('Seraj');
             })
             ->viteTheme('resources/css/filament/admin/theme.css')
-            ->databaseNotifications();
+            /*->databaseNotifications()*/;
     }
 }
