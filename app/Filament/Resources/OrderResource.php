@@ -84,8 +84,9 @@ class OrderResource extends Resource
                     ->toggleable()
                     ->alignCenter()
                     ->counts('items'),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->translateLabel()
+                Tables\Columns\TextColumn::make('time_apply_status')
+                    ->label(__("reserved"))
+                    ->jalaliDateTime("d F Y - H:i")
                     ->sortable()
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('collected_at')
@@ -113,6 +114,11 @@ class OrderResource extends Resource
                     ->label(__('Delivery by customer')),
                 Tables\Filters\SelectFilter::make('status')
                     ->relationship('status', 'label')
+                    ->searchable()
+                    ->preload()
+                    ->translateLabel(),
+                Tables\Filters\SelectFilter::make('driver')
+                    ->relationship('driver', 'name')
                     ->searchable()
                     ->preload()
                     ->translateLabel(),
