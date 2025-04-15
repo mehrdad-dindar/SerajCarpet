@@ -1,24 +1,28 @@
 <div
     class="max-w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 relative">
     <div class="p-4">
-        <a href="tel:+98{{intval($order->customer->phone)}}" class="flex justify-start items-center">
+        <div class="flex justify-start items-center">
             <x-srj-avatar xl icon="user" border="thick" class="me-2 bg-gradient-fuchsia"/>
             <div class="flex flex-col gap-2">
                 <span class="font-semibold text-lg text-gray-900 dark:text-white">{{$order->customer->name}}</span>
                 <span class="flex justify-between gap-4">
-                    <span>{{$order->customer->phone}}</span>
-                    <span>{{$order->customer?->phone2}}</span>
+                    <a href="tel:+98{{intval($order->customer->phone)}}">{{$order->customer->phone}}</a>
+                    <a href="tel:+98{{intval($order->customer->phone2)}}">{{$order->customer?->phone2}}</a>
                 </span>
             </div>
-        </a>
+        </div>
         <hr class="h-[1px] bg-gray-600">
-
+        @if($order->address->municipality_zone)
+        <b>{!! 'منطقه '.$order->address->municipality_zone . ' - محله '.$order->address->neighbourhood !!}</b>
+        @endif
         <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
             <x-phosphor.icons::duotone.map-pin-area class="w-5 h-5 ml-1" />
             {{$order->address->getFullAddress()}}</p>
-        <p class="border p-2 rounded-lg mb-3 font-normal text-gray-700 dark:text-gray-400">
-            <x-phosphor.icons::duotone.chat-circle-dots class="w-5 h-5 ml-1" />
-            {{$order->address->description}}</p>
+        @if($order->address->description)
+            <p class="border p-2 rounded-lg mb-3 font-normal text-gray-700 dark:text-gray-400">
+                <x-phosphor.icons::duotone.chat-circle-dots class="w-5 h-5 ml-1" />
+                {{$order->address->description}}</p>
+        @endif
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
             {{--            <x-srj-button wire:click="updateInvoice({{$order}})" spinner="updateInvoice" label="ثبت فاکتور" class="bg-gradient-fuchsia sm:col-span-full">--}}
             {{--                <x-slot name="prepend">--}}

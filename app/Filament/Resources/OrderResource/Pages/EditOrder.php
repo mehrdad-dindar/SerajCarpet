@@ -11,6 +11,12 @@ class EditOrder extends EditRecord
 {
     protected static string $resource = OrderResource::class;
 
+    public function mount(int|string $record): void
+    {
+        parent::mount($record);
+        parse_str(parse_url(url()->previous(), PHP_URL_QUERY) ?? '', $filters);
+        session()->put('orders_filters', $filters);
+    }
     protected function getFooterWidgets(): array
     {
         $order = $this->record;
@@ -27,7 +33,7 @@ class EditOrder extends EditRecord
 
     protected function getRedirectUrl(): ?string
     {
-        return $this->getResource()::getUrl('index');
+        return $this->getResource()::getUrl('index', session()->get('orders_filters', []));
     }
 
     protected function mutateFormDataBeforeFill(array $data): array

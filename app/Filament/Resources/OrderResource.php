@@ -58,7 +58,7 @@ class OrderResource extends Resource
                     ->translateLabel(),
                 Tables\Columns\TextColumn::make('customer.name')
                     ->label('Name')
-                    ->searchable()
+                    ->searchable(['name', 'phone', 'phone2'])
                     ->translateLabel()
                     ->url(function (Model $record): string {
                         return route('filament.admin.resources.customers.edit', $record->customer_id);
@@ -85,8 +85,9 @@ class OrderResource extends Resource
                     ->alignCenter()
                     ->counts('items'),
                 Tables\Columns\TextColumn::make('time_apply_status')
-                    ->label(__("reserved"))
-                    ->jalaliDateTime("d F Y - H:i")
+                    ->label(__('reserved'))
+                    ->jalaliDateTime('d F Y - H:i')
+                    ->tooltip(fn (?Model $record) => 'ایجاد شده در : '.$record->created_at)
                     ->sortable()
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('collected_at')
@@ -123,43 +124,59 @@ class OrderResource extends Resource
                     ->preload()
                     ->translateLabel(),
                 Tables\Filters\SelectFilter::make('area')
+                    ->multiple()
+                    ->preload()
+                    ->placeholder('مستثنی کردن مناطق')
                     ->options(function () {
                         return array_filter(Address::distinct()
+                            ->orderBy('municipality_zone')
                             ->pluck('municipality_zone', 'municipality_zone')
                             ->toArray());
                     })
                     ->query(function ($query, $state) {
-                        if (! $state['value']) {
+                        if (! $state['values']) {
                             return $query;
                         }
 
-                        return $query->whereHas('address', function ($query) use ($state) {
-                            $query->where('municipality_zone', $state);
+                        return $query->whereDoesntHave('address', function ($query) use ($state) {
+                            $query->whereIn('municipality_zone', $state['values']);
                         });
                     })
                     ->translateLabel(),
-                Tables\Filters\Filter::make('created_at')
+                Tables\Filters\Filter::make('time_apply_status')
                     ->form([
-                        Forms\Components\Fieldset::make('created_at')
-                            ->label(__('Created at'))
+                        Forms\Components\Fieldset::make('time_apply_status')
+                            ->label(__('Reservation Date'))
                             ->schema([
-                                DatePicker::make('created_from')
+                                DatePicker::make('reserved_from')
                                     ->label(__('from'))
                                     ->jalali(),
-                                DatePicker::make('created_until')
+                                DatePicker::make('reserved_until')
                                     ->label(__('until'))
                                     ->jalali(),
+                                Select::make("shift_time")
+                                    ->label(__("Shift Hours"))
+                                    ->columnSpanFull()
+                                    ->options(fn (Get $get): array => ShiftSettings::getDayShifts(
+                                        $get('reserved_from')
+                                    ))
+                                    ->visible(fn (Get $get) => $get('reserved_from') != null),
                             ]),
+
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
-                                $data['created_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                                $data['reserved_from'] ?? null,
+                                fn (Builder $query, $date): Builder => $query->whereDate('time_apply_status', '>=', $date)
                             )
                             ->when(
-                                $data['created_until'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                                $data['reserved_until'] ?? null,
+                                fn (Builder $query, $date): Builder => $query->whereDate('time_apply_status', '<=', $date)
+                            )
+                            ->when(
+                                $data['shift_time'] ?? null,
+                                fn (Builder $query, $time): Builder => $query->whereTime('time_apply_status', '=', $time)
                             );
                     }),
                 Tables\Filters\Filter::make('collected_at')
@@ -332,6 +349,7 @@ class OrderResource extends Resource
                                     ->label('customer')
                                     ->prefixIcon('heroicon-o-user')
                                     ->relationship('customer', 'id_name')
+                                    ->optionsLimit(10)
                                     ->searchable()
                                     ->preload()
                                     ->live()
@@ -607,11 +625,9 @@ class OrderResource extends Resource
                                         Forms\Components\DatePicker::make('reservation_date')
                                             ->prefixIcon('heroicon-o-calendar-days')
                                             ->label(__('Reservation Date'))
-                                            ->translateLabel()
                                             ->reactive()
-                                            ->displayFormat('Y-m-d')
-                                            ->default(Carbon::now())
-                                            ->columnSpanFull()
+                                            ->default(verta())
+                                            ->live()
                                             ->required()
                                             ->jalali(),
                                         Select::make('reservation_time')
@@ -619,7 +635,9 @@ class OrderResource extends Resource
                                                 fn (Get $get): bool => ! is_null($get('reservation_date'))
                                             )
                                             ->label(__('Shift'))
-                                            ->options(fn (Get $get): array => ShiftSettings::getDayShifts($get('reservation_date')))
+                                            ->options(fn (Get $get): array => ShiftSettings::getDayShifts(
+                                                $get('reservation_date')
+                                            ))
                                             ->reactive()
                                             ->required(),
                                     ]),
@@ -632,7 +650,11 @@ class OrderResource extends Resource
                                 Forms\Components\Placeholder::make('order_total')
                                     ->label(__('Order Total'))
                                     ->reactive()
-                                    ->content(fn (Get $get): ?string => number_format(self::calculateTotal($get), 0).' تومان'),
+                                    ->content(
+                                        fn (Get $get): ?string => number_format(
+                                            self::calculateTotal($get)
+                                        ).' تومان'
+                                    ),
                             ]),
                     ]),
             ])->columns(3);
