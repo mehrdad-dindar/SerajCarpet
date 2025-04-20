@@ -8,6 +8,7 @@ export default {
         content: [
         './app/Filament/**/*.php',
         './resources/views/filament/**/*.blade.php',
+        './resources/views/livewire/order-comments.blade.php',
         './vendor/filament/**/*.blade.php',
         ],
     }

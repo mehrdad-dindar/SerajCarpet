@@ -12,7 +12,10 @@
                           title="{{ $comment->created_at->toJalali()->format('d F Y - H:i') }}">{{ $comment->created_at->diffForHumans() }}</span>
                 </div>
             </div>
-            <p class="mt-2 border-s border-warning-400 ps-1">{!! nl2br(e($comment->body)) !!}</p>
+            <div class="relative mt-2 border-s border-warning-400 ps-1 ms-2">
+                <x-phosphor.icons::duotone.chat class="w-4 absolute top-0 -right-5 text-warning-400"/>
+                <p>{!! nl2br(e($comment->body)) !!}</p>
+            </div>
         </div>
     @endforeach
 </div>
