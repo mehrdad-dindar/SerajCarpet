@@ -18,6 +18,7 @@ use App\Settings\ShiftSettings;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Form;
@@ -588,7 +589,10 @@ class OrderResource extends Resource
                                 ->hiddenLabel()
                                 ->placeholder('توضیحات سفارش را اینجا بنویسید')
                                 ->helperText('این توضیحات فقط برای همین سفارش ثبت میشود!')
-                                ->rows(5)
+                                ->rows(5),
+                                Livewire::make('order-comments')
+                                    ->key('order-comments')
+                                    ->visible(fn (?Order $record) => $record !== null)
                             ]),
                         Forms\Components\Section::make('سایر خدمات')
                             ->schema([
