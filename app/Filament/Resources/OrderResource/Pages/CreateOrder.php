@@ -10,11 +10,11 @@ use App\Traits\Sms;
 use Carbon\Carbon;
 use Filament\Resources\Pages\CreateRecord;
 use Hashids\Hashids;
+use Illuminate\Support\Facades\Auth;
 
 class CreateOrder extends CreateRecord
 {
     use Sms;
-
     protected static string $resource = OrderResource::class;
 
     /**
@@ -22,6 +22,14 @@ class CreateOrder extends CreateRecord
      */
     protected function afterCreate(): void
     {
+        $comment = $this->data['comment'] ?? null;
+        if ($comment) {
+            $this->record->comments()->create([
+                'body' => $comment,
+                'commenter_type' => Auth::user()::class,
+                'commenter_id' => Auth::id(),
+            ]);
+        }
         $this->sendConfirmationSms($this->record);
     }
 
@@ -73,7 +81,11 @@ class CreateOrder extends CreateRecord
         }
 
         // Remove unnecessary fields from data
-        unset($data['reservation_date'], $data['reservation_time']);
+        unset(
+            $data['reservation_date'],
+            $data['reservation_time'],
+            $data['comment']
+        );
 
         return $data;
     }

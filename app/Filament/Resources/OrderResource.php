@@ -582,6 +582,14 @@ class OrderResource extends Resource
                 Forms\Components\Grid::make('Order')
                     ->columnSpan(1)
                     ->schema([
+                        Forms\Components\Section::make('توضیحات سفارش')
+                            ->schema([
+                                Forms\Components\Textarea::make('comment')
+                                ->hiddenLabel()
+                                ->placeholder('توضیحات سفارش را اینجا بنویسید')
+                                ->helperText('این توضیحات فقط برای همین سفارش ثبت میشود!')
+                                ->rows(5)
+                            ]),
                         Forms\Components\Section::make('سایر خدمات')
                             ->schema([
                                 Forms\Components\Select::make('options')
