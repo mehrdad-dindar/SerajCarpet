@@ -26,7 +26,6 @@ class OrderFactory extends Factory
     {
         return [
             'customer_id' => Customer::factory(),
-            'options' => $this->faker->randomElements([1, 2, 3, 4, 5, 6, 7], rand(3, 4)),
             'total' => $this->faker->randomFloat(0, 1000000, 9900000),
             'status_id' => random_int(1, 10),
             'created_at' => now(),

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('order_id')->nullable();
             $table->foreignId('property_id')->nullable();
             $table->integer('dimensions')->default(1);
+            $table->json('options')->nullable();
             $table->integer('quantity');
             $table->string('unit_price');
             $table->string('sub_total');

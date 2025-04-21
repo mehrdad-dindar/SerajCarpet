@@ -509,12 +509,20 @@ class OrderResource extends Resource
                                                         ->size(ActionSize::Medium)
                                                         ->form([
                                                             Forms\Components\Grid::make('options')
+                                                                ->label(__('Options'))
                                                                 ->schema([
+                                                                    Forms\Components\Select::make('options')
+                                                                        ->label("سایر خدمات")
+                                                                        ->multiple()
+                                                                        ->options(Option::pluck('name', 'id'))
+                                                                        ->default(Option::where('is_default', true)->pluck('id')->toArray())
+                                                                        ->native()
+                                                                        ->required(),
+                                                                    Forms\Components\SpatieMediaLibraryFileUpload::make('Attachment')
+                                                                        ->translateLabel(),
                                                                     Forms\Components\ColorPicker::make('color')
                                                                         ->translateLabel()
                                                                         ->required(),
-                                                                    Forms\Components\SpatieMediaLibraryFileUpload::make('Attachment')
-                                                                        ->label(false),
                                                                 ])
                                                                 ->columns(),
                                                         ]),
@@ -593,16 +601,6 @@ class OrderResource extends Resource
                                 Livewire::make('order-comments')
                                     ->key('order-comments')
                                     ->visible(fn (?Order $record) => $record !== null)
-                            ]),
-                        Forms\Components\Section::make('سایر خدمات')
-                            ->schema([
-                                Forms\Components\Select::make('options')
-                                    ->hiddenLabel()
-                                    ->multiple()
-                                    ->options(Option::pluck('name', 'id'))
-                                    ->default(Option::where('is_default', true)->pluck('id')->toArray())
-                                    ->native()
-                                    ->required(),
                             ]),
                         Forms\Components\Section::make('وضعیت سفارش')
                             ->schema([
