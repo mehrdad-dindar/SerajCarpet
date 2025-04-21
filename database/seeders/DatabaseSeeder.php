@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             OptionSeeder::class,
             OrderStatusSeeder::class,
             OrderSeeder::class,
+            CarpetColorSeeder::class
         ]);
     }
 }

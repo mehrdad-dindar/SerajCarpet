@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('property_id')->nullable();
             $table->integer('dimensions')->default(1);
             $table->json('options')->nullable();
+            $table->foreignId('carpet_color_id')->nullable();
             $table->integer('quantity');
             $table->string('unit_price');
             $table->string('sub_total');

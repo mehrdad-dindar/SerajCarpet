@@ -8,6 +8,7 @@ use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\Widgets\OrderStatusHistoryWidget;
 use App\Forms\Components\AddressForm;
 use App\Models\Address;
+use App\Models\CarpetColor;
 use App\Models\Customer;
 use App\Models\Driver;
 use App\Models\Option;
@@ -33,6 +34,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HtmlString;
 
 class OrderResource extends Resource
 {
@@ -520,9 +522,31 @@ class OrderResource extends Resource
                                                                         ->required(),
                                                                     Forms\Components\SpatieMediaLibraryFileUpload::make('Attachment')
                                                                         ->translateLabel(),
-                                                                    Forms\Components\ColorPicker::make('color')
+                                                                    Forms\Components\Select::make('color')
+                                                                        ->options(function () {
+                                                                            return CarpetColor::query()
+                                                                                ->orderBy('name')
+                                                                                ->pluck('name', 'hex')
+                                                                                ->toArray();
+                                                                        })
+                                                                        ->searchable()
+                                                                        ->preload()
+                                                                        ->live()
                                                                         ->translateLabel()
                                                                         ->required(),
+                                                                    Forms\Components\Placeholder::make('color-hex')
+                                                                        ->visible(fn (Get $get) => filled($get('color')))
+                                                                        ->content(fn (Get $get): HtmlString => new HtmlString(
+                                                                            '<span style="background-color: ' . $get('color') . ';
+                                                                            color: white;
+                                                                            display: inline-block;
+                                                                            width: 32px;
+                                                                            height: 32px;
+                                                                            border-radius: 50px;
+                                                                            border: 2px solid white;
+                                                                            padding: 8px;">
+                                                                            </span>'
+                                                                        ))                                                                        ->label('رنگ انتخابی'),
                                                                 ])
                                                                 ->columns(),
                                                         ]),
