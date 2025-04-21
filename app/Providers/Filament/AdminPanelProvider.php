@@ -3,7 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Dashboard;
-use App\Filament\Resources\AddressResource;
+use App\Filament\Resources\CommentResource\Widgets\LatestCommentsWidget;
 use App\Filament\Resources\CustomerResource;
 use App\Filament\Resources\DriverResource;
 use App\Filament\Resources\OrderResource;
@@ -14,7 +14,6 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationGroup;
-use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -51,7 +50,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 OverlookWidget::class,
                 Widgets\AccountWidget::class,
-//                Widgets\FilamentInfoWidget::class,
+                LatestCommentsWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -83,38 +82,33 @@ class AdminPanelProvider extends PanelProvider
                         CustomerResource::class,
                         DriverResource::class,
                         OrderResource::class,
-//                        ProductResource::class,
-//                        UserResource::class,
-//                        ArticleResource::class,
-//                        FileResource::class
                     ]),
             ])
             ->navigationGroups([
                 'Management' => NavigationGroup::make()
                     ->label(function () {
-                        return __("Management");
+                        return __('Management');
                     })
-                    ->icon("heroicon-o-adjustments-horizontal"),
+                    ->icon('heroicon-o-adjustments-horizontal'),
                 'Services Setting' => NavigationGroup::make()
                     ->label(function () {
-                        return __("Services Setting");
+                        return __('Services Setting');
                     })
-                    ->icon("heroicon-o-swatch"),
+                    ->icon('heroicon-o-swatch'),
                 'User Settings' => NavigationGroup::make()
                     ->label(function () {
-                        return __("User Settings");
+                        return __('User Settings');
                     })
-                    ->icon("heroicon-o-users"),
+                    ->icon('heroicon-o-users'),
                 'System Setting' => NavigationGroup::make()
                     ->label(function () {
-                        return __("System Setting");
+                        return __('System Setting');
                     })
-                    ->icon("heroicon-o-swatch"),
+                    ->icon('heroicon-o-swatch'),
             ])
             ->brandName(function () {
                 return __('Seraj');
             })
-            ->viteTheme('resources/css/filament/admin/theme.css')
-            /*->databaseNotifications()*/;
+            ->viteTheme('resources/css/filament/admin/theme.css');
     }
 }

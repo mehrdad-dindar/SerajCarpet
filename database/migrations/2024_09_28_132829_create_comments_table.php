@@ -21,6 +21,7 @@ return new class extends Migration
                 ->constrained('comments')
                 ->onDelete('cascade');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
