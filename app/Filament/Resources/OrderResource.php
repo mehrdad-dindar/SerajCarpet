@@ -18,6 +18,7 @@ use App\Settings\ShiftSettings;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Form;
@@ -508,12 +509,20 @@ class OrderResource extends Resource
                                                         ->size(ActionSize::Medium)
                                                         ->form([
                                                             Forms\Components\Grid::make('options')
+                                                                ->label(__('Options'))
                                                                 ->schema([
+                                                                    Forms\Components\Select::make('options')
+                                                                        ->label("سایر خدمات")
+                                                                        ->multiple()
+                                                                        ->options(Option::pluck('name', 'id'))
+                                                                        ->default(Option::where('is_default', true)->pluck('id')->toArray())
+                                                                        ->native()
+                                                                        ->required(),
+                                                                    Forms\Components\SpatieMediaLibraryFileUpload::make('Attachment')
+                                                                        ->translateLabel(),
                                                                     Forms\Components\ColorPicker::make('color')
                                                                         ->translateLabel()
                                                                         ->required(),
-                                                                    Forms\Components\SpatieMediaLibraryFileUpload::make('Attachment')
-                                                                        ->label(false),
                                                                 ])
                                                                 ->columns(),
                                                         ]),
@@ -582,15 +591,16 @@ class OrderResource extends Resource
                 Forms\Components\Grid::make('Order')
                     ->columnSpan(1)
                     ->schema([
-                        Forms\Components\Section::make('سایر خدمات')
+                        Forms\Components\Section::make('توضیحات سفارش')
                             ->schema([
-                                Forms\Components\Select::make('options')
-                                    ->hiddenLabel()
-                                    ->multiple()
-                                    ->options(Option::pluck('name', 'id'))
-                                    ->default(Option::where('is_default', true)->pluck('id')->toArray())
-                                    ->native()
-                                    ->required(),
+                                Forms\Components\Textarea::make('comment')
+                                ->hiddenLabel()
+                                ->placeholder('توضیحات سفارش را اینجا بنویسید')
+                                ->helperText('این توضیحات فقط برای همین سفارش ثبت میشود!')
+                                ->rows(5),
+                                Livewire::make('order-comments')
+                                    ->key('order-comments')
+                                    ->visible(fn (?Order $record) => $record !== null)
                             ]),
                         Forms\Components\Section::make('وضعیت سفارش')
                             ->schema([

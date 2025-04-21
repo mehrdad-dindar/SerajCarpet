@@ -95,11 +95,11 @@ class Order extends Model
         };
     }
 
-    public function getOptionModelsAttribute()
-    {
-        $optionIds = $this->options ?? [];
-        return Option::whereIn('id', $optionIds)->get();
-    }
+//    public function getOptionModelsAttribute()
+//    {
+//        $optionIds = $this->options ?? [];
+//        return Option::whereIn('id', $optionIds)->get();
+//    }
 
     public function getDescriptionForEvent(string $eventName): string
     {
@@ -152,14 +152,6 @@ class Order extends Model
     {
         return Attribute::make(
             get: fn (string $value) => verta($value)->format('d F Y - H:i'),
-        );
-    }
-
-    protected function options(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => json_decode($value, true),
-            set: fn ($value) => json_encode($value),
         );
     }
 
