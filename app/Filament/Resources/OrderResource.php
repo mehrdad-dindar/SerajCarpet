@@ -522,6 +522,12 @@ class OrderResource extends Resource
                                                             ->mutateDehydratedStateUsing(fn (array $state) => array_map('intval', $state))
                                                             ->native(false)
                                                             ->required(),
+                                                        Forms\Components\SpatieMediaLibraryFileUpload::make('Attachment')
+                                                            ->multiple()
+                                                            ->openable()
+                                                            ->downloadable()
+                                                            ->conversion('default')
+                                                            ->translateLabel(),
 
                                                         //                                                        Forms\Components\ColorPicker::make('color')
                                                         //                                                            ->label(__('Color')),
