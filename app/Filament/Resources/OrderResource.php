@@ -8,6 +8,7 @@ use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\Widgets\OrderStatusHistoryWidget;
 use App\Forms\Components\AddressForm;
 use App\Models\Address;
+use App\Models\CarpetColor;
 use App\Models\Customer;
 use App\Models\Driver;
 use App\Models\Option;
@@ -33,6 +34,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HtmlString;
 
 class OrderResource extends Resource
 {
@@ -155,8 +157,8 @@ class OrderResource extends Resource
                                 DatePicker::make('reserved_until')
                                     ->label(__('until'))
                                     ->jalali(),
-                                Select::make("shift_time")
-                                    ->label(__("Shift Hours"))
+                                Select::make('shift_time')
+                                    ->label(__('Shift Hours'))
                                     ->columnSpanFull()
                                     ->options(fn (Get $get): array => ShiftSettings::getDayShifts(
                                         $get('reserved_from')
@@ -434,6 +436,9 @@ class OrderResource extends Resource
                                                     ->reactive()
                                                     ->helperText(fn (Get $get) => Property::find($get('property_id'))->helperText ?? '')
                                                     ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                                        if (is_null($state)) {
+                                                            return null;
+                                                        }
                                                         $set('sub_total', ((int) $get('dimensions') ?? 1) * $get('quantity') * Property::find($state)->price);
                                                         $set('unit_price', Property::find($state)->price);
                                                     })
@@ -441,6 +446,9 @@ class OrderResource extends Resource
                                                     ->getOptionLabelFromRecordUsing(function (Property $property) {
                                                         return $property->fullTitle;
                                                     })
+                                                    ->searchable()
+                                                    ->preload()
+                                                    ->native(false)
                                                     ->columnSpan(3),
                                                 Forms\Components\Select::make('dimensions')
                                                     ->options(function ($state, Get $get) {
@@ -501,32 +509,44 @@ class OrderResource extends Resource
                                                     ->stripCharacters('.')
                                                     ->mutateStateForValidationUsing(fn ($state) => str_replace(',', '', $state))
                                                     ->mutateDehydratedStateUsing(fn ($state) => str_replace(',', '', $state)),
-                                                Forms\Components\Actions::make([
-                                                    Forms\Components\Actions\Action::make('Other')
-                                                        ->label(false)
-                                                        ->icon('heroicon-o-squares-plus')
-                                                        ->iconButton()
-                                                        ->size(ActionSize::Medium)
-                                                        ->form([
-                                                            Forms\Components\Grid::make('options')
-                                                                ->label(__('Options'))
-                                                                ->schema([
-                                                                    Forms\Components\Select::make('options')
-                                                                        ->label("سایر خدمات")
-                                                                        ->multiple()
-                                                                        ->options(Option::pluck('name', 'id'))
-                                                                        ->default(Option::where('is_default', true)->pluck('id')->toArray())
-                                                                        ->native()
-                                                                        ->required(),
-                                                                    Forms\Components\SpatieMediaLibraryFileUpload::make('Attachment')
-                                                                        ->translateLabel(),
-                                                                    Forms\Components\ColorPicker::make('color')
-                                                                        ->translateLabel()
-                                                                        ->required(),
-                                                                ])
-                                                                ->columns(),
-                                                        ]),
-                                                ])->verticallyAlignCenter(),
+                                                Forms\Components\Section::make(__('Additional Options'))
+                                                    ->translateLabel()
+                                                    ->collapsed()
+                                                    ->icon('heroicon-o-squares-plus')
+                                                    ->schema([
+                                                        Forms\Components\Select::make('carpet_color_id')
+                                                            ->label(__('Color'))
+                                                            ->relationship('color','name')
+                                                            ->searchable()
+                                                            ->preload()
+                                                            ->live()
+                                                            ->translateLabel()
+                                                            ->required(),
+                                                        Forms\Components\Placeholder::make('color-hex')
+                                                            ->visible(fn (Get $get) => filled($get('carpet_color_id')))
+                                                            ->content(function (Get $get){
+                                                                $color = CarpetColor::find($get('carpet_color_id'));
+                                                                return new HtmlString(
+                                                                    '<div class="flex items-center gap-2" style="border: 2px solid '.$color->hex.';width:max-content;border-radius: 50px;"><span style="background-color: ' . $color->hex . ';color: white;display: inline-block;width: 32px;height: 32px;border-radius: 50px;border: 2px solid white;padding: 8px;"></span><span style="padding-left: 8px;">'.$color->name.'</span></div>'
+                                                                );
+                                                            })                                                                        ->label('رنگ انتخابی'),
+                                                        Forms\Components\Select::make('options')
+                                                            ->label('سایر خدمات')
+                                                            ->multiple()
+                                                            ->options(Option::pluck('name', 'id'))
+                                                            ->default(Option::where('is_default', true)->pluck('id')->toArray())
+                                                            ->mutateDehydratedStateUsing(fn (array $state) => array_map('intval', $state))
+                                                            ->native(false)
+                                                            ->required(),
+                                                        Forms\Components\SpatieMediaLibraryFileUpload::make('Attachment')
+                                                            ->multiple()
+                                                            ->openable()
+                                                            ->downloadable()
+                                                            ->conversion('default')
+                                                            ->translateLabel(),
+                                                    ])
+                                                    ->columns()
+                                                    ->collapsible(),
                                             ])->columns(12),
                                     ])
                                     ->columns(1),
@@ -583,7 +603,44 @@ class OrderResource extends Resource
                                             ->stripCharacters('.')
                                             ->mutateStateForValidationUsing(fn ($state) => str_replace(',', '', $state))
                                             ->mutateDehydratedStateUsing(fn ($state) => str_replace(',', '', $state)),
-
+                                        Forms\Components\Section::make(__('Additional Options'))
+                                            ->translateLabel()
+                                            ->collapsed()
+                                            ->icon('heroicon-o-squares-plus')
+                                            ->schema([
+                                                Forms\Components\Select::make('carpet_color_id')
+                                                    ->label(__('Color'))
+                                                    ->relationship('color','name')
+                                                    ->searchable()
+                                                    ->preload()
+                                                    ->live()
+                                                    ->translateLabel()
+                                                    ->required(),
+                                                Forms\Components\Placeholder::make('color-hex')
+                                                    ->visible(fn (Get $get) => filled($get('carpet_color_id')))
+                                                    ->content(function (Get $get){
+                                                        $color = CarpetColor::find($get('carpet_color_id'));
+                                                        return new HtmlString(
+                                                            '<div class="flex items-center gap-2" style="border: 2px solid '.$color->hex.';width:max-content;border-radius: 50px;"><span style="background-color: ' . $color->hex . ';color: white;display: inline-block;width: 32px;height: 32px;border-radius: 50px;border: 2px solid white;padding: 8px;"></span><span style="padding-left: 8px;">'.$color->name.'</span></div>'
+                                                        );
+                                                    })                                                                        ->label('رنگ انتخابی'),
+                                                Forms\Components\Select::make('options')
+                                                    ->label('سایر خدمات')
+                                                    ->multiple()
+                                                    ->options(Option::pluck('name', 'id'))
+                                                    ->default(Option::where('is_default', true)->pluck('id')->toArray())
+                                                    ->mutateDehydratedStateUsing(fn (array $state) => array_map('intval', $state))
+                                                    ->native(false)
+                                                    ->required(),
+                                                Forms\Components\SpatieMediaLibraryFileUpload::make('Attachment')
+                                                    ->multiple()
+                                                    ->openable()
+                                                    ->downloadable()
+                                                    ->conversion('default')
+                                                    ->translateLabel(),
+                                            ])
+                                            ->columns()
+                                            ->collapsible(),
                                     ])
                                     ->columnSpanFull(),
                             ])->icon('heroicon-o-list-bullet'),
@@ -594,13 +651,13 @@ class OrderResource extends Resource
                         Forms\Components\Section::make('توضیحات سفارش')
                             ->schema([
                                 Forms\Components\Textarea::make('comment')
-                                ->hiddenLabel()
-                                ->placeholder('توضیحات سفارش را اینجا بنویسید')
-                                ->helperText('این توضیحات فقط برای همین سفارش ثبت میشود!')
-                                ->rows(5),
+                                    ->hiddenLabel()
+                                    ->placeholder('توضیحات سفارش را اینجا بنویسید')
+                                    ->helperText('این توضیحات فقط برای همین سفارش ثبت میشود!')
+                                    ->rows(5),
                                 Livewire::make('order-comments')
                                     ->key('order-comments')
-                                    ->visible(fn (?Order $record) => $record !== null)
+                                    ->visible(fn (?Order $record) => $record !== null),
                             ]),
                         Forms\Components\Section::make('وضعیت سفارش')
                             ->schema([

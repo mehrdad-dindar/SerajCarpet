@@ -7,9 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class OrderItem extends Model
+class OrderItem extends Model implements HasMedia
 {
+    use InteractsWithMedia;
     protected $guarded;
     protected $casts = [
         'options' => 'array',
@@ -52,9 +55,15 @@ class OrderItem extends Model
 
     protected function options(): Attribute
     {
+
         return Attribute::make(
             get: fn ($value) => json_decode($value, true),
             set: fn ($value) => json_encode($value),
         );
+    }
+
+    public function color(): BelongsTo
+    {
+        return $this->belongsTo(CarpetColor::class, 'carpet_color_id');
     }
 }
