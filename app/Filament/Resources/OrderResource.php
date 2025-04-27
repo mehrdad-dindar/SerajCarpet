@@ -514,6 +514,22 @@ class OrderResource extends Resource
                                                     ->collapsed()
                                                     ->icon('heroicon-o-squares-plus')
                                                     ->schema([
+                                                        Forms\Components\Select::make('carpet_color_id')
+                                                            ->label(__('Color'))
+                                                            ->relationship('color','name')
+                                                            ->searchable()
+                                                            ->preload()
+                                                            ->live()
+                                                            ->translateLabel()
+                                                            ->required(),
+                                                        Forms\Components\Placeholder::make('color-hex')
+                                                            ->visible(fn (Get $get) => filled($get('carpet_color_id')))
+                                                            ->content(function (Get $get){
+                                                                $color = CarpetColor::find($get('carpet_color_id'));
+                                                                return new HtmlString(
+                                                                    '<div class="flex items-center gap-2" style="border: 2px solid '.$color->hex.';width:max-content;border-radius: 50px;"><span style="background-color: ' . $color->hex . ';color: white;display: inline-block;width: 32px;height: 32px;border-radius: 50px;border: 2px solid white;padding: 8px;"></span><span style="padding-left: 8px;">'.$color->name.'</span></div>'
+                                                                );
+                                                            })                                                                        ->label('رنگ انتخابی'),
                                                         Forms\Components\Select::make('options')
                                                             ->label('سایر خدمات')
                                                             ->multiple()
@@ -528,61 +544,9 @@ class OrderResource extends Resource
                                                             ->downloadable()
                                                             ->conversion('default')
                                                             ->translateLabel(),
-
-                                                        //                                                        Forms\Components\ColorPicker::make('color')
-                                                        //                                                            ->label(__('Color')),
-                                                        //
-                                                        //                                                        Forms\Components\FileUpload::make('attachments')
-                                                        //                                                            ->label(__('Attachments'))
-                                                        //                                                            ->multiple()
-                                                        //                                                            ->directory('order-items') // مسیر ذخیره
-                                                        //                                                            ->reorderable(),
                                                     ])
                                                     ->columns()
                                                     ->collapsible(),
-                                                /*Forms\Components\Actions::make([
-                                                    Forms\Components\Actions\Action::make('Other')
-                                                        ->label(false)
-                                                        ->icon('heroicon-o-squares-plus')
-                                                        ->iconButton()
-                                                        ->size(ActionSize::Medium)
-                                                        ->form([
-                                                            Forms\Components\Grid::make('options')
-                                                                ->label(__('Options'))
-                                                                ->schema([
-                                                                    Forms\Components\Select::make('options')
-                                                                        ->label("سایر خدمات")
-                                                                        ->multiple()
-                                                                        ->options(Option::pluck('name', 'id'))
-                                                                        ->default(Option::where('is_default', true)->pluck('id')->toArray())
-                                                                        ->native(false)
-                                                                        ->afterStateHydrated(function ($component, $state) {
-                                                                            $component->state($state);
-                                                                        })
-                                                                        ->dehydrateStateUsing(fn ($state) => $state)
-                                                                        ->required(),
-                                                                    Forms\Components\SpatieMediaLibraryFileUpload::make('Attachment')
-                                                                        ->translateLabel(),
-                                                                    Forms\Components\Select::make('carpet_color_id')
-                                                                        ->label(__('Color'))
-                                                                        ->relationship('color','name')
-                                                                        ->searchable()
-                                                                        ->preload()
-                                                                        ->live()
-                                                                        ->translateLabel()
-                                                                        ->required(),
-                                                                    Forms\Components\Placeholder::make('color-hex')
-                                                                        ->visible(fn (Get $get) => filled($get('carpet_color_id')))
-                                                                        ->content(function (Get $get){
-                                                                            $color = CarpetColor::find($get('carpet_color_id'));
-                                                                            return new HtmlString(
-                                                                            '<div class="flex items-center gap-2" style="border: 2px solid '.$color->hex.';width:max-content;border-radius: 50px;"><span style="background-color: ' . $color->hex . ';color: white;display: inline-block;width: 32px;height: 32px;border-radius: 50px;border: 2px solid white;padding: 8px;"></span><span style="padding-left: 8px;">'.$color->name.'</span></div>'
-                                                                        );
-                                                                        })                                                                        ->label('رنگ انتخابی'),
-                                                                ])
-                                                                ->columns(),
-                                                        ]),
-                                                ])->verticallyAlignCenter(),*/
                                             ])->columns(12),
                                     ])
                                     ->columns(1),
@@ -639,7 +603,44 @@ class OrderResource extends Resource
                                             ->stripCharacters('.')
                                             ->mutateStateForValidationUsing(fn ($state) => str_replace(',', '', $state))
                                             ->mutateDehydratedStateUsing(fn ($state) => str_replace(',', '', $state)),
-
+                                        Forms\Components\Section::make(__('Additional Options'))
+                                            ->translateLabel()
+                                            ->collapsed()
+                                            ->icon('heroicon-o-squares-plus')
+                                            ->schema([
+                                                Forms\Components\Select::make('carpet_color_id')
+                                                    ->label(__('Color'))
+                                                    ->relationship('color','name')
+                                                    ->searchable()
+                                                    ->preload()
+                                                    ->live()
+                                                    ->translateLabel()
+                                                    ->required(),
+                                                Forms\Components\Placeholder::make('color-hex')
+                                                    ->visible(fn (Get $get) => filled($get('carpet_color_id')))
+                                                    ->content(function (Get $get){
+                                                        $color = CarpetColor::find($get('carpet_color_id'));
+                                                        return new HtmlString(
+                                                            '<div class="flex items-center gap-2" style="border: 2px solid '.$color->hex.';width:max-content;border-radius: 50px;"><span style="background-color: ' . $color->hex . ';color: white;display: inline-block;width: 32px;height: 32px;border-radius: 50px;border: 2px solid white;padding: 8px;"></span><span style="padding-left: 8px;">'.$color->name.'</span></div>'
+                                                        );
+                                                    })                                                                        ->label('رنگ انتخابی'),
+                                                Forms\Components\Select::make('options')
+                                                    ->label('سایر خدمات')
+                                                    ->multiple()
+                                                    ->options(Option::pluck('name', 'id'))
+                                                    ->default(Option::where('is_default', true)->pluck('id')->toArray())
+                                                    ->mutateDehydratedStateUsing(fn (array $state) => array_map('intval', $state))
+                                                    ->native(false)
+                                                    ->required(),
+                                                Forms\Components\SpatieMediaLibraryFileUpload::make('Attachment')
+                                                    ->multiple()
+                                                    ->openable()
+                                                    ->downloadable()
+                                                    ->conversion('default')
+                                                    ->translateLabel(),
+                                            ])
+                                            ->columns()
+                                            ->collapsible(),
                                     ])
                                     ->columnSpanFull(),
                             ])->icon('heroicon-o-list-bullet'),
