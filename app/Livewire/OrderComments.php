@@ -8,6 +8,7 @@ use Livewire\Component;
 class OrderComments extends Component
 {
     public Order $order;
+    protected $listeners = [ 'comment-added' => '$refresh'];
 
     public function mount(Order $record)
     {

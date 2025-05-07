@@ -41,21 +41,59 @@
                     <x-phosphor.icons::regular.path class="w-5 h-5"/>
                 </x-slot>
             </x-srj-button>
-            <x-srj-dropdown>
-                <x-slot name="trigger">
-                    <x-srj-button rounded-lg outline primary hover:outline.info focus:solid.info label="عملیات"/>
+            <x-srj-dropdown height="4xl">
+                <x-slot name="trigger" class="relative">
+                    <x-srj-button rounded-lg outline primary hover:outline.info focus:solid.info label="عملیات" class="w-full"/>
+                    @if($order->comments->count())
+                    <span class="absolute top-0 left-0 -mt-1 -mr-1">
+                        <span class="relative flex h-3 w-3">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-warning-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-3 w-3 bg-warning-500"></span>
+                        </span>
+                    </span>
+                    @endif
                 </x-slot>
 
                 <x-srj-dropdown.item wire:click="carpetsReceived()" icon="check" label="تحویل گرفته شد"/>
                 <x-srj-dropdown.item wire:click="revisitingDriver()" separator icon="arrow-path" label="مراجعه مجدد راننده"/>
                 <x-srj-dropdown.item wire:click="deliveredAndPaid()" separator icon="clipboard-document-check" label="تحویل و تسویه"/>
-                <x-srj-dropdown.item separator icon="x-circle" x-on:click="$openModal('cancel-{{$order->id}}')" rounded-lg outline negative hover:outline.negative focus:solid.negative label="کنسل"/>
+                <x-srj-dropdown.item separator class="relative">
+                    <x-srj-icon name="clipboard-document-check" class="w-5 h-5 mr-2" />
+                    <span x-on:click="$openModal('orderDescription')">توضیحات سفارش</span>
+                    @if($order->comments->count())
+                        <x-srj-mini-badge negative rounded :label="$order->comments->count()" class="absolute top-0 left-0"/>
+                    @endif
+                </x-srj-dropdown.item>
+                <x-srj-dropdown.item primery separator icon="x-circle" x-on:click="$openModal('cancel-{{$order->id}}')" rounded-lg outline negative hover:outline.negative focus:solid.negative label="کنسل"/>
             </x-srj-dropdown>
-            {{--<x-srj-button x-on:click="$openModal('cancel-{{$order->id}}')" rounded-lg outline negative hover:outline.negative focus:solid.negative label="کنسل">
-                <x-slot name="prepend">
-                    <x-phosphor.icons::regular.x-circle class="w-5 h-5" />
-                </x-slot>
-            </x-srj-button>--}}
+            <x-srj-modal name="orderDescription" blur="md" align="items-center" width="xl">
+                <x-srj-card title="توضیحات سفارش">
+                    <x-slot name="header" class="border-secondary-200 dark:border-secondary-600 px-4 py-2.5 flex justify-between items-center rounded-t-md border-b">
+                            <span class="font-medium text-base whitespace-normal text-secondary-700 dark:text-secondary-400">توضیحات سفارش</span>
+                        <x-srj-button positive label="افزودن" icon="plus" id="toggleFormBtn"/>
+                    </x-slot>
+                    @livewire('comment.create', ['order' => $order])
+                    @livewire('order-comments', ['record' => $order])
+                    <x-slot name="footer" class="flex justify-end gap-x-4">
+                        <x-srj-button outline red label="بستن !" x-on:click="close" />
+                    </x-slot>
+                </x-srj-card>
+            </x-srj-modal>
+            <script>
+                const toggleBtn = document.getElementById('toggleFormBtn');
+                const commentForm = document.getElementById('commentForm');
+
+                let isOpen = false;
+
+                toggleBtn.addEventListener('click', () => {
+                    isOpen = !isOpen;
+
+                    commentForm.classList.toggle('opacity-0', !isOpen);
+                    commentForm.classList.toggle('opacity-100', isOpen);
+                    commentForm.classList.toggle('max-h-0', !isOpen);
+                    commentForm.classList.toggle('max-h-[500px]', isOpen);
+                });
+            </script>
         </div>
     </div>
     <x-srj-badge :label="$order->getStatusLabel()" :class="$order->getStatusColor() . ' absolute top-1 end-1'"

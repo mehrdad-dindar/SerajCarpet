@@ -1,4 +1,5 @@
 <div class="space-y-4">
+    @if($comments->count())
     @foreach($comments as $comment)
         <div class="p-4 border rounded">
             <div class="flex justify-between">
@@ -18,4 +19,7 @@
             </div>
         </div>
     @endforeach
+    @else
+    <p>هیچ توضیحی وجود ندارد!</p>
+    @endif
 </div>
