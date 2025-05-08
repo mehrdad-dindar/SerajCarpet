@@ -21,3 +21,7 @@
 [x-cloak] {
     display: none;
 }
+
+.srj-dropdown svg {
+    @apply mr-0 ml-2;
+}

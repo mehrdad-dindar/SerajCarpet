@@ -41,7 +41,7 @@
                     <x-phosphor.icons::regular.path class="w-5 h-5"/>
                 </x-slot>
             </x-srj-button>
-            <x-srj-dropdown height="4xl">
+            <x-srj-dropdown height="4xl" class="srj-dropdown">
                 <x-slot name="trigger" class="relative">
                     <x-srj-button rounded-lg outline primary hover:outline.info focus:solid.info label="عملیات" class="w-full"/>
                     @if($order->comments->count())

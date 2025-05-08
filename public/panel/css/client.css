@@ -2346,6 +2346,9 @@ h6 {
 .-ml-px {
   margin-left: -1px;
 }
+.-mr-1 {
+  margin-right: -0.25rem;
+}
 .-mr-2 {
   margin-right: -0.5rem;
 }
@@ -2357,6 +2360,9 @@ h6 {
 }
 .-ms-2 {
   margin-inline-start: -0.5rem;
+}
+.-mt-1 {
+  margin-top: -0.25rem;
 }
 .-mt-16 {
   margin-top: -4rem;
@@ -2667,6 +2673,9 @@ h6 {
 .h-screen {
   height: 100vh;
 }
+.max-h-0 {
+  max-height: 0px;
+}
 .max-h-40 {
   max-height: 10rem;
 }
@@ -2699,6 +2708,9 @@ h6 {
 }
 .max-h-96 {
   max-height: 24rem;
+}
+.max-h-\[500px\] {
+  max-height: 500px;
 }
 .max-h-screen {
   max-height: 100vh;
@@ -4554,6 +4566,10 @@ h6 {
 .bg-warning-300\/60 {
   background-color: rgb(252 211 77 / 0.6);
 }
+.bg-warning-400 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(251 191 36 / var(--tw-bg-opacity, 1));
+}
 .bg-warning-50 {
   --tw-bg-opacity: 1;
   background-color: rgb(255 251 235 / var(--tw-bg-opacity, 1));
@@ -6061,6 +6077,11 @@ input[type="number"].appearance-number-none {
 .mapboxgl-ctrl-group button {
   height: 3rem !important;
   width: 3rem !important;
+}
+
+.srj-dropdown svg {
+  margin-right: 0px;
+  margin-left: 0.5rem;
 }
 
 .dark\:prose-invert:is(.dark *) {
