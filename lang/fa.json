@@ -199,8 +199,11 @@
     "Comment" : "دیدگاه",
     "Order Description" : "توضیحات سفارش",
     "Description" : "توضیحات",
+    "Toman" : "تومان",
+    "Attachments" : "پیوست ها",
     "Customer comment for address" : "توضیحات مشتری برای آدرس سفارش",
     "Address description" : "توضیحات آدرس",
     "There are currently no orders." : "در حال حاضر سفارشی وجود ندارد.",
+    "Currently the order items are unavailable or not registered." : "در حال حاضر موارد سفارش در دسترس نیست یا ثبت نشده.",
     "Customer" : "مشتری"
 }

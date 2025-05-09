@@ -159,4 +159,9 @@ class Order extends Model
     {
         return $this->morphMany(Comment::class, 'commentable');
     }
+
+    public function getAllItemsAttribute()
+    {
+        return $this->items->merge($this->otherItems);
+    }
 }

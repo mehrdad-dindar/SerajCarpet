@@ -9,10 +9,12 @@ use Livewire\Component;
 class Show extends Component
 {
     public Order $order;
+    public $allItems;
 
     public function mount(Order $order): void
     {
         $this->order = $order;
+        $this->allItems = $order->getAllItemsAttribute();
     }
 
     #[Layout("customer.layouts.app")]

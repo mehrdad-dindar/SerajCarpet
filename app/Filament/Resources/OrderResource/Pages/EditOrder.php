@@ -28,6 +28,7 @@ class EditOrder extends EditRecord
                 'commenter_type' => Auth::user()::class,
                 'commenter_id' => Auth::id(),
             ]);
+            $this->dispatch('comment-added');
         }
     }
     protected function getFooterWidgets(): array
