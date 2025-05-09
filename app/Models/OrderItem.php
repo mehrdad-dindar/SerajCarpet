@@ -21,6 +21,16 @@ class OrderItem extends Model implements HasMedia
     protected $attributes = [
         'options' => null,
     ];
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('carpet_images')
+            ->useDisk('media')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png']);
+
+        $this->addMediaCollection('attachments')
+            ->useDisk('media')
+            ->acceptsMimeTypes(['video/*', 'audio/*']);
+    }
 
     public function __construct(array $attributes = [])
     {

@@ -8,32 +8,23 @@
                     <h6 class="mb-0">{{ __("Order Items") }}</h6>
                 </div>
                 <div class="flex-auto p-4 pt-6">
-                    <ul class="flex flex-col pl-0 mb-0 rounded-lg">
-                        @foreach($order->items as $item)
-                        <li class="relative flex p-6 mb-2 border-0 rounded-t-inherit rounded-xl bg-gray-50">
-                            <div class="flex flex-col">
-                                <h6 class="mb-4 leading-normal text-size-sm">{{ $item->property->full_title }}</h6>
-                                <span class="mb-2 leading-tight text-size-xs">{{ __("Dimensions") }} :<span
-                                        class="font-semibold text-slate-700 sm:ms-2">{{ $item->dimensions . " " . __($item->property->unit) }}</span></span>
-                                <span class="mb-2 leading-tight text-size-xs">{{ __("Quantity") }} :<span
-                                        class="font-semibold text-slate-700 sm:ms-2">{{ $item->quantity }}</span></span>
-                                <span class="leading-tight text-size-xs">{{ __("Price") }} :<span
-                                        class="font-semibold text-slate-700 sm:ms-2">{{ number_format($item->sub_total) }} تومان</span></span>
-                            </div>
-                            {{--<div class="ms-auto text-left">
-                                <a class="inline-block px-4 py-3 mb-0 font-bold text-center uppercase align-middle transition-all bg-transparent border-0 rounded-lg shadow-none cursor-pointer leading-pro text-size-xs ease-soft-in bg-150 hover:scale-102 active:opacity-85 bg-x-25 text-slate-700"
-                                   href="javascript:;"><i class="mr-2 fas fa-pencil-alt text-slate-700" aria-hidden="true"></i>Edit</a>
-                            </div>--}}
-                        </li>
-                        @endforeach
-                    </ul>
+                    @foreach($allItems as $item)
+                        <x-order-item
+                            :title="$item->property->full_title ?? $item->title"
+                            :dimensions="$item->dimensions"
+                            :unit="($item->property->unit ?? $item->unit) ?? 'meter'"
+                            :quantity="$item->quantity"
+                            :price="$item->sub_total"
+                            :item="$item"
+                        />
+                    @endforeach
                 </div>
                 <div class="p-6 px-4 pb-4 mb-0 bg-white border-b-0 rounded-t-2xl">
                     <h6 class="mb-3">{{ __("Services") }}</h6>
                     <div>
-                        @foreach($order->option_models as $option)
-                            <x-srj-badge :label="$option->name" outline orange/>
-                        @endforeach
+{{--                        @foreach($order->option_models as $option)--}}
+{{--                            <x-srj-badge :label="$option->name" outline orange/>--}}
+{{--                        @endforeach--}}
                     </div>
                 </div>
             </div>
