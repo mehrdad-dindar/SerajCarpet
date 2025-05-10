@@ -1,6 +1,12 @@
 {
     "Login / Register" : "ورود / عضویت",
     "Services" : "خدمات",
+    "Issue Invoice" : "صدور فاکتور",
+    "Invoice creation failed" : "ایجاد فاکتور ناموفق بود",
+    "Are you sure you want to issue an invoice for this order?" : "آیا از صدور فاکتور برای این سفارش مطمئن هستید؟",
+    "Invoice created" : "فاکتور صادر شد",
+    "Invoice updated" : "فاکتور به‌روزرسانی شد",
+    "Invoice ID: #:id - Amount: :amount" : "فاکتور شماره #:id به مبلغ :amount تومان صادر شد",
     "customer" : "مشتری",
     "Customer's Address" : "آدرس مشتری",
     "Select Service" : "انتخاب خدمت",
