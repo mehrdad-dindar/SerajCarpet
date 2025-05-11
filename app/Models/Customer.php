@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -77,5 +78,17 @@ class Customer extends Authenticatable
     public function comments()
     {
         return $this->morphMany(Comment::class, 'commenter');
+    }
+
+    public function invoices(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Invoice::class,
+            Order::class,
+            'customer_id',
+            'order_id',
+            'id',
+            'id'
+        );
     }
 }

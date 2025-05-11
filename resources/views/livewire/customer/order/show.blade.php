@@ -92,7 +92,8 @@
                             class="relative flex justify-between px-4 py-2 pl-0 mb-2 bg-white border-0 border-t-0 rounded-b-inherit text-size-inherit rounded-xl">
                             <div class="flex items-center">
                                 <button
-                                    class="leading-pro ease-soft-in text-size-xs bg-150 w-6.35 h-6.35 p-1.2 rounded-3.5xl tracking-tight-soft bg-x-25 me-4 mb-0 flex cursor-pointer items-center justify-center border border-solid border-slate-700 border-transparent bg-transparent text-center align-middle font-bold uppercase text-slate-700 transition-all hover:opacity-75 {{$order->getStatusColor()}}"><i
+                                    class="leading-pro ease-soft-in text-size-xs bg-150 w-6.35 h-6.35 p-1.2 rounded-3.5xl tracking-tight-soft bg-x-25 me-4 mb-0 flex cursor-pointer items-center justify-center border border-solid border-slate-700 border-transparent bg-transparent text-center align-middle font-bold uppercase text-slate-700 transition-all hover:opacity-75 {{$order->getStatusColor()}}">
+                                    <i
                                         class="fas fa-exclamation text-size-3xs"></i></button>
                                 <div class="flex flex-col">
                                     <h6 class="mb-1 leading-normal text-size-sm text-slate-700">{{ __("Status") }}</h6>
@@ -106,13 +107,15 @@
                             </div>
                         </li>
                     </ul>
-                    <h6 class="mb-4 font-bold leading-tight uppercase text-size-xs text-slate-500">----------------</h6>
+                    <h6 class="mb-4 text-center leading-tight uppercase text-size-xs text-slate-500">--------------------------------</h6>
                     <ul class="flex flex-col ps-0 mb-0 rounded-lg">
                         <li
                             class="relative flex justify-between px-4 py-2 ps-0 mb-2 bg-white border-0 border-t-0 rounded-b-inherit text-size-inherit rounded-xl">
                             <div class="flex items-center">
                                 <button
-                                    class="leading-pro ease-soft-in text-size-xs bg-150 w-6.35 h-6.35 p-1.2 rounded-3.5xl tracking-tight-soft bg-x-25 mr-4 mb-0 flex cursor-pointer items-center justify-center border border-solid border-lime-500 border-transparent bg-transparent text-center align-middle font-bold uppercase text-lime-500 transition-all hover:opacity-75"><x-srj-icon name="plus" class="text-size-3xs"/></button>
+                                    class="leading-pro ease-soft-in text-size-xs bg-150 w-6.35 h-6.35 p-1.2 rounded-3.5xl tracking-tight-soft bg-x-25 mr-4 mb-0 flex cursor-pointer items-center justify-center border border-solid border-lime-500 border-transparent bg-transparent text-center align-middle font-bold uppercase text-lime-500 transition-all hover:opacity-75">
+                                    <x-srj-icon name="plus" class="text-size-3xs"/>
+                                </button>
                                 <div class="flex flex-col">
                                     <h6 class="mb-1 leading-normal text-size-sm text-slate-700">{{ __("Order Total") }}</h6>
                                     <span class="leading-tight text-size-xs">@php
@@ -126,11 +129,19 @@
                                 </div>
                             </div>
                             <div class="flex flex-col items-center justify-center">
-                                <p
-                                    class="relative z-10 inline-block m-0 font-semibold leading-normal text-transparent bg-gradient-lime text-size-sm bg-clip-text">{{ number_format($order->total) }} تومان</p>
+                                <p class="relative z-10 inline-block m-0 font-semibold leading-normal text-transparent bg-gradient-lime text-size-sm bg-clip-text">{{ number_format($order->total) }}
+                                    تومان</p>
                             </div>
                         </li>
                     </ul>
+                    <x-srj-button
+                        href="{{route('customer.panel.invoice.show', ['invoice' => $order->invoice->id])}}"
+                        full
+                        info
+                        spinner
+                        rounded="sm"
+                        icon="banknotes"
+                        :label="__('Bill payment')"/>
                 </div>
             </div>
         </div>
