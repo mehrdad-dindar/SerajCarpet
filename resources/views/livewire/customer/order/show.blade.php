@@ -134,14 +134,27 @@
                             </div>
                         </li>
                     </ul>
-                    <x-srj-button
-                        href="{{route('customer.panel.invoice.show', ['invoice' => $order->invoice->id])}}"
-                        full
-                        info
-                        spinner
-                        rounded="sm"
-                        icon="banknotes"
-                        :label="__('Bill payment')"/>
+                    @if($order->invoice()->exists())
+                        @if($order->invoice->status == 'pending')
+                        <x-srj-button
+                            href="{{route('customer.panel.invoice.show', ['invoice' => $order->invoice->id])}}"
+                            full
+                            info
+                            spinner
+                            rounded="sm"
+                            icon="banknotes"
+                            :label="__('Bill payment')"/>
+                        @else
+                            <x-srj-button
+                                href="{{route('customer.panel.invoice.show', ['invoice' => $order->invoice->id])}}"
+                                full
+                                info
+                                spinner
+                                rounded="sm"
+                                icon="banknotes"
+                                :label="__('View invoice')"/>
+                        @endif
+                    @endif
                 </div>
             </div>
         </div>

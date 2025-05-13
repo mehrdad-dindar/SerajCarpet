@@ -28,12 +28,14 @@
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^v3.5.19",
         "mokhosh/filament-jalali": "v4.9.0",
+        "shetabit/payment": "^6.2",
         "spatie/laravel-activitylog": "^4.10",
         "spatie/laravel-livewire-wizard": "^2.3",
         "spatie/laravel-medialibrary": "^11.12",
         "wireui/breadcrumbs": "^3.1",
         "wireui/phosphoricons": "^2.3",
-        "wireui/wireui": "^2.0"
+        "wireui/wireui": "^2.0",
+        "ext-http": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

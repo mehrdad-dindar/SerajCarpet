@@ -91,4 +91,9 @@ class Customer extends Authenticatable
             'id'
         );
     }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class, 'customer_id');
+    }
 }

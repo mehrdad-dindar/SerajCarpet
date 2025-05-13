@@ -79,6 +79,10 @@ Route::middleware(['auth:customer'])->prefix('panel')->group(function () {
     Route::prefix('invoices')->group(function () {
         Route::get('/', CustomerInvoices::class)->name('customer.panel.invoices');
         Route::get('{invoice}', CustomerInvoiceShow::class)->name('customer.panel.invoice.show');
+        Route::get('{invoice}/purchase', [InvoiceController::class, 'purchase'])
+            ->name('customer.panel.invoice.purchase');
+        Route::get('{invoice}/purchase/result', [InvoiceController::class, 'result'])
+            ->name('customer.panel.invoice.purchase.result');
     });
 });
 Route::middleware(['auth:driver'])->prefix('dashboard')->group(function () {

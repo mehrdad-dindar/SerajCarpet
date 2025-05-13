@@ -11,6 +11,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Livewire\Component;
 
 class ListInvoices extends Component implements HasForms, HasTable
@@ -30,6 +31,11 @@ class ListInvoices extends Component implements HasForms, HasTable
                     ->label(__('Invoice Id'))
                     ->prefix('#'),
                 TextColumn::make('order.id')
+                    ->prefix('#')
+                    ->url(function (Model $record): string {
+                        return route('customer.panel.order.show', $record->order);
+                    })
+                    ->description(fn (Model $record): ?string => verta($record->created_at)->format('(d F Y)'))
                     ->label(__('Order Id')),
                 TextColumn::make('amount')
                     ->numeric()
@@ -37,8 +43,15 @@ class ListInvoices extends Component implements HasForms, HasTable
                     ->label(__('Order Total')),
                 TextColumn::make('status')
                     ->label(__('Status'))
+                    ->formatStateUsing(function($state) {
+                        return __('invoice.status.' . $state);
+                    })
                     ->badge()
-                    ->color('info'),
+                    ->color(fn($state) => match ($state) {
+                        'paid' => 'success',
+                        'canceled' => 'danger',
+                        'pending' => 'warning'
+                    }),
                 TextColumn::make('expire_at')
                     ->jalaliDate('d F Y - H:i')
                     ->translateLabel(),
@@ -55,9 +68,10 @@ class ListInvoices extends Component implements HasForms, HasTable
                     ->url(fn ($record) => route('customer.panel.invoice.show', $record))
                     ->color('primary'),
                 Action::make('پرداخت')
+                    ->visible(fn ($record) => $record->status == 'pending')
                     ->button()
                     ->icon('heroicon-o-banknotes')
-//                    ->url(fn ($record) => route('customer.panel.invoice.pay', $record))
+                    ->url(fn ($record) => route('customer.panel.invoice.purchase', $record))
                     ->color(Color::Lime),
             ])
             ->bulkActions([

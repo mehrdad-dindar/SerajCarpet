@@ -14,11 +14,15 @@ class Show extends Component
     public function mount(Invoice $invoice): void
     {
         $this->invoice = $invoice;
-//        $this->allItems = $order->getAllItemsAttribute();
     }
     #[Layout("customer.layouts.app")]
     public function render()
     {
         return view('livewire.customer.invoice.show');
+    }
+
+    public function purchase()
+    {
+        $this->redirect(route('customer.panel.invoice.purchase', [$this->invoice]));
     }
 }
