@@ -20,9 +20,10 @@
     <template x-for="trail in breadcrumbs" :key="trail.url + trail.label">
         <div class="flex items-center gap-2 text-indigo-600 last:text-gray-400">
             <!-- Heroicons v2 chevron-right/outline -->
-            <svg class="w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
+            <x-heroicon-o-chevron-left class="w-4 h-4 text-gray-400"/>
+{{--            <svg class="w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">--}}
+{{--                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />--}}
+{{--            </svg>--}}
 
             <a x-text="trail.label" :href="trail.url && trail.url"></a>
         </div>

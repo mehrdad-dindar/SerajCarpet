@@ -5,15 +5,18 @@
   <div class="flex items-center justify-between w-full px-4 py-1 mx-auto flex-wrap-inherit">
     <nav>
       <!-- breadcrumb -->
-      <ol class="flex flex-wrap pt-1 bg-transparent rounded-lg">
-        <li class="{{ (true ? 'pl-2' : '') }}{{--Request::is('rtl')--}} leading-normal text-size-sm">
+        <x-breadcrumbs />
+
+
+        {{--<ol class="flex flex-wrap pt-1 bg-transparent rounded-lg">
+        <li class="{{ (true ? 'pl-2' : '') }}--}}{{--Request::is('rtl')--}}{{-- leading-normal text-size-sm">
           <a class="opacity-50 text-slate-700" href="{{ auth('customer')->check() ? route("customer.panel.index") : route("driver.panel.index") }}">{{__("Dashboard")}}</a>
         </li>
         <li
-          class="{{ (Request::is("panel") ? 'hidden' : '') }} text-size-sm capitalize leading-normal text-slate-700 {{ (true ? 'before:float-right before:pl-2' : 'before:float-left before:pr-2') }}{{--Request::is('rtl')--}} before:text-gray-600 before:content-['/']"
+          class="{{ (Request::is("panel") ? 'hidden' : '') }} text-size-sm capitalize leading-normal text-slate-700 {{ (true ? 'before:float-right before:pl-2' : 'before:float-left before:pr-2') }}--}}{{--Request::is('rtl')--}}{{-- before:text-gray-600 before:content-['/']"
           aria-current="page">{{ str_replace('panel/', ' ', Request::path()) }}</li>
       </ol>
-      <h6 class="{{ (Request::is("panel") ? 'hidden' : '') }} mb-0 font-bold capitalize">{{ str_replace('panel/', ' ', Request::path()) }}</h6>
+      <h6 class="{{ (Request::is("panel") ? 'hidden' : '') }} mb-0 font-bold capitalize">{{ str_replace('panel/', ' ', Request::path()) }}</h6>--}}
     </nav>
 
     <div
