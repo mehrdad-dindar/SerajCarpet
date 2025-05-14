@@ -3,8 +3,11 @@
 namespace App\Filament\Resources\OrderResource\Pages;
 
 use App\Filament\Resources\OrderResource;
+use App\Models\Order;
+use App\Services\InvoiceService;
 use Carbon\Carbon;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Auth;
 
@@ -41,7 +44,15 @@ class EditOrder extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+            ->icon('heroicon-o-trash'),
+            Actions\Action::make('issue-invoice')
+                ->label(__('Issue Invoice'))
+                ->icon('heroicon-o-clipboard-document-list')
+                ->color('primary')
+                ->action(fn () => $this->issueInvoice())
+                ->requiresConfirmation()
+                ->modalHeading(__('Are you sure you want to issue an invoice for this order?')),
         ];
     }
 
@@ -70,5 +81,30 @@ class EditOrder extends EditRecord
         );
 
         return $data;
+    }
+
+    public function issueInvoice(): void
+    {
+        try {
+            /** @var \App\Models\Order $order */
+            $order = $this->getRecord();
+
+            ['invoice' => $invoice, 'created' => $created] = app(InvoiceService::class)->generate($order);
+
+            Notification::make()
+                ->title($created ? __('Invoice created') : __('Invoice updated'))
+                ->body(__("Invoice ID: #:id - Amount: :amount", [
+                    'id' => $invoice->id,
+                    'amount' => number_format($invoice->amount),
+                ]))
+                ->success()
+                ->send();
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title(__('Invoice creation failed'))
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
     }
 }

@@ -48,6 +48,11 @@ class Address extends Model
         $this->addressService->updateAddressGeo($this, $location);
     }
 
+    public function getMapUrl()
+    {
+        return $this->addressService->getMapUrl($this);
+    }
+
     public function comments()
     {
         return $this->morphMany(Comment::class, 'commentable');

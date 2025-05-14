@@ -1,10 +1,13 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Customer\InvoiceController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DriverLocationController;
 use App\Http\Controllers\PropertyController;
 use App\Livewire\Auth\Login;
+use App\Livewire\Customer\Invoice as CustomerInvoices;
+use App\Livewire\Customer\Invoice\Show as CustomerInvoiceShow;
 use App\Livewire\Customer\Panel as CustomerPanel;
 use App\Livewire\Driver\Order\CreateWizard;
 use App\Livewire\Driver\Order\EditOrder;
@@ -16,7 +19,7 @@ use App\Livewire\Driver\Tasks;
 use App\Livewire\SetLocation;
 use App\Models\Address;
 use App\Models\Customer;
-use App\Livewire\Customer\Orders as CustomerOrder;
+use App\Livewire\Customer\Orders as CustomerOrders;
 use App\Livewire\Customer\Order\Show as CustomerOrderShow;
 use Hashids\Hashids;
 use Illuminate\Support\Facades\Route;
@@ -69,8 +72,18 @@ Route::middleware(['auth:customer'])->prefix('panel')->group(function () {
         $lng = $address->longitude;
         return redirect("");
     })->name("admin.users.edit");
-    Route::get('/orders', CustomerOrder::class)->name('customer.panel.orders');
-    Route::get('/orders/{order}', CustomerOrderShow::class)->name('customer.panel.orders.show');
+    Route::prefix('orders')->group(function () {
+        Route::get('/', CustomerOrders::class)->name('customer.panel.orders');
+        Route::get('{order}', CustomerOrderShow::class)->name('customer.panel.order.show');
+    });
+    Route::prefix('invoices')->group(function () {
+        Route::get('/', CustomerInvoices::class)->name('customer.panel.invoices');
+        Route::get('{invoice}', CustomerInvoiceShow::class)->name('customer.panel.invoice.show');
+        Route::get('{invoice}/purchase', [InvoiceController::class, 'purchase'])
+            ->name('customer.panel.invoice.purchase');
+        Route::get('{invoice}/purchase/result', [InvoiceController::class, 'result'])
+            ->name('customer.panel.invoice.purchase.result');
+    });
 });
 Route::middleware(['auth:driver'])->prefix('dashboard')->group(function () {
     Route::post('/update-location', [DriverLocationController::class, 'updateLocation']);
