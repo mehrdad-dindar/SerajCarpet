@@ -90,7 +90,7 @@ class Order extends Model
             OrderStatus::PRE_WASH_REPAIR_SERVICE => 'bg-orange-500',
             OrderStatus::SENT_TO_FACTORY_FOR_WASHING => 'bg-green-500',
             OrderStatus::POST_WASH_REPAIR_SERVICE => 'bg-red-500',
-            OrderStatus::READY_FOR_DELIVERY_TO_CUSTOMER => 'bg-purple-500',
+            OrderStatus::READY_FOR_DELIVERY => 'bg-purple-500',
             OrderStatus::DELIVERED_AND_PAID => 'bg-green-700',
             default => 'bg-red-500'
         };

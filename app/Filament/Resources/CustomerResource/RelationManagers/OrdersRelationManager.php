@@ -1,15 +1,11 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\CustomerResource\RelationManagers;
 
 use App\Events\BulkOrderUpdated;
-use App\Filament\Resources\CustomerResource\RelationManagers\AddressRelationManager;
-use App\Filament\Resources\OrderResource\Pages;
-use App\Filament\Resources\OrderResource\Widgets\OrderStatusHistoryWidget;
 use App\Forms\Components\AddressForm;
 use App\Models\Address;
 use App\Models\CarpetColor;
-use App\Models\Customer;
 use App\Models\Driver;
 use App\Models\Option;
 use App\Models\Order;
@@ -27,356 +23,25 @@ use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
-use Filament\Resources\Resource;
-use Filament\Support\Enums\ActionSize;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 use Throwable;
 
-class OrderResource extends Resource
+class OrdersRelationManager extends RelationManager
 {
-    protected static ?string $model = Order::class;
+    protected static string $relationship = 'orders';
+    protected static ?string $label = 'سفارش';
+    protected static ?string $title = 'سفارش‌ها';
 
-    protected static ?string $navigationGroup = 'Management';
-
-    protected static ?string $navigationLabel = 'سفارش ها';
-
-    protected static ?string $pluralModelLabel = 'سفارش ها';
-
-    protected static ?string $modelLabel = 'سفارش';
-
-    protected static ?int $navigationSort = 1;
-
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->defaultSort('created_at', 'desc')
-            ->columns([
-                Tables\Columns\TextColumn::make('id')
-                    ->label('Order ID')
-                    ->searchable()
-                    ->translateLabel(),
-                Tables\Columns\TextColumn::make('customer.name')
-                    ->label('Name')
-                    ->searchable(['name', 'phone', 'phone2'])
-                    ->translateLabel()
-                    ->url(function (Model $record): string {
-                        return route('filament.admin.resources.customers.edit', $record->customer_id);
-                    })
-                    ->description(fn (Model $record): ?string => $record->customer->phone)
-                    ->alignCenter()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('status')
-                    ->label('Status')
-                    ->translateLabel()
-                    ->sortable()
-                    ->badge()
-                    ->color(fn (OrderStatus $state): string => $state->color)
-                    ->toggleable()
-                    ->formatStateUsing(fn (OrderStatus $state): string => $state->label),
-                Tables\Columns\TextColumn::make('area')
-                    ->badge()->color(fn ($state, $record): string => $record->address ? 'info' : 'danger')
-                    ->getStateUsing(fn ($record) => $record->address ? $record->address->getArea() : 'X')
-                    ->wrap()
-                    ->description(fn ($record) => $record->address ? $record->address->getFullAddress() : 'فاقد آدرس')
-                    ->sortable()
-                    ->translateLabel()
-                    ->toggleable()
-                    ->alignCenter()
-                    ->counts('items'),
-                Tables\Columns\TextColumn::make('time_apply_status')
-                    ->label(__('reserved'))
-                    ->jalaliDateTime('d F Y - H:i')
-                    ->tooltip(fn (?Model $record) => 'ایجاد شده در : '.$record->created_at)
-                    ->sortable()
-                    ->toggleable(),
-                Tables\Columns\TextColumn::make('collected_at')
-                    ->label(__('Collection date'))
-                    ->sortable()
-                    ->toggleable(),
-                Tables\Columns\TextColumn::make('sent_to_factory_at')
-                    ->label(__('Sent to Factory'))
-                    ->sortable()
-                    ->toggleable(true, true),
-                Tables\Columns\SelectColumn::make('driver_id')
-                    ->label(__('Assign Driver'))
-                    ->disabled(fn ($record) => $record ? $record->in_person_delivery : false)
-                    ->options(Driver::all()->pluck('name', 'id')->toArray())
-                    ->translateLabel()
-                    ->sortable()
-                    ->toggleable(),
-            ])
-            ->recordClasses(function (Model $record) {
-                return $record->in_person_delivery ? 'in_person_delivery' : '';
-            })
-            ->filters([
-                Tables\Filters\Filter::make('in_person_delivery')
-                    ->query(fn (Builder $query): Builder => $query->where('in_person_delivery', true))
-                    ->label(__('Delivery by customer')),
-                Tables\Filters\SelectFilter::make('status')
-                    ->relationship('status', 'label')
-                    ->searchable()
-                    ->preload()
-                    ->translateLabel(),
-                Tables\Filters\SelectFilter::make('driver')
-                    ->relationship('driver', 'name')
-                    ->searchable()
-                    ->preload()
-                    ->translateLabel(),
-                Tables\Filters\SelectFilter::make('area')
-                    ->multiple()
-                    ->preload()
-                    ->placeholder('مستثنی کردن مناطق')
-                    ->options(function () {
-                        return array_filter(Address::distinct()
-                            ->orderBy('municipality_zone')
-                            ->pluck('municipality_zone', 'municipality_zone')
-                            ->toArray());
-                    })
-                    ->query(function ($query, $state) {
-                        if (! $state['values']) {
-                            return $query;
-                        }
-
-                        return $query->whereDoesntHave('address', function ($query) use ($state) {
-                            $query->whereIn('municipality_zone', $state['values']);
-                        });
-                    })
-                    ->translateLabel(),
-                Tables\Filters\Filter::make('time_apply_status')
-                    ->form([
-                        Forms\Components\Fieldset::make('time_apply_status')
-                            ->label(__('Reservation Date'))
-                            ->schema([
-                                DatePicker::make('reserved_from')
-                                    ->label(__('from'))
-                                    ->jalali(),
-                                DatePicker::make('reserved_until')
-                                    ->label(__('until'))
-                                    ->jalali(),
-                                Select::make('shift_time')
-                                    ->label(__('Shift Hours'))
-                                    ->columnSpanFull()
-                                    ->options(fn (Get $get): array => ShiftSettings::getDayShifts(
-                                        $get('reserved_from')
-                                    ))
-                                    ->visible(fn (Get $get) => $get('reserved_from') != null),
-                            ]),
-
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['reserved_from'] ?? null,
-                                fn (Builder $query, $date): Builder => $query->whereDate('time_apply_status', '>=', $date)
-                            )
-                            ->when(
-                                $data['reserved_until'] ?? null,
-                                fn (Builder $query, $date): Builder => $query->whereDate('time_apply_status', '<=', $date)
-                            )
-                            ->when(
-                                $data['shift_time'] ?? null,
-                                fn (Builder $query, $time): Builder => $query->whereTime('time_apply_status', '=', $time)
-                            );
-                    }),
-                Tables\Filters\Filter::make('collected_at')
-                    ->form([
-                        Forms\Components\Fieldset::make('collected_at')
-                            ->label(__('Collection date'))
-                            ->schema([
-                                DatePicker::make('collected_from')
-                                    ->label(__('from'))
-                                    ->jalali(),
-                                DatePicker::make('collected_until')
-                                    ->label(__('until'))
-                                    ->jalali(),
-                            ]),
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['collected_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('collected_at', '>=', $date),
-                            )
-                            ->when(
-                                $data['collected_until'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('collected_at', '<=', $date),
-                            );
-                    }),
-                Tables\Filters\Filter::make('sent_to_factory_at')
-                    ->form([
-                        Forms\Components\Fieldset::make('sent_to_factory_at')
-                            ->label(__('Sent to Factory'))
-                            ->schema([
-                                DatePicker::make('sent_to_factory_from')
-                                    ->label(__('from'))
-                                    ->jalali(),
-                                DatePicker::make('sent_to_factory_until')
-                                    ->label(__('until'))
-                                    ->jalali(),
-                            ]),
-                    ]),
-                // TODO: sent_to_factory bayad takmil beshe;
-                /*->query(function (Builder $query, array $data): Builder {
-                    return $query
-                        ->when(
-                            $data['sent_to_factory_from'],
-                            fn (Builder $query, $date): Builder => $query->whereDate('sent_to_factory_at', '>=', $date),
-                        )
-                        ->when(
-                            $data['sent_to_factory_until'],
-                            fn (Builder $query, $date): Builder => $query->whereDate('sent_to_factory_at', '<=', $date),
-                        );
-                }),*/
-            ])
-            ->actions([
-                Tables\Actions\ActionGroup::make([
-                    Tables\Actions\Action::make('assignDriver')
-                        ->label('Assign Driver')
-                        ->icon('heroicon-o-truck')
-                        ->translateLabel()
-                        ->action(function (Order $record, array $data): void {
-                            $record->update([
-                                'driver_id' => $data['driver_id'],
-                            ]);
-                        })
-                        ->form([
-                            Forms\Components\Select::make('driver_id')
-                                ->label('Driver')
-                                ->relationship('driver', 'name')
-                                ->required(),
-                        ]),
-                    Tables\Actions\Action::make('issue-invoice')
-                        ->label(fn ($record) => $record->invoice()->exists() ?
-                            __('Reissuance of invoice') :
-                            __('Issue Invoice'))
-                        ->icon('heroicon-o-clipboard-document-list')
-                        ->color('primary')
-                        ->action(fn ($record) => app(invoiceService::class)->issueInvoice($record))
-                        ->requiresConfirmation()
-                        ->modalHeading(__('Are you sure you want to issue an invoice for this order?')),
-                    Tables\Actions\ViewAction::make(),
-                    Tables\Actions\EditAction::make(),
-                    Tables\Actions\DeleteAction::make(),
-                ]),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('changeStatus')
-                        ->label('Change status')
-                        ->icon('heroicon-o-arrow-path-rounded-square')
-                        ->translateLabel()
-                        ->action(function (Collection $records, array $data): void {
-                            $ids = $records->pluck('id');
-
-                            $reservationDate = $data['reservation_date'] ?? null;
-                            $reservationTime = $data['reservation_time'] ?? null;
-
-                            if ($reservationDate && $reservationTime) {
-                                $time_apply_status = Carbon::parse("$reservationDate $reservationTime");
-                            } else {
-                                $time_apply_status = null;
-                            }
-
-                            $orders = Order::whereIn('id', $ids)->update([
-                                'status_id' => $data['status_id'],
-                                'time_apply_status' => $time_apply_status ?? DB::raw('time_apply_status'),
-                            ]);
-                            if ($orders) {
-                                event(new BulkOrderUpdated($records, $data['status_id']));
-                            }
-                        })
-                        ->form([
-                            Forms\Components\Select::make('status_id')
-                                ->relationship('status', 'label')
-                                ->hiddenLabel()
-                                ->live()
-                                ->required()
-                                ->label(__('Order Status')),
-                            Forms\Components\Fieldset::make('reservation setting')
-                                ->label(__('Reservation setting for'))
-                                ->visible(
-                                    fn (Get $get): bool => OrderStatus::where(
-                                        'id',
-                                        intval($get('status_id'))
-                                    )->value('has_time') == true
-                                )
-                                ->schema([
-                                    Forms\Components\DatePicker::make('reservation_date')
-                                        ->prefixIcon('heroicon-o-calendar-days')
-                                        ->label(__('Reservation Date'))
-                                        ->translateLabel()
-                                        ->reactive()
-                                        ->default(null)
-                                        ->displayFormat('Y-m-d')
-                                        ->required()
-                                        ->jalali(),
-                                    Select::make('reservation_time')
-                                        ->visible(
-                                            fn (Get $get): bool => ! is_null($get('reservation_date'))
-                                        )
-                                        ->label(__('Shift'))
-                                        ->options(fn (Get $get): array => ShiftSettings::getDayShifts($get('reservation_date')))
-                                        ->reactive()
-                                        ->required(),
-                                ]),
-                        ]),
-                    Tables\Actions\BulkAction::make('assignDriver')
-                        ->label('Assign Driver')
-                        ->icon('heroicon-o-truck')
-                        ->translateLabel()
-                        ->action(function (Collection $records, array $data): void {
-                            $ids = $records->pluck('id');
-                            $orders = Order::whereIn('id', $ids)->update(['driver_id' => $data['driver_id']]);
-                            if ($orders) {
-                                event(new BulkOrderUpdated($records));
-                            }
-                        })
-                        ->form([
-                            Forms\Components\Select::make('driver_id')
-                                ->label('Driver')
-                                ->translateLabel()
-                                ->relationship('driver', 'name')
-                                ->required(),
-                        ]),
-                    Tables\Actions\BulkAction::make('issue-invoice')
-                        ->label(__('Issue Invoice'))
-                        ->icon('heroicon-o-clipboard-document-list')
-                        ->color('primary')
-                        ->action(function (Collection $records) {
-                            $service = app(InvoiceService::class);
-
-                            foreach ($records as $record) {
-                                try {
-                                    $service->issueInvoice($record);
-                                } catch (Throwable $e) {
-                                    Notification::make()
-                                        ->title("خطا در فاکتور سفارش #{$record->id}")
-                                        ->body($e->getMessage())
-                                        ->danger()
-                                        ->send();
-                                }
-                            }
-
-                            Notification::make()
-                                ->title(__('Invoice created'))
-                                ->success()
-                                ->send();
-                        })
-                        ->requiresConfirmation()
-                        ->modalHeading(__('Are you sure you want to issue an invoice for this order?')),
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
-    }
-
-    public static function form(Form $form): Form
+    public function form(Form $form): Form
     {
         return $form
             ->schema([
@@ -385,42 +50,12 @@ class OrderResource extends Resource
                     ->schema([
                         Forms\Components\Section::make('اطلاعات مشتری')
                             ->schema([
-                                Forms\Components\Select::make('customer_id')
-                                    ->translateLabel()
-                                    ->label('customer')
-                                    ->prefixIcon('heroicon-o-user')
-                                    ->relationship('customer', 'id_name')
-                                    ->optionsLimit(10)
-                                    ->searchable()
-                                    ->preload()
-                                    ->live()
-                                    ->afterStateUpdated(fn (Set $set) => $set('address_id', null))
-                                    ->createOptionForm([
-                                        Forms\Components\Grid::make()
-                                            ->schema([
-                                                Forms\Components\TextInput::make('name')
-                                                    ->prefixIcon('heroicon-o-user')
-                                                    ->label(__('Customer Name'))
-                                                    ->required(),
-                                                Forms\Components\TextInput::make('phone')
-                                                    ->label(__('Customer Phone'))
-                                                    ->prefixIcon('heroicon-o-phone')
-                                                    ->unique()
-                                                    ->required(),
-                                                Forms\Components\TextInput::make('phone2')
-                                                    ->prefixIcon('heroicon-o-phone')
-                                                    ->label(__('Customer\'s second contact number')),
-                                            ])
-                                            ->columns(1),
-                                    ])
-                                    ->createOptionAction(fn ($action) => $action->modalWidth('sm'))
-                                    ->required(),
                                 Forms\Components\Select::make('address_id')
                                     ->prefixIcon('heroicon-o-map-pin')
                                     ->label(__("Customer's Address"))
                                     ->translateLabel()
-                                    ->options(fn (Get $get) => Address::query()
-                                        ->where('customer_id', $get('customer_id'))
+                                    ->options(fn () => Address::query()
+                                        ->where('customer_id', $this->getOwnerRecord()->id)
                                         ->whereNotNull('address')
                                         ->pluck('address', 'id')
                                         ->sortKeysDesc())
@@ -444,14 +79,13 @@ class OrderResource extends Resource
                                                     ]),
                                             ]),
                                     ])
-                                    ->createOptionUsing(function (array $data, Get $get): int {
-                                        $customer = Customer::findOrFail($get('customer_id'));
+                                    ->createOptionUsing(function (array $data): int {
+                                        $customer = $this->getOwnerRecord();
                                         $data['customer_id'] = $customer->id;
                                         $data = AddressForm::mutate($data);
 
                                         return $customer->addresses()->create($data)->getKey();
                                     })
-                                    ->visible(fn (Get $get) => $get('customer_id'))
                                     ->searchable()
                                     ->preload(),
                             ])->columns()->icon('heroicon-o-user'),
@@ -689,9 +323,19 @@ class OrderResource extends Resource
                         Forms\Components\Section::make('توضیحات سفارش')
                             ->schema([
                                 Forms\Components\Textarea::make('comment')
+                                    ->dehydrated(false)
                                     ->hiddenLabel()
                                     ->placeholder('توضیحات سفارش را اینجا بنویسید')
                                     ->helperText('این توضیحات فقط برای همین سفارش ثبت میشود!')
+                                    ->saveRelationshipsUsing(function (Order $order, $state) {
+                                        if ($state) {
+                                            $order->comments()->create([
+                                                'body' => $state,
+                                                'commenter_type' => Auth::user()::class,
+                                                'commenter_id' => Auth::id(),
+                                            ]);
+                                        }
+                                    })
                                     ->rows(5),
                                 Livewire::make('order-comments')
                                     ->key('order-comments')
@@ -765,6 +409,322 @@ class OrderResource extends Resource
             ])->columns(3);
     }
 
+    public function table(Table $table): Table
+    {
+        return $table
+            ->recordTitleAttribute('id')
+            ->defaultSort('created_at', 'desc')
+            ->columns([
+                Tables\Columns\TextColumn::make('id')
+                    ->label('Order ID')
+                    ->prefix('#')
+                    ->searchable()
+                    ->translateLabel(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->translateLabel()
+                    ->sortable()
+                    ->badge()
+                    ->color(fn (OrderStatus $state): string => $state->color)
+                    ->toggleable()
+                    ->formatStateUsing(fn (OrderStatus $state): string => $state->label),
+                Tables\Columns\TextColumn::make('area')
+                    ->badge()->color(fn ($state, $record): string => $record->address ? 'info' : 'danger')
+                    ->getStateUsing(fn ($record) => $record->address ? $record->address->getArea() : 'X')
+                    ->wrap()
+                    ->description(fn ($record) => $record->address ? $record->address->getFullAddress() : 'فاقد آدرس')
+                    ->sortable()
+                    ->translateLabel()
+                    ->toggleable()
+                    ->alignCenter()
+                    ->counts('items'),
+                Tables\Columns\TextColumn::make('time_apply_status')
+                    ->label(__('reserved'))
+                    ->jalaliDateTime('d F Y - H:i')
+                    ->tooltip(fn (?Model $record) => 'ایجاد شده در : '.$record->created_at)
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('collected_at')
+                    ->label(__('Collection date'))
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('sent_to_factory_at')
+                    ->label(__('Sent to Factory'))
+                    ->sortable()
+                    ->toggleable(true, true),
+                Tables\Columns\SelectColumn::make('driver_id')
+                    ->label(__('Assign Driver'))
+                    ->disabled(fn ($record) => $record ? $record->in_person_delivery : false)
+                    ->options(Driver::all()->pluck('name', 'id')->toArray())
+                    ->translateLabel()
+                    ->sortable()
+                    ->toggleable(),
+                ])
+            ->recordClasses(function (Model $record) {
+                return $record->in_person_delivery ? 'in_person_delivery' : '';
+            })
+            ->filters([
+                Tables\Filters\Filter::make('in_person_delivery')
+                    ->query(fn (Builder $query): Builder => $query->where('in_person_delivery', true))
+                    ->label(__('Delivery by customer')),
+                Tables\Filters\SelectFilter::make('status')
+                    ->relationship('status', 'label')
+                    ->searchable()
+                    ->preload()
+                    ->translateLabel(),
+                Tables\Filters\SelectFilter::make('driver')
+                    ->relationship('driver', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->translateLabel(),
+                Tables\Filters\SelectFilter::make('area')
+                    ->multiple()
+                    ->preload()
+                    ->placeholder('مستثنی کردن مناطق')
+                    ->options(function () {
+                        return array_filter(Address::distinct()
+                            ->orderBy('municipality_zone')
+                            ->pluck('municipality_zone', 'municipality_zone')
+                            ->toArray());
+                    })
+                    ->query(function ($query, $state) {
+                        if (! $state['values']) {
+                            return $query;
+                        }
+
+                        return $query->whereDoesntHave('address', function ($query) use ($state) {
+                            $query->whereIn('municipality_zone', $state['values']);
+                        });
+                    })
+                    ->translateLabel(),
+                Tables\Filters\Filter::make('time_apply_status')
+                    ->form([
+                        Forms\Components\Fieldset::make('time_apply_status')
+                            ->label(__('Reservation Date'))
+                            ->schema([
+                                DatePicker::make('reserved_from')
+                                    ->label(__('from'))
+                                    ->jalali(),
+                                DatePicker::make('reserved_until')
+                                    ->label(__('until'))
+                                    ->jalali(),
+                                Select::make('shift_time')
+                                    ->label(__('Shift Hours'))
+                                    ->columnSpanFull()
+                                    ->options(fn (Get $get): array => ShiftSettings::getDayShifts(
+                                        $get('reserved_from')
+                                    ))
+                                    ->visible(fn (Get $get) => $get('reserved_from') != null),
+                            ]),
+
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['reserved_from'] ?? null,
+                                fn (Builder $query, $date): Builder => $query->whereDate('time_apply_status', '>=', $date)
+                            )
+                            ->when(
+                                $data['reserved_until'] ?? null,
+                                fn (Builder $query, $date): Builder => $query->whereDate('time_apply_status', '<=', $date)
+                            )
+                            ->when(
+                                $data['shift_time'] ?? null,
+                                fn (Builder $query, $time): Builder => $query->whereTime('time_apply_status', '=', $time)
+                            );
+                    }),
+                Tables\Filters\Filter::make('collected_at')
+                    ->form([
+                        Forms\Components\Fieldset::make('collected_at')
+                            ->label(__('Collection date'))
+                            ->schema([
+                                DatePicker::make('collected_from')
+                                    ->label(__('from'))
+                                    ->jalali(),
+                                DatePicker::make('collected_until')
+                                    ->label(__('until'))
+                                    ->jalali(),
+                            ]),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['collected_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('collected_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['collected_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('collected_at', '<=', $date),
+                            );
+                    }),
+                Tables\Filters\Filter::make('sent_to_factory_at')
+                    ->form([
+                        Forms\Components\Fieldset::make('sent_to_factory_at')
+                            ->label(__('Sent to Factory'))
+                            ->schema([
+                                DatePicker::make('sent_to_factory_from')
+                                    ->label(__('from'))
+                                    ->jalali(),
+                                DatePicker::make('sent_to_factory_until')
+                                    ->label(__('until'))
+                                    ->jalali(),
+                            ]),
+                    ]),
+                // TODO: sent_to_factory bayad takmil beshe;
+                /*->query(function (Builder $query, array $data): Builder {
+                    return $query
+                        ->when(
+                            $data['sent_to_factory_from'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('sent_to_factory_at', '>=', $date),
+                        )
+                        ->when(
+                            $data['sent_to_factory_until'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('sent_to_factory_at', '<=', $date),
+                        );
+                }),*/
+            ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make(),
+            ])
+            ->actions([
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('assignDriver')
+                        ->label('Assign Driver')
+                        ->icon('heroicon-o-truck')
+                        ->translateLabel()
+                        ->action(function (Order $record, array $data): void {
+                            $record->update([
+                                'driver_id' => $data['driver_id'],
+                            ]);
+                        })
+                        ->form([
+                            Forms\Components\Select::make('driver_id')
+                                ->label('Driver')
+                                ->relationship('driver', 'name')
+                                ->required(),
+                        ]),
+                    Tables\Actions\Action::make('issue-invoice')
+                        ->label(fn ($record) => $record->invoice()->exists() ? __('Reissuance of invoice') : __('Issue Invoice'))
+                        ->icon('heroicon-o-clipboard-document-list')
+                        ->color('primary')
+                        ->action(fn ($record) => app(invoiceService::class)->issueInvoice($record))
+                        ->requiresConfirmation()
+                        ->modalHeading(__('Are you sure you want to issue an invoice for this order?')),
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ]),
+                ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('changeStatus')
+                        ->label('Change status')
+                        ->icon('heroicon-o-arrow-path-rounded-square')
+                        ->translateLabel()
+                        ->action(function (Collection $records, array $data): void {
+                            $ids = $records->pluck('id');
+
+                            $reservationDate = $data['reservation_date'] ?? null;
+                            $reservationTime = $data['reservation_time'] ?? null;
+
+                            if ($reservationDate && $reservationTime) {
+                                $time_apply_status = Carbon::parse("$reservationDate $reservationTime");
+                            } else {
+                                $time_apply_status = null;
+                            }
+
+                            $orders = Order::whereIn('id', $ids)->update([
+                                'status_id' => $data['status_id'],
+                                'time_apply_status' => $time_apply_status ?? DB::raw('time_apply_status'),
+                            ]);
+                            if ($orders) {
+                                event(new BulkOrderUpdated($records, $data['status_id']));
+                            }
+                        })
+                        ->form([
+                            Forms\Components\Select::make('status_id')
+                                ->relationship('status', 'label')
+                                ->hiddenLabel()
+                                ->live()
+                                ->required()
+                                ->label(__('Order Status')),
+                            Forms\Components\Fieldset::make('reservation setting')
+                                ->label(__('Reservation setting for'))
+                                ->visible(
+                                    fn (Get $get): bool => OrderStatus::where(
+                                        'id',
+                                        intval($get('status_id'))
+                                    )->value('has_time') == true
+                                )
+                                ->schema([
+                                    Forms\Components\DatePicker::make('reservation_date')
+                                        ->prefixIcon('heroicon-o-calendar-days')
+                                        ->label(__('Reservation Date'))
+                                        ->translateLabel()
+                                        ->reactive()
+                                        ->default(null)
+                                        ->displayFormat('Y-m-d')
+                                        ->required()
+                                        ->jalali(),
+                                    Select::make('reservation_time')
+                                        ->visible(
+                                            fn (Get $get): bool => ! is_null($get('reservation_date'))
+                                        )
+                                        ->label(__('Shift'))
+                                        ->options(fn (Get $get): array => ShiftSettings::getDayShifts($get('reservation_date')))
+                                        ->reactive()
+                                        ->required(),
+                                ]),
+                        ]),
+                    Tables\Actions\BulkAction::make('assignDriver')
+                        ->label('Assign Driver')
+                        ->icon('heroicon-o-truck')
+                        ->translateLabel()
+                        ->action(function (Collection $records, array $data): void {
+                            $ids = $records->pluck('id');
+                            $orders = Order::whereIn('id', $ids)->update(['driver_id' => $data['driver_id']]);
+                            if ($orders) {
+                                event(new BulkOrderUpdated($records));
+                            }
+                        })
+                        ->form([
+                            Forms\Components\Select::make('driver_id')
+                                ->label('Driver')
+                                ->translateLabel()
+                                ->relationship('driver', 'name')
+                                ->required(),
+                        ]),
+                    Tables\Actions\BulkAction::make('issue-invoice')
+                        ->label(__('Issue Invoice'))
+                        ->icon('heroicon-o-clipboard-document-list')
+                        ->color('primary')
+                        ->action(function (Collection $records) {
+                            $service = app(InvoiceService::class);
+
+                            foreach ($records as $record) {
+                                try {
+                                    $service->issueInvoice($record);
+                                } catch (Throwable $e) {
+                                    Notification::make()
+                                        ->title("خطا در فاکتور سفارش #{$record->id}")
+                                        ->body($e->getMessage())
+                                        ->danger()
+                                        ->send();
+                                }
+                            }
+
+                            Notification::make()
+                                ->title(__('Invoice created'))
+                                ->success()
+                                ->send();
+                        })
+                        ->requiresConfirmation()
+                        ->modalHeading(__('Are you sure you want to issue an invoice for this order?')),
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
     private static function calculateTotal($data): int
     {
         $items = array_merge($data('items'), $data('otherItems'));
@@ -783,28 +743,5 @@ class OrderResource extends Resource
         } else {
             return 1;
         }
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //            AddressRelationManager::class
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => Pages\ListOrders::route('/'),
-            'create' => Pages\CreateOrder::route('/create'),
-            'edit' => Pages\EditOrder::route('/{record}/edit'),
-        ];
-    }
-
-    public static function getWidgets(): array
-    {
-        return [
-            OrderStatusHistoryWidget::class,
-        ];
     }
 }

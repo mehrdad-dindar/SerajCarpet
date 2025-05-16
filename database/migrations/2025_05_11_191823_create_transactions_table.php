@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->char('payment_id', 32)->index();
             $table->foreignId('customer_id')->constrained('customers');
-            $table->foreignId('invoice_id')->constrained('invoices');
+            $table->foreignId('invoice_id')->constrained('invoices')->cascadeOnDelete();
             $table->unsignedInteger('paid');
             $table->unsignedTinyInteger('status')->default(1);
             $table->text('invoice_details')->nullable();
