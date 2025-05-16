@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Invoice;
 use App\Models\Order;
 use Carbon\Carbon;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
@@ -42,5 +43,27 @@ class InvoiceService
                 'created' => true,
             ];
         });
+    }
+
+    public function issueInvoice(Order $order): void
+    {
+        try {
+            ['invoice' => $invoice, 'created' => $created] = $this->generate($order);
+
+            Notification::make()
+                ->title($created ? __('Invoice created') : __('Invoice updated'))
+                ->body(__("Invoice ID: #:id - Amount: :amount", [
+                    'id' => $invoice->id,
+                    'amount' => number_format($invoice->amount),
+                ]))
+                ->success()
+                ->send();
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title(__('Invoice creation failed'))
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
     }
 }

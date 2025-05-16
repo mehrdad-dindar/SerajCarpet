@@ -114,7 +114,6 @@ class CommentResource extends Resource
             ->filters([
                 Tables\Filters\TrashedFilter::make()
                     ->label('آیتم‌های حذف شده')
-                    ->label('آیتم‌های حذف شده')
                     ->native(false)
                     ->placeholder('همه آیتم‌ها')
                     ->trueLabel('فقط حذف شده‌ها')
