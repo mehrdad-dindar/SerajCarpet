@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\InvoiceResource\Widgets;
+namespace App\Filament\Widgets;
 
 use App\Models\Invoice;
 use Filament\Widgets\ChartWidget;
