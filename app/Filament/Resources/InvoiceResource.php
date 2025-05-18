@@ -149,4 +149,9 @@ class InvoiceResource extends Resource
             'edit' => Pages\EditInvoice::route('/{record}/edit'),
         ];
     }
+
+    public static function getWidgets(): array
+    {
+        return parent::getWidgets();
+    }
 }

@@ -6,6 +6,7 @@ use App\Filament\Pages\Dashboard;
 use App\Filament\Resources\CommentResource\Widgets\LatestCommentsWidget;
 use App\Filament\Resources\CustomerResource;
 use App\Filament\Resources\DriverResource;
+use App\Filament\Resources\InvoiceResource\Widgets\InvoiceChart;
 use App\Filament\Resources\OrderResource;
 use App\Filament\Resources\UserResource;
 use Awcodes\Overlook\OverlookPlugin;
@@ -48,9 +49,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                OverlookWidget::class,
-                Widgets\AccountWidget::class,
+                InvoiceChart::class,
                 LatestCommentsWidget::class,
+                OverlookWidget::class,
+//                Widgets\AccountWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
