@@ -1,84 +1,47 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\CustomerResource\RelationManagers;
 
-use App\Filament\Resources\InvoiceResource\Pages;
-use App\Filament\Resources\InvoiceResource\RelationManagers;
-use App\Models\Invoice;
 use App\Services\InvoiceService;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Support\Colors\Color;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class InvoiceResource extends Resource
+class InvoicesRelationManager extends RelationManager
 {
-    protected static ?string $model = Invoice::class;
+    protected static string $relationship = 'invoices';
+    protected static ?string $label = 'صورتحساب';
+    protected static ?string $title = 'صورتحساب‌ها';
 
-    protected static ?string $navigationGroup = 'Management';
-
-    protected static ?string $navigationLabel = 'صورتحساب‌ها';
-
-    protected static ?string $pluralModelLabel = 'صورتحساب‌ها';
-
-    protected static ?string $modelLabel = 'صورتحساب';
-
-    protected static ?int $navigationSort = 2;
-
-    //    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-    public static function form(Form $form): Form
+    public function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('order_id')
-                    ->label(__('Order ID'))
-                    ->relationship('order', 'id')
-                    ->required(),
-                Forms\Components\TextInput::make('amount')
-                    ->translateLabel()
+                Forms\Components\TextInput::make('id')
                     ->required()
-                    ->maxLength(191),
-                Forms\Components\Select::make('status')
-                    ->translateLabel()
-                    ->options([
-                        'paid' => 'paid',
-                        'pending' => 'pending',
-                        'canceled' => 'canceled'
-                    ])
-                    ->native(false)
-                    ->required(),
-                Forms\Components\DateTimePicker::make('expire_at')
-                    ->translateLabel()
-                    ->required(),
+                    ->maxLength(255),
             ]);
     }
 
-    public static function table(Table $table): Table
+    public function table(Table $table): Table
     {
         return $table
-            ->defaultSort('created_at', 'desc')
+            ->recordTitleAttribute('id')
             ->columns([
+                Tables\Columns\TextColumn::make('id')
+                    ->label(__('Invoice Id'))
+                    ->prefix('#')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('order.id')
-                    ->label(__("Order ID"))
+                    ->label(__('Order Id'))
                     ->prefix('#')
                     ->url(fn (Model $record) => route('filament.admin.resources.orders.edit', $record->order))
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('order.customer.name')
-                    ->label('Name')
-                    ->searchable(['name', 'phone', 'phone2'])
-                    ->translateLabel()
-                    ->url(function (Model $record): string {
-                        return route('filament.admin.resources.customers.edit', $record->order->customer_id);
-                    })
-                    ->description(fn (Model $record): ?string => $record->order->customer->phone)
-                    ->alignCenter()
-                    ->sortable(),
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('amount')
                     ->label(__("Amount"))
                     ->numeric(locale: 'en')
@@ -116,6 +79,9 @@ class InvoiceResource extends Resource
                     ])
                     ->translateLabel(),
             ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make(),
+            ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make('issue-invoice')
@@ -132,21 +98,5 @@ class InvoiceResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => Pages\ListInvoices::route('/'),
-            'create' => Pages\CreateInvoice::route('/create'),
-            'edit' => Pages\EditInvoice::route('/{record}/edit'),
-        ];
     }
 }

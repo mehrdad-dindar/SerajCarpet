@@ -4,11 +4,10 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CustomerResource\Pages;
 use App\Filament\Resources\CustomerResource\RelationManagers;
-use App\Filament\Resources\CustomerResource\RelationManagers\AddressRelationManager;
-use App\Filament\Resources\CustomerResource\RelationManagers\OrdersRelationManager;
 use App\Models\Customer;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Resources\RelationManagers\RelationGroup;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -72,8 +71,12 @@ class CustomerResource extends Resource
     public static function getRelations(): array
     {
         return [
-                OrdersRelationManager::class,
-                AddressRelationManager::class,
+            RelationManagers\OrdersRelationManager::class,
+            RelationGroup::make('پرداخت‌ها', [
+                RelationManagers\InvoicesRelationManager::class,
+                RelationManagers\TransactionsRelationManager::class
+            ])->icon('heroicon-o-banknotes'),
+            RelationManagers\AddressRelationManager::class,
         ];
     }
 

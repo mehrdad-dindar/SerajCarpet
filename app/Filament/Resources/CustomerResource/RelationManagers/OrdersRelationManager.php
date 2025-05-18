@@ -41,6 +41,7 @@ class OrdersRelationManager extends RelationManager
     protected static ?string $label = 'سفارش';
     protected static ?string $title = 'سفارش‌ها';
 
+    protected static ?string $icon = 'heroicon-o-clipboard-document-list';
     public function form(Form $form): Form
     {
         return $form
