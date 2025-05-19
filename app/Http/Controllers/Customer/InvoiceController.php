@@ -54,6 +54,10 @@ class InvoiceController extends Controller
             $transaction->transaction_result = $e->getMessage();
             $transaction->status = Transaction::STATUS_FAILED;
             $transaction->save();
+            return view('livewire.customer.invoice.purchase_result')->with([
+                'status' => $e->getCode(),
+                'message' => 'خطا در پردازش درخواست. لطفا به پشتیبان سایت اطلاع دهید.',
+            ]);
         }
     }
 
