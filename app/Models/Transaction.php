@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use phpDocumentor\Reflection\PseudoTypes\TraitString;
 
 class Transaction extends Model
 {
@@ -15,6 +17,11 @@ class Transaction extends Model
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
+    }
+
+    public function getOrderAttribute()
+    {
+        return $this->invoice?->order;
     }
 
     public function customer(): BelongsTo

@@ -50,7 +50,7 @@ class EditOrder extends EditRecord
                 ->label(__('Issue Invoice'))
                 ->icon('heroicon-o-clipboard-document-list')
                 ->color('primary')
-                ->action(fn () => $this->issueInvoice())
+                ->action(fn () => app(invoiceService::class)->issueInvoice($this->getRecord()))
                 ->requiresConfirmation()
                 ->modalHeading(__('Are you sure you want to issue an invoice for this order?')),
         ];
@@ -81,30 +81,5 @@ class EditOrder extends EditRecord
         );
 
         return $data;
-    }
-
-    public function issueInvoice(): void
-    {
-        try {
-            /** @var \App\Models\Order $order */
-            $order = $this->getRecord();
-
-            ['invoice' => $invoice, 'created' => $created] = app(InvoiceService::class)->generate($order);
-
-            Notification::make()
-                ->title($created ? __('Invoice created') : __('Invoice updated'))
-                ->body(__("Invoice ID: #:id - Amount: :amount", [
-                    'id' => $invoice->id,
-                    'amount' => number_format($invoice->amount),
-                ]))
-                ->success()
-                ->send();
-        } catch (\Exception $e) {
-            Notification::make()
-                ->title(__('Invoice creation failed'))
-                ->body($e->getMessage())
-                ->danger()
-                ->send();
-        }
     }
 }

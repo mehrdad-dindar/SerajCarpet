@@ -9,6 +9,7 @@ return new class extends SettingsMigration
         $this->migrator->add('system.sms_panel_username', '9363432406');
         $this->migrator->add('system.sms_panel_password', 'd5c81d78-1a21-4aa7-ac42-e1bdbe5a144c');
         $this->migrator->add('system.factory_location', ['35.747962952792','51.517529189587']);
+        $this->migrator->add('system.zarinpal', [0,'bff41308-36a3-4bf2-9699-abe92740e662']);
         $this->migrator->add('shift.shifts', [
             [
                 'day' => '0',

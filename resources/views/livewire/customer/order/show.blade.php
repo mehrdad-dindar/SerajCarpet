@@ -154,6 +154,14 @@
                                 icon="banknotes"
                                 :label="__('View invoice')"/>
                         @endif
+                    @else
+                            <x-srj-button
+                                disabled
+                                full
+                                warning
+                                rounded="sm"
+                                icon="clock"
+                                :label="__('Waiting for invoice')"/>
                     @endif
                 </div>
             </div>

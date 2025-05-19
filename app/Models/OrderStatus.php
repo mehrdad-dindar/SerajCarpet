@@ -13,7 +13,7 @@ class OrderStatus extends Model
     const IN_DISTRIBUTION_LIST = 'in_distribution_list';
     const REVISITING_DRIVER = 'revisiting_driver';
     const CARPETS_RECEIVED = 'carpets_received';
-    const READY_FOR_DELIVERY_TO_CUSTOMER = 'ready_for_delivery_to_customer';
+    const READY_FOR_DELIVERY = 'ready_for_deliver';
     const DELIVERED_AND_PAID = 'delivered_and_paid';
     const PRE_WASH_REPAIR_SERVICE = 'pre_wash_repair_service';
     const POST_WASH_REPAIR_SERVICE = 'post_wash_repair_service';

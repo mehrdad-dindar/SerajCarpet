@@ -3,11 +3,12 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Dashboard;
-use App\Filament\Resources\CommentResource\Widgets\LatestCommentsWidget;
 use App\Filament\Resources\CustomerResource;
 use App\Filament\Resources\DriverResource;
 use App\Filament\Resources\OrderResource;
 use App\Filament\Resources\UserResource;
+use App\Filament\Widgets\InvoiceChart;
+use App\Filament\Widgets\LatestCommentsWidget;
 use Awcodes\Overlook\OverlookPlugin;
 use Awcodes\Overlook\Widgets\OverlookWidget;
 use Filament\Http\Middleware\Authenticate;
@@ -17,7 +18,6 @@ use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -48,9 +48,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                OverlookWidget::class,
-                Widgets\AccountWidget::class,
+                InvoiceChart::class,
                 LatestCommentsWidget::class,
+                OverlookWidget::class,
+//                Widgets\AccountWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

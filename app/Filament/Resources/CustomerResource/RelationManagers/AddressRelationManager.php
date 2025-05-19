@@ -19,6 +19,7 @@ class AddressRelationManager extends RelationManager
     protected static string $relationship = 'addresses';
     protected static ?string $label = 'آدرس';
     protected static ?string $title = 'آدرس ها';
+    protected static ?string $icon = 'heroicon-o-map-pin';
 
     public function table(Table $table): Table
     {

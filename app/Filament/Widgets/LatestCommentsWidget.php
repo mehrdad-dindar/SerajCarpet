@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\CommentResource\Widgets;
+namespace App\Filament\Widgets;
 
 use App\Models\Comment;
 use Filament\Tables;
@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class LatestCommentsWidget extends BaseWidget
 {
+    protected static ?int $sort = 4;
     public function table(Table $table): Table
     {
         return $table
