@@ -8,6 +8,8 @@ use Filament\Widgets\ChartWidget;
 class CustomersChart extends ChartWidget
 {
     protected static ?string $heading = 'رشد مشتریان';
+    protected static ?int $sort = 2;
+    public ?string $filter = 'daily';
 
     public function getFilters(): ?array
     {
@@ -20,7 +22,7 @@ class CustomersChart extends ChartWidget
     }
     protected function getData(): array
     {
-        $filter = $this->filter ?? 'daily';
+        $filter = $this->filter;
 
         [$groupFormat, $labelFormat] = match ($filter) {
             'weekly' => ['%x-%v', 'هفته %V %Y'],

@@ -14,7 +14,7 @@ class OrderSeeder extends Seeder
      */
     public function run(): void
     {
-        Order::factory()->count(5)->create()->each(function ($order) {
+        Order::factory()->count(5000)->create()->each(function ($order) {
             $address = Address::factory()->create([
                 'customer_id' => $order->customer->id,
                 'state' => 'تهران',

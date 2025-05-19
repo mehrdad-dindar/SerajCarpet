@@ -9,6 +9,8 @@ use Hekmatinasser\Verta\Verta;
 class InvoiceChart extends ChartWidget
 {
     protected static ?string $heading = 'گزارش صورتحساب‌ها';
+    protected static ?int $sort = 3;
+
 
     protected function getData(): array
     {
