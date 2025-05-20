@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\PaymentMethod;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -25,6 +26,8 @@ class DatabaseSeeder extends Seeder
             OptionSeeder::class,
             OrderStatusSeeder::class,
             OrderSeeder::class,
+            CarpetColorSeeder::class,
+            PaymentMethodSeeder::class
         ]);
     }
 }

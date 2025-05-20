@@ -41,6 +41,30 @@ class SystemManager extends SettingsPage
                             ->hint(__("Sms Panel Password"))
                             ->required(),
                     ])->columns(),
+                Forms\Components\Section::make(__('Payment'))
+                    ->schema([
+                        Forms\Components\Fieldset::make('payment type')
+                            ->translateLabel()
+                            ->columnSpan(1)
+                            ->schema([
+                                Forms\Components\Toggle::make('zarinpal.0')
+                                    ->hint('پرداخت با استفاده از درگاه پرداخت زرینپال')
+                                    ->hintColor('primary')
+                                    ->columnSpanFull()
+                                    ->live()
+                                    ->label(__('Zarinpal')),
+                            ]),
+                        Forms\Components\Fieldset::make('payment settings')
+                            ->columnSpan(1)
+                            ->schema([
+                                TextInput::make('zarinpal.1')
+                                    ->label(__('Zarinpal merchent id'))
+                                    ->visible(fn (Get $get) => $get('zarinpal.0'))
+                                    ->hint('کد درگاه پرداخت یا Merchant Id زرین پال')
+                                    ->required(),
+                            ])
+                            ->translateLabel(),
+                    ])->columns(),
                 Forms\Components\Section::make(__('Factory Location'))
                     ->schema([
                         Map::make('location')
@@ -80,18 +104,36 @@ class SystemManager extends SettingsPage
                             ->schema([
                                 Forms\Components\Placeholder::make('lat')
                                     ->translateLabel()
-                                    ->content( fn(Get $get) => $get('location.lat')),
+                                    ->content(fn (Get $get) => $get('location.lat')),
                                 Forms\Components\Placeholder::make('lng')
                                     ->translateLabel()
-                                    ->content(fn(Get $get) => $get('location.lng')),
+                                    ->content(fn (Get $get) => $get('location.lng')),
                                 Forms\Components\Placeholder::make('address')
                                     ->translateLabel()
                                     ->columnSpanFull()
-                                    ->content(fn(Get $get) => self::reverseGeocoding($get('location.lat'),$get('location.lng'))->getData(true)['formatted_address']),
+                                    ->content(fn (Get $get) => self::reverseGeocoding(
+                                        $get('location.lat'),
+                                        $get('location.lng')
+                                    )->getData(true)['formatted_address']),
                                 Forms\Components\Hidden::make('factory_location.0'),
                                 Forms\Components\Hidden::make('factory_location.1')
                             ])->columnSpan(1),
                     ])->columns(),
             ]);
+    }
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('save')
+                ->label('ذخیره تنظیمات')
+                ->action('save')
+                ->color('primary')
+                ->icon('heroicon-m-check')
+        ];
+    }
+
+    public function getFormActions(): array
+    {
+        return [];
     }
 }

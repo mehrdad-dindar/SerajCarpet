@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -89,17 +90,17 @@ class Order extends Model
             OrderStatus::PRE_WASH_REPAIR_SERVICE => 'bg-orange-500',
             OrderStatus::SENT_TO_FACTORY_FOR_WASHING => 'bg-green-500',
             OrderStatus::POST_WASH_REPAIR_SERVICE => 'bg-red-500',
-            OrderStatus::READY_FOR_DELIVERY_TO_CUSTOMER => 'bg-purple-500',
+            OrderStatus::READY_FOR_DELIVERY => 'bg-purple-500',
             OrderStatus::DELIVERED_AND_PAID => 'bg-green-700',
             default => 'bg-red-500'
         };
     }
 
-    public function getOptionModelsAttribute()
-    {
-        $optionIds = $this->options ?? [];
-        return Option::whereIn('id', $optionIds)->get();
-    }
+//    public function getOptionModelsAttribute()
+//    {
+//        $optionIds = $this->options ?? [];
+//        return Option::whereIn('id', $optionIds)->get();
+//    }
 
     public function getDescriptionForEvent(string $eventName): string
     {
@@ -155,16 +156,18 @@ class Order extends Model
         );
     }
 
-    protected function options(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => json_decode($value, true),
-            set: fn ($value) => json_encode($value),
-        );
-    }
-
     public function comments()
     {
         return $this->morphMany(Comment::class, 'commentable');
+    }
+
+    public function getAllItemsAttribute()
+    {
+        return $this->items->merge($this->otherItems);
+    }
+
+    public function invoice(): HasOne
+    {
+        return $this->hasOne(Invoice::class);
     }
 }

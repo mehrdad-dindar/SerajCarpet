@@ -1,0 +1,748 @@
+<?php
+
+namespace App\Filament\Resources\CustomerResource\RelationManagers;
+
+use App\Events\BulkOrderUpdated;
+use App\Forms\Components\AddressForm;
+use App\Models\Address;
+use App\Models\CarpetColor;
+use App\Models\Driver;
+use App\Models\Option;
+use App\Models\Order;
+use App\Models\OrderStatus;
+use App\Models\Property;
+use App\Services\InvoiceService;
+use App\Settings\ShiftSettings;
+use Carbon\Carbon;
+use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Livewire;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Tabs;
+use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
+use Filament\Notifications\Notification;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Support\RawJs;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HtmlString;
+use Throwable;
+
+class OrdersRelationManager extends RelationManager
+{
+    protected static string $relationship = 'orders';
+    protected static ?string $label = 'سفارش';
+    protected static ?string $title = 'سفارش‌ها';
+
+    protected static ?string $icon = 'heroicon-o-clipboard-document-list';
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Grid::make('Order')
+                    ->columnSpan(2)
+                    ->schema([
+                        Forms\Components\Section::make('اطلاعات مشتری')
+                            ->schema([
+                                Forms\Components\Select::make('address_id')
+                                    ->prefixIcon('heroicon-o-map-pin')
+                                    ->label(__("Customer's Address"))
+                                    ->translateLabel()
+                                    ->options(fn () => Address::query()
+                                        ->where('customer_id', $this->getOwnerRecord()->id)
+                                        ->whereNotNull('address')
+                                        ->pluck('address', 'id')
+                                        ->sortKeysDesc())
+                                    ->createOptionForm([
+                                        Forms\Components\Grid::make('آدرس')
+                                            ->schema([
+                                                Tabs::make('Tabs')
+                                                    ->tabs([
+                                                        Tabs\Tab::make('Address Info')
+                                                            ->icon('heroicon-o-map')
+                                                            ->translateLabel()
+                                                            ->schema(AddressForm::schema()),
+                                                        Tabs\Tab::make('Description')
+                                                            ->icon('heroicon-o-bookmark')
+                                                            ->translateLabel()
+                                                            ->schema([
+                                                                Forms\Components\Textarea::make('description')
+                                                                    ->rows(5)
+                                                                    ->label(__('Address description')),
+                                                            ]),
+                                                    ]),
+                                            ]),
+                                    ])
+                                    ->createOptionUsing(function (array $data): int {
+                                        $customer = $this->getOwnerRecord();
+                                        $data['customer_id'] = $customer->id;
+                                        $data = AddressForm::mutate($data);
+
+                                        return $customer->addresses()->create($data)->getKey();
+                                    })
+                                    ->searchable()
+                                    ->preload(),
+                            ])->columns()->icon('heroicon-o-user'),
+                        Forms\Components\Section::make('موارد سفارش')
+                            ->schema([
+                                Forms\Components\Repeater::make('items')
+                                    ->label(__('Items'))
+                                    ->translateLabel()
+                                    ->relationship()
+                                    ->reorderable()
+                                    ->defaultItems(1)
+                                    ->hiddenLabel()
+                                    ->schema([
+                                        Forms\Components\Grid::make()
+                                            ->schema([
+                                                Forms\Components\Select::make('property_id')
+                                                    ->label(__('Select Service'))
+                                                    ->translateLabel()
+                                                    ->required()
+                                                    ->reactive()
+                                                    ->helperText(fn (Get $get) => Property::find($get('property_id'))->helperText ?? '')
+                                                    ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                                        if (is_null($state)) {
+                                                            return null;
+                                                        }
+                                                        $set('sub_total', ((int) $get('dimensions') ?? 1) * $get('quantity') * Property::find($state)->price);
+                                                        $set('unit_price', Property::find($state)->price);
+                                                    })
+                                                    ->relationship('property', 'fullTitle')
+                                                    ->getOptionLabelFromRecordUsing(function (Property $property) {
+                                                        return $property->fullTitle;
+                                                    })
+                                                    ->searchable()
+                                                    ->preload()
+                                                    ->native(false)
+                                                    ->columnSpan(3),
+                                                Forms\Components\Select::make('dimensions')
+                                                    ->options(function ($state, Get $get) {
+                                                        if ($propertyId = $get('property_id')) {
+                                                            $dimensions = Property::find($propertyId)->dimensions ?? [];
+
+                                                            return array_combine($dimensions, $dimensions);
+                                                        }
+
+                                                        return [];
+                                                    })
+                                                    ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                                        $set('sub_total', ((int) $get('dimensions') ?? 1) * $get('quantity') * Property::find($get('property_id'))->price);
+                                                        $set('unit_price', Property::find($get('property_id'))->price);
+                                                    })
+                                                    ->translateLabel()
+                                                    ->live()
+                                                    ->hidden(function ($get, $set) {
+                                                        $propertyId = $get('property_id');
+                                                        $property = $propertyId ? Property::find($propertyId) : null;
+
+                                                        if (! $propertyId || ! $property || ! $property->dimensions) {
+                                                            $set('dimensions', 1);
+
+                                                            return true;
+                                                        }
+
+                                                        return false;
+                                                    })
+                                                    ->columnSpan(2),
+                                                Forms\Components\TextInput::make('quantity')
+                                                    ->label(__('Quantity'))
+                                                    ->translateLabel()
+                                                    ->numeric()
+                                                    ->default(1)
+                                                    ->minValue(1)
+                                                    ->reactive()
+                                                    ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                                        if ($get('property_id') !== null) {
+                                                            $price = Property::find($get('property_id'))->price;
+                                                            $set('sub_total', ((int) $get('dimensions') ?? 1) * $state * $price);
+                                                            $set('unit_price', $price);
+                                                        }
+                                                    })
+                                                    ->columnSpan(2)
+                                                    ->required(),
+                                                Forms\Components\Hidden::make('unit_price'),
+                                                Forms\Components\TextInput::make('sub_total')
+                                                    ->label(__('Sub Total Price'))
+                                                    ->readOnly()
+                                                    ->dehydrated()
+                                                    ->translateLabel()
+                                                    ->integer()
+                                                    ->required()
+                                                    ->columnSpan(4)
+                                                    ->mask(RawJs::make('$money($input)'))
+                                                    ->suffix('تومان')
+                                                    ->stripCharacters('.')
+                                                    ->mutateStateForValidationUsing(fn ($state) => str_replace(',', '', $state))
+                                                    ->mutateDehydratedStateUsing(fn ($state) => str_replace(',', '', $state)),
+                                                Forms\Components\Section::make(__('Additional Options'))
+                                                    ->translateLabel()
+                                                    ->collapsed()
+                                                    ->icon('heroicon-o-squares-plus')
+                                                    ->schema([
+                                                        Forms\Components\Select::make('carpet_color_id')
+                                                            ->label(__('Color'))
+                                                            ->relationship('color', 'name')
+                                                            ->searchable()
+                                                            ->preload()
+                                                            ->live()
+                                                            ->translateLabel()
+                                                            ->required(),
+                                                        Forms\Components\Placeholder::make('color-hex')
+                                                            ->visible(fn (Get $get) => filled($get('carpet_color_id')))
+                                                            ->content(function (Get $get) {
+                                                                $color = CarpetColor::find($get('carpet_color_id'));
+                                                                return new HtmlString(
+                                                                    '<div class="flex items-center gap-2" style="border: 2px solid '.$color->hex.';width:max-content;border-radius: 50px;"><span style="background-color: ' . $color->hex . ';color: white;display: inline-block;width: 32px;height: 32px;border-radius: 50px;border: 2px solid white;padding: 8px;"></span><span style="padding-left: 8px;">'.$color->name.'</span></div>'
+                                                                );
+                                                            })                                                                        ->label('رنگ انتخابی'),
+                                                        Forms\Components\Select::make('options')
+                                                            ->label('سایر خدمات')
+                                                            ->multiple()
+                                                            ->options(Option::pluck('name', 'id'))
+                                                            ->default(Option::where('is_default', true)->pluck('id')->toArray())
+                                                            ->mutateDehydratedStateUsing(fn (array $state) => array_map('intval', $state))
+                                                            ->native(false)
+                                                            ->required(),
+                                                        Forms\Components\SpatieMediaLibraryFileUpload::make('Attachment')
+                                                            ->multiple()
+                                                            ->openable()
+                                                            ->downloadable()
+                                                            ->conversion('default')
+                                                            ->translateLabel(),
+                                                    ])
+                                                    ->columns()
+                                                    ->collapsible(),
+                                            ])->columns(12),
+                                    ])
+                                    ->columns(1),
+                                Forms\Components\Repeater::make('otherItems')
+                                    ->label(__('Other Items'))
+                                    ->translateLabel()
+                                    ->relationship()
+                                    ->defaultItems(0)
+                                    ->hiddenLabel()
+                                    ->columns(12)
+                                    ->schema([
+                                        Forms\Components\Hidden::make('is_custom')->default(1),
+                                        Forms\Components\TextInput::make('title')
+                                            ->columnSpan(4),
+                                        Forms\Components\TextInput::make('quantity')
+                                            ->label(__('Quantity'))
+                                            ->translateLabel()
+                                            ->numeric()
+                                            ->default(1)
+                                            ->minValue(1)
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                                if ($price = str_replace(',', '', $get('unit_price'))) {
+                                                    $set('sub_total', (int) $state * (int) $price);
+                                                }
+                                            })
+                                            ->columnSpan(2)
+                                            ->required(),
+                                        Forms\Components\TextInput::make('unit_price')
+                                            ->label(__('Unit Price'))
+                                            ->columnSpan(3)
+                                            ->mask(RawJs::make('$money($input)'))
+                                            ->suffix('تومان')
+                                            ->stripCharacters('.')
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                                if ($price = str_replace(',', '', $state)) {
+                                                    $set('sub_total', number_format((int) $get('quantity') * (int) $price));
+                                                    $set('unit_price', number_format($price));
+                                                }
+                                            })
+                                            ->mutateStateForValidationUsing(fn ($state) => str_replace(',', '', $state))
+                                            ->mutateDehydratedStateUsing(fn ($state) => str_replace(',', '', $state)),
+                                        Forms\Components\TextInput::make('sub_total')
+                                            ->label(__('Sub Total Price'))
+                                            ->readOnly()
+                                            ->dehydrated()
+                                            ->translateLabel()
+                                            ->integer()
+                                            ->required()
+                                            ->columnSpan(3)
+                                            ->mask(RawJs::make('$money($input)'))
+                                            ->suffix('تومان')
+                                            ->stripCharacters('.')
+                                            ->mutateStateForValidationUsing(fn ($state) => str_replace(',', '', $state))
+                                            ->mutateDehydratedStateUsing(fn ($state) => str_replace(',', '', $state)),
+                                        Forms\Components\Section::make(__('Additional Options'))
+                                            ->translateLabel()
+                                            ->collapsed()
+                                            ->icon('heroicon-o-squares-plus')
+                                            ->schema([
+                                                Forms\Components\Select::make('carpet_color_id')
+                                                    ->label(__('Color'))
+                                                    ->relationship('color', 'name')
+                                                    ->searchable()
+                                                    ->preload()
+                                                    ->live()
+                                                    ->translateLabel()
+                                                    ->required(),
+                                                Forms\Components\Placeholder::make('color-hex')
+                                                    ->visible(fn (Get $get) => filled($get('carpet_color_id')))
+                                                    ->content(function (Get $get) {
+                                                        $color = CarpetColor::find($get('carpet_color_id'));
+                                                        return new HtmlString(
+                                                            '<div class="flex items-center gap-2" style="border: 2px solid '.$color->hex.';width:max-content;border-radius: 50px;"><span style="background-color: ' . $color->hex . ';color: white;display: inline-block;width: 32px;height: 32px;border-radius: 50px;border: 2px solid white;padding: 8px;"></span><span style="padding-left: 8px;">'.$color->name.'</span></div>'
+                                                        );
+                                                    })                                                                        ->label('رنگ انتخابی'),
+                                                Forms\Components\Select::make('options')
+                                                    ->label('سایر خدمات')
+                                                    ->multiple()
+                                                    ->options(Option::pluck('name', 'id'))
+                                                    ->default(Option::where('is_default', true)->pluck('id')->toArray())
+                                                    ->mutateDehydratedStateUsing(fn (array $state) => array_map('intval', $state))
+                                                    ->native(false)
+                                                    ->required(),
+                                                Forms\Components\SpatieMediaLibraryFileUpload::make('Attachment')
+                                                    ->multiple()
+                                                    ->openable()
+                                                    ->downloadable()
+                                                    ->conversion('default')
+                                                    ->translateLabel(),
+                                            ])
+                                            ->columns()
+                                            ->collapsible(),
+                                    ])
+                                    ->columnSpanFull(),
+                            ])->icon('heroicon-o-list-bullet'),
+                    ]),
+                Forms\Components\Grid::make('Order')
+                    ->columnSpan(1)
+                    ->schema([
+                        Forms\Components\Section::make('توضیحات سفارش')
+                            ->schema([
+                                Forms\Components\Textarea::make('comment')
+                                    ->dehydrated(false)
+                                    ->hiddenLabel()
+                                    ->placeholder('توضیحات سفارش را اینجا بنویسید')
+                                    ->helperText('این توضیحات فقط برای همین سفارش ثبت میشود!')
+                                    ->saveRelationshipsUsing(function (Order $order, $state) {
+                                        if ($state) {
+                                            $order->comments()->create([
+                                                'body' => $state,
+                                                'commenter_type' => Auth::user()::class,
+                                                'commenter_id' => Auth::id(),
+                                            ]);
+                                        }
+                                    })
+                                    ->rows(5),
+                                Livewire::make('order-comments')
+                                    ->key('order-comments')
+                                    ->visible(fn (?Order $record) => $record !== null),
+                            ]),
+                        Forms\Components\Section::make('وضعیت سفارش')
+                            ->schema([
+                                Forms\Components\Checkbox::make('in_person_delivery')
+                                    ->live()
+                                    ->afterStateUpdated(function (Set $set) {
+                                        $set(
+                                            'status_id',
+                                            OrderStatus::whereName(OrderStatus::CARPETS_RECEIVED)->pluck('id')->first()
+                                        );
+                                    })
+                                    ->reactive()
+                                    ->dehydrated()
+                                    ->label(__('Delivery by customer')),
+                                Forms\Components\Select::make('status_id')
+                                    ->relationship('status', 'label')
+                                    ->default(OrderStatus::whereName(OrderStatus::IN_COLLECTIVE_LIST)->pluck('id')->first())
+                                    ->hiddenLabel()
+                                    ->reactive()
+                                    ->required()
+                                    ->label(__('Order Status')),
+                                Forms\Components\Fieldset::make('reservation setting')
+                                    ->label(__('Reservation setting for'))
+                                    ->live()
+                                    ->visible(
+                                        fn (Get $get): bool => OrderStatus::where(
+                                            'id',
+                                            intval($get('status_id'))
+                                        )->value('has_time') == true
+                                    )
+                                    ->schema([
+                                        Forms\Components\DatePicker::make('reservation_date')
+                                            ->prefixIcon('heroicon-o-calendar-days')
+                                            ->label(__('Reservation Date'))
+                                            ->reactive()
+                                            ->default(verta())
+                                            ->live()
+                                            ->required()
+                                            ->jalali(),
+                                        Select::make('reservation_time')
+                                            ->visible(
+                                                fn (Get $get): bool => ! is_null($get('reservation_date'))
+                                            )
+                                            ->label(__('Shift'))
+                                            ->options(fn (Get $get): array => ShiftSettings::getDayShifts(
+                                                $get('reservation_date')
+                                            ))
+                                            ->reactive()
+                                            ->required(),
+                                    ]),
+
+                            ]),
+                        Forms\Components\Section::make('قیمت کل')
+                            ->schema([
+                                Forms\Components\Hidden::make('total')
+                                    ->mutateDehydratedStateUsing(fn (Get $get) => self::calculateTotal($get)),
+                                Forms\Components\Placeholder::make('order_total')
+                                    ->label(__('Order Total'))
+                                    ->reactive()
+                                    ->content(
+                                        fn (Get $get): ?string => number_format(
+                                            self::calculateTotal($get)
+                                        ).' تومان'
+                                    ),
+                            ]),
+                    ]),
+            ])->columns(3);
+    }
+
+    public function table(Table $table): Table
+    {
+        return $table
+            ->recordTitleAttribute('id')
+            ->defaultSort('created_at', 'desc')
+            ->columns([
+                Tables\Columns\TextColumn::make('id')
+                    ->label('Order ID')
+                    ->prefix('#')
+                    ->searchable()
+                    ->translateLabel(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->translateLabel()
+                    ->sortable()
+                    ->badge()
+                    ->color(fn (OrderStatus $state): string => $state->color)
+                    ->toggleable()
+                    ->formatStateUsing(fn (OrderStatus $state): string => $state->label),
+                Tables\Columns\TextColumn::make('area')
+                    ->badge()->color(fn ($state, $record): string => $record->address ? 'info' : 'danger')
+                    ->getStateUsing(fn ($record) => $record->address ? $record->address->getArea() : 'X')
+                    ->wrap()
+                    ->description(fn ($record) => $record->address ? $record->address->getFullAddress() : 'فاقد آدرس')
+                    ->sortable()
+                    ->translateLabel()
+                    ->toggleable()
+                    ->alignCenter()
+                    ->counts('items'),
+                Tables\Columns\TextColumn::make('time_apply_status')
+                    ->label(__('reserved'))
+                    ->jalaliDateTime('d F Y - H:i')
+                    ->tooltip(fn (?Model $record) => 'ایجاد شده در : '.$record->created_at)
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('collected_at')
+                    ->label(__('Collection date'))
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('sent_to_factory_at')
+                    ->label(__('Sent to Factory'))
+                    ->sortable()
+                    ->toggleable(true, true),
+                Tables\Columns\SelectColumn::make('driver_id')
+                    ->label(__('Assign Driver'))
+                    ->disabled(fn ($record) => $record ? $record->in_person_delivery : false)
+                    ->options(Driver::all()->pluck('name', 'id')->toArray())
+                    ->translateLabel()
+                    ->sortable()
+                    ->toggleable(),
+                ])
+            ->recordClasses(function (Model $record) {
+                return $record->in_person_delivery ? 'in_person_delivery' : '';
+            })
+            ->filters([
+                Tables\Filters\Filter::make('in_person_delivery')
+                    ->query(fn (Builder $query): Builder => $query->where('in_person_delivery', true))
+                    ->label(__('Delivery by customer')),
+                Tables\Filters\SelectFilter::make('status')
+                    ->relationship('status', 'label')
+                    ->searchable()
+                    ->preload()
+                    ->translateLabel(),
+                Tables\Filters\SelectFilter::make('driver')
+                    ->relationship('driver', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->translateLabel(),
+                Tables\Filters\SelectFilter::make('area')
+                    ->multiple()
+                    ->preload()
+                    ->placeholder('مستثنی کردن مناطق')
+                    ->options(function () {
+                        return array_filter(Address::distinct()
+                            ->orderBy('municipality_zone')
+                            ->pluck('municipality_zone', 'municipality_zone')
+                            ->toArray());
+                    })
+                    ->query(function ($query, $state) {
+                        if (! $state['values']) {
+                            return $query;
+                        }
+
+                        return $query->whereDoesntHave('address', function ($query) use ($state) {
+                            $query->whereIn('municipality_zone', $state['values']);
+                        });
+                    })
+                    ->translateLabel(),
+                Tables\Filters\Filter::make('time_apply_status')
+                    ->form([
+                        Forms\Components\Fieldset::make('time_apply_status')
+                            ->label(__('Reservation Date'))
+                            ->schema([
+                                DatePicker::make('reserved_from')
+                                    ->label(__('from'))
+                                    ->jalali(),
+                                DatePicker::make('reserved_until')
+                                    ->label(__('until'))
+                                    ->jalali(),
+                                Select::make('shift_time')
+                                    ->label(__('Shift Hours'))
+                                    ->columnSpanFull()
+                                    ->options(fn (Get $get): array => ShiftSettings::getDayShifts(
+                                        $get('reserved_from')
+                                    ))
+                                    ->visible(fn (Get $get) => $get('reserved_from') != null),
+                            ]),
+
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['reserved_from'] ?? null,
+                                fn (Builder $query, $date): Builder => $query->whereDate('time_apply_status', '>=', $date)
+                            )
+                            ->when(
+                                $data['reserved_until'] ?? null,
+                                fn (Builder $query, $date): Builder => $query->whereDate('time_apply_status', '<=', $date)
+                            )
+                            ->when(
+                                $data['shift_time'] ?? null,
+                                fn (Builder $query, $time): Builder => $query->whereTime('time_apply_status', '=', $time)
+                            );
+                    }),
+                Tables\Filters\Filter::make('collected_at')
+                    ->form([
+                        Forms\Components\Fieldset::make('collected_at')
+                            ->label(__('Collection date'))
+                            ->schema([
+                                DatePicker::make('collected_from')
+                                    ->label(__('from'))
+                                    ->jalali(),
+                                DatePicker::make('collected_until')
+                                    ->label(__('until'))
+                                    ->jalali(),
+                            ]),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['collected_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('collected_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['collected_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('collected_at', '<=', $date),
+                            );
+                    }),
+                Tables\Filters\Filter::make('sent_to_factory_at')
+                    ->form([
+                        Forms\Components\Fieldset::make('sent_to_factory_at')
+                            ->label(__('Sent to Factory'))
+                            ->schema([
+                                DatePicker::make('sent_to_factory_from')
+                                    ->label(__('from'))
+                                    ->jalali(),
+                                DatePicker::make('sent_to_factory_until')
+                                    ->label(__('until'))
+                                    ->jalali(),
+                            ]),
+                    ]),
+                // TODO: sent_to_factory bayad takmil beshe;
+                /*->query(function (Builder $query, array $data): Builder {
+                    return $query
+                        ->when(
+                            $data['sent_to_factory_from'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('sent_to_factory_at', '>=', $date),
+                        )
+                        ->when(
+                            $data['sent_to_factory_until'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('sent_to_factory_at', '<=', $date),
+                        );
+                }),*/
+            ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make(),
+            ])
+            ->actions([
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('assignDriver')
+                        ->label('Assign Driver')
+                        ->icon('heroicon-o-truck')
+                        ->translateLabel()
+                        ->action(function (Order $record, array $data): void {
+                            $record->update([
+                                'driver_id' => $data['driver_id'],
+                            ]);
+                        })
+                        ->form([
+                            Forms\Components\Select::make('driver_id')
+                                ->label('Driver')
+                                ->relationship('driver', 'name')
+                                ->required(),
+                        ]),
+                    Tables\Actions\Action::make('issue-invoice')
+                        ->label(fn ($record) => $record->invoice()->exists() ? __('Reissuance of invoice') : __('Issue Invoice'))
+                        ->icon('heroicon-o-clipboard-document-list')
+                        ->color('primary')
+                        ->action(fn ($record) => app(invoiceService::class)->issueInvoice($record))
+                        ->requiresConfirmation()
+                        ->modalHeading(__('Are you sure you want to issue an invoice for this order?')),
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ]),
+                ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('changeStatus')
+                        ->label('Change status')
+                        ->icon('heroicon-o-arrow-path-rounded-square')
+                        ->translateLabel()
+                        ->action(function (Collection $records, array $data): void {
+                            $ids = $records->pluck('id');
+
+                            $reservationDate = $data['reservation_date'] ?? null;
+                            $reservationTime = $data['reservation_time'] ?? null;
+
+                            if ($reservationDate && $reservationTime) {
+                                $time_apply_status = Carbon::parse("$reservationDate $reservationTime");
+                            } else {
+                                $time_apply_status = null;
+                            }
+
+                            $orders = Order::whereIn('id', $ids)->update([
+                                'status_id' => $data['status_id'],
+                                'time_apply_status' => $time_apply_status ?? DB::raw('time_apply_status'),
+                            ]);
+                            if ($orders) {
+                                event(new BulkOrderUpdated($records, $data['status_id']));
+                            }
+                        })
+                        ->form([
+                            Forms\Components\Select::make('status_id')
+                                ->relationship('status', 'label')
+                                ->hiddenLabel()
+                                ->live()
+                                ->required()
+                                ->label(__('Order Status')),
+                            Forms\Components\Fieldset::make('reservation setting')
+                                ->label(__('Reservation setting for'))
+                                ->visible(
+                                    fn (Get $get): bool => OrderStatus::where(
+                                        'id',
+                                        intval($get('status_id'))
+                                    )->value('has_time') == true
+                                )
+                                ->schema([
+                                    Forms\Components\DatePicker::make('reservation_date')
+                                        ->prefixIcon('heroicon-o-calendar-days')
+                                        ->label(__('Reservation Date'))
+                                        ->translateLabel()
+                                        ->reactive()
+                                        ->default(null)
+                                        ->displayFormat('Y-m-d')
+                                        ->required()
+                                        ->jalali(),
+                                    Select::make('reservation_time')
+                                        ->visible(
+                                            fn (Get $get): bool => ! is_null($get('reservation_date'))
+                                        )
+                                        ->label(__('Shift'))
+                                        ->options(fn (Get $get): array => ShiftSettings::getDayShifts($get('reservation_date')))
+                                        ->reactive()
+                                        ->required(),
+                                ]),
+                        ]),
+                    Tables\Actions\BulkAction::make('assignDriver')
+                        ->label('Assign Driver')
+                        ->icon('heroicon-o-truck')
+                        ->translateLabel()
+                        ->action(function (Collection $records, array $data): void {
+                            $ids = $records->pluck('id');
+                            $orders = Order::whereIn('id', $ids)->update(['driver_id' => $data['driver_id']]);
+                            if ($orders) {
+                                event(new BulkOrderUpdated($records));
+                            }
+                        })
+                        ->form([
+                            Forms\Components\Select::make('driver_id')
+                                ->label('Driver')
+                                ->translateLabel()
+                                ->relationship('driver', 'name')
+                                ->required(),
+                        ]),
+                    Tables\Actions\BulkAction::make('issue-invoice')
+                        ->label(__('Issue Invoice'))
+                        ->icon('heroicon-o-clipboard-document-list')
+                        ->color('primary')
+                        ->action(function (Collection $records) {
+                            $service = app(InvoiceService::class);
+
+                            foreach ($records as $record) {
+                                try {
+                                    $service->issueInvoice($record);
+                                } catch (Throwable $e) {
+                                    Notification::make()
+                                        ->title("خطا در فاکتور سفارش #{$record->id}")
+                                        ->body($e->getMessage())
+                                        ->danger()
+                                        ->send();
+                                }
+                            }
+
+                            Notification::make()
+                                ->title(__('Invoice created'))
+                                ->success()
+                                ->send();
+                        })
+                        ->requiresConfirmation()
+                        ->modalHeading(__('Are you sure you want to issue an invoice for this order?')),
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    private static function calculateTotal($data): int
+    {
+        $items = array_merge($data('items'), $data('otherItems'));
+        $total = 0;
+        foreach ($items as $item) {
+            $dimensions = 1;
+            if (isset($item['dimensions'])) {
+                $dimensions = (int) $item['dimensions'] ?? 1;
+            }
+            $quantity = (int) $item['quantity'] ?? 0;
+            $unitPrice = (int) str_replace(',', '', $item['unit_price']);
+            $total += $dimensions * $quantity * $unitPrice;
+        }
+        if ($total) {
+            return $total;
+        } else {
+            return 1;
+        }
+    }
+}

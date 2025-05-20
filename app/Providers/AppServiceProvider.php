@@ -7,6 +7,7 @@ use App\Livewire\Driver\Order\Steps\AddItemsStepComponent;
 use App\Livewire\Driver\Order\Steps\ConfirmStepComponent;
 use App\Livewire\Driver\Order\Steps\CustomerInfoStepComponent;
 use App\Services\ShiftSchedulerService;
+use App\Settings\SystemSettings;
 use Filament\Support\Facades\FilamentView;
 use Hekmatinasser\Verta\Verta;
 use Illuminate\Console\Scheduling\Schedule;
@@ -21,7 +22,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->booted(function () {
+            $settings = app(SystemSettings::class);
+            config()->set('payment.drivers.zarinpal.merchantId', $settings->zarinpal[1]);
+        });
     }
 
     /**

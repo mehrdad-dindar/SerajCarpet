@@ -3,14 +3,37 @@
 namespace App\Filament\Resources\OrderResource\Pages;
 
 use App\Filament\Resources\OrderResource;
+use App\Models\Order;
+use App\Services\InvoiceService;
 use Carbon\Carbon;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Auth;
 
 class EditOrder extends EditRecord
 {
     protected static string $resource = OrderResource::class;
 
+    public function mount(int|string $record): void
+    {
+        parent::mount($record);
+        parse_str(parse_url(url()->previous(), PHP_URL_QUERY) ?? '', $filters);
+        session()->put('orders_filters', $filters);
+    }
+
+    protected function afterSave()
+    {
+        $comment = $this->data['comment'] ?? null;
+        if ($comment) {
+            $this->record->comments()->create([
+                'body' => $comment,
+                'commenter_type' => Auth::user()::class,
+                'commenter_id' => Auth::id(),
+            ]);
+            $this->dispatch('comment-added');
+        }
+    }
     protected function getFooterWidgets(): array
     {
         $order = $this->record;
@@ -21,13 +44,21 @@ class EditOrder extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+            ->icon('heroicon-o-trash'),
+            Actions\Action::make('issue-invoice')
+                ->label(__('Issue Invoice'))
+                ->icon('heroicon-o-clipboard-document-list')
+                ->color('primary')
+                ->action(fn () => app(invoiceService::class)->issueInvoice($this->getRecord()))
+                ->requiresConfirmation()
+                ->modalHeading(__('Are you sure you want to issue an invoice for this order?')),
         ];
     }
 
     protected function getRedirectUrl(): ?string
     {
-        return $this->getResource()::getUrl('index');
+        return $this->getResource()::getUrl('index', session()->get('orders_filters', []));
     }
 
     protected function mutateFormDataBeforeFill(array $data): array
@@ -43,11 +74,11 @@ class EditOrder extends EditRecord
         if (isset($data['reservation_date'], $data['reservation_time'])) {
             $data['time_apply_status'] = Carbon::parse($data['reservation_date'] . ' ' . $data['reservation_time']);
         }
-        if (isset($data['options'])) {
-            $data['options'] = array_map('intval', $data['options']);
-        }
-
-        unset($data['reservation_date'], $data['reservation_time']);
+        unset(
+            $data['reservation_date'],
+            $data['reservation_time'],
+            $data['comment']
+        );
 
         return $data;
     }

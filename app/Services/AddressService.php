@@ -61,4 +61,22 @@ class AddressService
         $address->longitude = $points[1];
         $address->save();
     }
+
+    public function getMapUrl(Address $address)
+    {
+        $lon = $address->longitude;
+        $lat = $address->latitude;
+        if ($lat && $lon) {
+            $tileNumber = $this->getTileNumber($lon, $lat);
+        }
+        return "https://tile.openstreetmap.org/$tileNumber.png";
+    }
+
+    private function getTileNumber($lon, $lat)
+    {
+        $zoom = 15;
+        $xtile = floor((($lon + 180) / 360) * pow(2, $zoom));
+        $ytile = floor((1 - log(tan(deg2rad($lat)) + 1 / cos(deg2rad($lat))) / pi()) /2 * pow(2, $zoom));
+        return  $zoom . "/" . $xtile . "/" . $ytile;
+    }
 }

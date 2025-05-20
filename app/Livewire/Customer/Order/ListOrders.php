@@ -63,7 +63,7 @@ class ListOrders extends Component implements HasForms, HasTable
             ->actions([
                 Action::make('مشاهده')
                     ->icon('heroicon-o-eye') // آیکون برای اکشن
-                    ->url(fn ($record) => route('customer.panel.orders.show', $record))
+                    ->url(fn ($record) => route('customer.panel.order.show', $record))
                     ->color('primary'),
             ])
             ->bulkActions([

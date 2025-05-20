@@ -8,21 +8,25 @@ use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\Widgets\OrderStatusHistoryWidget;
 use App\Forms\Components\AddressForm;
 use App\Models\Address;
+use App\Models\CarpetColor;
 use App\Models\Customer;
 use App\Models\Driver;
 use App\Models\Option;
 use App\Models\Order;
 use App\Models\OrderStatus;
 use App\Models\Property;
+use App\Services\InvoiceService;
 use App\Settings\ShiftSettings;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\ActionSize;
 use Filament\Support\RawJs;
@@ -32,6 +36,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HtmlString;
+use Throwable;
 
 class OrderResource extends Resource
 {
@@ -58,7 +64,7 @@ class OrderResource extends Resource
                     ->translateLabel(),
                 Tables\Columns\TextColumn::make('customer.name')
                     ->label('Name')
-                    ->searchable()
+                    ->searchable(['name', 'phone', 'phone2'])
                     ->translateLabel()
                     ->url(function (Model $record): string {
                         return route('filament.admin.resources.customers.edit', $record->customer_id);
@@ -85,8 +91,9 @@ class OrderResource extends Resource
                     ->alignCenter()
                     ->counts('items'),
                 Tables\Columns\TextColumn::make('time_apply_status')
-                    ->label(__("reserved"))
-                    ->jalaliDateTime("d F Y - H:i")
+                    ->label(__('reserved'))
+                    ->jalaliDateTime('d F Y - H:i')
+                    ->tooltip(fn (?Model $record) => 'ایجاد شده در : '.$record->created_at)
                     ->sortable()
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('collected_at')
@@ -123,43 +130,59 @@ class OrderResource extends Resource
                     ->preload()
                     ->translateLabel(),
                 Tables\Filters\SelectFilter::make('area')
+                    ->multiple()
+                    ->preload()
+                    ->placeholder('مستثنی کردن مناطق')
                     ->options(function () {
                         return array_filter(Address::distinct()
+                            ->orderBy('municipality_zone')
                             ->pluck('municipality_zone', 'municipality_zone')
                             ->toArray());
                     })
                     ->query(function ($query, $state) {
-                        if (! $state['value']) {
+                        if (! $state['values']) {
                             return $query;
                         }
 
-                        return $query->whereHas('address', function ($query) use ($state) {
-                            $query->where('municipality_zone', $state);
+                        return $query->whereDoesntHave('address', function ($query) use ($state) {
+                            $query->whereIn('municipality_zone', $state['values']);
                         });
                     })
                     ->translateLabel(),
-                Tables\Filters\Filter::make('created_at')
+                Tables\Filters\Filter::make('time_apply_status')
                     ->form([
-                        Forms\Components\Fieldset::make('created_at')
-                            ->label(__('Created at'))
+                        Forms\Components\Fieldset::make('time_apply_status')
+                            ->label(__('Reservation Date'))
                             ->schema([
-                                DatePicker::make('created_from')
+                                DatePicker::make('reserved_from')
                                     ->label(__('from'))
                                     ->jalali(),
-                                DatePicker::make('created_until')
+                                DatePicker::make('reserved_until')
                                     ->label(__('until'))
                                     ->jalali(),
+                                Select::make('shift_time')
+                                    ->label(__('Shift Hours'))
+                                    ->columnSpanFull()
+                                    ->options(fn (Get $get): array => ShiftSettings::getDayShifts(
+                                        $get('reserved_from')
+                                    ))
+                                    ->visible(fn (Get $get) => $get('reserved_from') != null),
                             ]),
+
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
-                                $data['created_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                                $data['reserved_from'] ?? null,
+                                fn (Builder $query, $date): Builder => $query->whereDate('time_apply_status', '>=', $date)
                             )
                             ->when(
-                                $data['created_until'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                                $data['reserved_until'] ?? null,
+                                fn (Builder $query, $date): Builder => $query->whereDate('time_apply_status', '<=', $date)
+                            )
+                            ->when(
+                                $data['shift_time'] ?? null,
+                                fn (Builder $query, $time): Builder => $query->whereTime('time_apply_status', '=', $time)
                             );
                     }),
                 Tables\Filters\Filter::make('collected_at')
@@ -229,6 +252,15 @@ class OrderResource extends Resource
                                 ->relationship('driver', 'name')
                                 ->required(),
                         ]),
+                    Tables\Actions\Action::make('issue-invoice')
+                        ->label(fn ($record) => $record->invoice()->exists() ?
+                            __('Reissuance of invoice') :
+                            __('Issue Invoice'))
+                        ->icon('heroicon-o-clipboard-document-list')
+                        ->color('primary')
+                        ->action(fn ($record) => app(invoiceService::class)->issueInvoice($record))
+                        ->requiresConfirmation()
+                        ->modalHeading(__('Are you sure you want to issue an invoice for this order?')),
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
@@ -310,9 +342,35 @@ class OrderResource extends Resource
                             Forms\Components\Select::make('driver_id')
                                 ->label('Driver')
                                 ->translateLabel()
-                                ->relationship('driver', 'name') // رابطه صحیح باید استفاده شود
+                                ->relationship('driver', 'name')
                                 ->required(),
                         ]),
+                    Tables\Actions\BulkAction::make('issue-invoice')
+                        ->label(__('Issue Invoice'))
+                        ->icon('heroicon-o-clipboard-document-list')
+                        ->color('primary')
+                        ->action(function (Collection $records) {
+                            $service = app(InvoiceService::class);
+
+                            foreach ($records as $record) {
+                                try {
+                                    $service->issueInvoice($record);
+                                } catch (Throwable $e) {
+                                    Notification::make()
+                                        ->title("خطا در فاکتور سفارش #{$record->id}")
+                                        ->body($e->getMessage())
+                                        ->danger()
+                                        ->send();
+                                }
+                            }
+
+                            Notification::make()
+                                ->title(__('Invoice created'))
+                                ->success()
+                                ->send();
+                        })
+                        ->requiresConfirmation()
+                        ->modalHeading(__('Are you sure you want to issue an invoice for this order?')),
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
@@ -332,6 +390,7 @@ class OrderResource extends Resource
                                     ->label('customer')
                                     ->prefixIcon('heroicon-o-user')
                                     ->relationship('customer', 'id_name')
+                                    ->optionsLimit(10)
                                     ->searchable()
                                     ->preload()
                                     ->live()
@@ -415,6 +474,9 @@ class OrderResource extends Resource
                                                     ->reactive()
                                                     ->helperText(fn (Get $get) => Property::find($get('property_id'))->helperText ?? '')
                                                     ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                                        if (is_null($state)) {
+                                                            return null;
+                                                        }
                                                         $set('sub_total', ((int) $get('dimensions') ?? 1) * $get('quantity') * Property::find($state)->price);
                                                         $set('unit_price', Property::find($state)->price);
                                                     })
@@ -422,6 +484,9 @@ class OrderResource extends Resource
                                                     ->getOptionLabelFromRecordUsing(function (Property $property) {
                                                         return $property->fullTitle;
                                                     })
+                                                    ->searchable()
+                                                    ->preload()
+                                                    ->native(false)
                                                     ->columnSpan(3),
                                                 Forms\Components\Select::make('dimensions')
                                                     ->options(function ($state, Get $get) {
@@ -482,24 +547,44 @@ class OrderResource extends Resource
                                                     ->stripCharacters('.')
                                                     ->mutateStateForValidationUsing(fn ($state) => str_replace(',', '', $state))
                                                     ->mutateDehydratedStateUsing(fn ($state) => str_replace(',', '', $state)),
-                                                Forms\Components\Actions::make([
-                                                    Forms\Components\Actions\Action::make('Other')
-                                                        ->label(false)
-                                                        ->icon('heroicon-o-squares-plus')
-                                                        ->iconButton()
-                                                        ->size(ActionSize::Medium)
-                                                        ->form([
-                                                            Forms\Components\Grid::make('options')
-                                                                ->schema([
-                                                                    Forms\Components\ColorPicker::make('color')
-                                                                        ->translateLabel()
-                                                                        ->required(),
-                                                                    Forms\Components\SpatieMediaLibraryFileUpload::make('Attachment')
-                                                                        ->label(false),
-                                                                ])
-                                                                ->columns(),
-                                                        ]),
-                                                ])->verticallyAlignCenter(),
+                                                Forms\Components\Section::make(__('Additional Options'))
+                                                    ->translateLabel()
+                                                    ->collapsed()
+                                                    ->icon('heroicon-o-squares-plus')
+                                                    ->schema([
+                                                        Forms\Components\Select::make('carpet_color_id')
+                                                            ->label(__('Color'))
+                                                            ->relationship('color', 'name')
+                                                            ->searchable()
+                                                            ->preload()
+                                                            ->live()
+                                                            ->translateLabel()
+                                                            ->required(),
+                                                        Forms\Components\Placeholder::make('color-hex')
+                                                            ->visible(fn (Get $get) => filled($get('carpet_color_id')))
+                                                            ->content(function (Get $get) {
+                                                                $color = CarpetColor::find($get('carpet_color_id'));
+                                                                return new HtmlString(
+                                                                    '<div class="flex items-center gap-2" style="border: 2px solid '.$color->hex.';width:max-content;border-radius: 50px;"><span style="background-color: ' . $color->hex . ';color: white;display: inline-block;width: 32px;height: 32px;border-radius: 50px;border: 2px solid white;padding: 8px;"></span><span style="padding-left: 8px;">'.$color->name.'</span></div>'
+                                                                );
+                                                            })                                                                        ->label('رنگ انتخابی'),
+                                                        Forms\Components\Select::make('options')
+                                                            ->label('سایر خدمات')
+                                                            ->multiple()
+                                                            ->options(Option::pluck('name', 'id'))
+                                                            ->default(Option::where('is_default', true)->pluck('id')->toArray())
+                                                            ->mutateDehydratedStateUsing(fn (array $state) => array_map('intval', $state))
+                                                            ->native(false)
+                                                            ->required(),
+                                                        Forms\Components\SpatieMediaLibraryFileUpload::make('Attachment')
+                                                            ->multiple()
+                                                            ->openable()
+                                                            ->downloadable()
+                                                            ->conversion('default')
+                                                            ->translateLabel(),
+                                                    ])
+                                                    ->columns()
+                                                    ->collapsible(),
                                             ])->columns(12),
                                     ])
                                     ->columns(1),
@@ -556,7 +641,44 @@ class OrderResource extends Resource
                                             ->stripCharacters('.')
                                             ->mutateStateForValidationUsing(fn ($state) => str_replace(',', '', $state))
                                             ->mutateDehydratedStateUsing(fn ($state) => str_replace(',', '', $state)),
-
+                                        Forms\Components\Section::make(__('Additional Options'))
+                                            ->translateLabel()
+                                            ->collapsed()
+                                            ->icon('heroicon-o-squares-plus')
+                                            ->schema([
+                                                Forms\Components\Select::make('carpet_color_id')
+                                                    ->label(__('Color'))
+                                                    ->relationship('color', 'name')
+                                                    ->searchable()
+                                                    ->preload()
+                                                    ->live()
+                                                    ->translateLabel()
+                                                    ->required(),
+                                                Forms\Components\Placeholder::make('color-hex')
+                                                    ->visible(fn (Get $get) => filled($get('carpet_color_id')))
+                                                    ->content(function (Get $get) {
+                                                        $color = CarpetColor::find($get('carpet_color_id'));
+                                                        return new HtmlString(
+                                                            '<div class="flex items-center gap-2" style="border: 2px solid '.$color->hex.';width:max-content;border-radius: 50px;"><span style="background-color: ' . $color->hex . ';color: white;display: inline-block;width: 32px;height: 32px;border-radius: 50px;border: 2px solid white;padding: 8px;"></span><span style="padding-left: 8px;">'.$color->name.'</span></div>'
+                                                        );
+                                                    })                                                                        ->label('رنگ انتخابی'),
+                                                Forms\Components\Select::make('options')
+                                                    ->label('سایر خدمات')
+                                                    ->multiple()
+                                                    ->options(Option::pluck('name', 'id'))
+                                                    ->default(Option::where('is_default', true)->pluck('id')->toArray())
+                                                    ->mutateDehydratedStateUsing(fn (array $state) => array_map('intval', $state))
+                                                    ->native(false)
+                                                    ->required(),
+                                                Forms\Components\SpatieMediaLibraryFileUpload::make('Attachment')
+                                                    ->multiple()
+                                                    ->openable()
+                                                    ->downloadable()
+                                                    ->conversion('default')
+                                                    ->translateLabel(),
+                                            ])
+                                            ->columns()
+                                            ->collapsible(),
                                     ])
                                     ->columnSpanFull(),
                             ])->icon('heroicon-o-list-bullet'),
@@ -564,15 +686,16 @@ class OrderResource extends Resource
                 Forms\Components\Grid::make('Order')
                     ->columnSpan(1)
                     ->schema([
-                        Forms\Components\Section::make('سایر خدمات')
+                        Forms\Components\Section::make('توضیحات سفارش')
                             ->schema([
-                                Forms\Components\Select::make('options')
+                                Forms\Components\Textarea::make('comment')
                                     ->hiddenLabel()
-                                    ->multiple()
-                                    ->options(Option::pluck('name', 'id'))
-                                    ->default(Option::where('is_default', true)->pluck('id')->toArray())
-                                    ->native()
-                                    ->required(),
+                                    ->placeholder('توضیحات سفارش را اینجا بنویسید')
+                                    ->helperText('این توضیحات فقط برای همین سفارش ثبت میشود!')
+                                    ->rows(5),
+                                Livewire::make('order-comments')
+                                    ->key('order-comments')
+                                    ->visible(fn (?Order $record) => $record !== null),
                             ]),
                         Forms\Components\Section::make('وضعیت سفارش')
                             ->schema([
@@ -607,11 +730,9 @@ class OrderResource extends Resource
                                         Forms\Components\DatePicker::make('reservation_date')
                                             ->prefixIcon('heroicon-o-calendar-days')
                                             ->label(__('Reservation Date'))
-                                            ->translateLabel()
                                             ->reactive()
-                                            ->displayFormat('Y-m-d')
-                                            ->default(Carbon::now())
-                                            ->columnSpanFull()
+                                            ->default(verta())
+                                            ->live()
                                             ->required()
                                             ->jalali(),
                                         Select::make('reservation_time')
@@ -619,7 +740,9 @@ class OrderResource extends Resource
                                                 fn (Get $get): bool => ! is_null($get('reservation_date'))
                                             )
                                             ->label(__('Shift'))
-                                            ->options(fn (Get $get): array => ShiftSettings::getDayShifts($get('reservation_date')))
+                                            ->options(fn (Get $get): array => ShiftSettings::getDayShifts(
+                                                $get('reservation_date')
+                                            ))
                                             ->reactive()
                                             ->required(),
                                     ]),
@@ -632,7 +755,11 @@ class OrderResource extends Resource
                                 Forms\Components\Placeholder::make('order_total')
                                     ->label(__('Order Total'))
                                     ->reactive()
-                                    ->content(fn (Get $get): ?string => number_format(self::calculateTotal($get), 0).' تومان'),
+                                    ->content(
+                                        fn (Get $get): ?string => number_format(
+                                            self::calculateTotal($get)
+                                        ).' تومان'
+                                    ),
                             ]),
                     ]),
             ])->columns(3);

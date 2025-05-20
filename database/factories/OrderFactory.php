@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Random\RandomException;
 
@@ -26,11 +27,10 @@ class OrderFactory extends Factory
     {
         return [
             'customer_id' => Customer::factory(),
-            'options' => $this->faker->randomElements([1, 2, 3, 4, 5, 6, 7], rand(3, 4)),
             'total' => $this->faker->randomFloat(0, 1000000, 9900000),
             'status_id' => random_int(1, 10),
-            'created_at' => now(),
-            'updated_at' => now(),
+            'created_at' => Carbon::now()->subDays(rand(1, 368)),
+            'updated_at' => Carbon::now()->subDays(rand(1, 368)),
         ];
     }
 }

@@ -55,6 +55,7 @@ class MoveOrdersToNextShift implements ShouldQueue
                 'name',
                 [
                     OrderStatus::IN_COLLECTIVE_LIST,
+                    OrderStatus::IN_DISTRIBUTION_LIST,
                     OrderStatus::REVISITING_DRIVER,
                 ]
             )->pluck('id'))

@@ -3,22 +3,21 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Dashboard;
-use App\Filament\Resources\AddressResource;
 use App\Filament\Resources\CustomerResource;
 use App\Filament\Resources\DriverResource;
 use App\Filament\Resources\OrderResource;
 use App\Filament\Resources\UserResource;
+use App\Filament\Widgets\InvoiceChart;
+use App\Filament\Widgets\LatestCommentsWidget;
 use Awcodes\Overlook\OverlookPlugin;
 use Awcodes\Overlook\Widgets\OverlookWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationGroup;
-use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -40,7 +39,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->spa()
+//            ->spa()
             ->font('iranSans')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -49,9 +48,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
+                InvoiceChart::class,
+                LatestCommentsWidget::class,
                 OverlookWidget::class,
-                Widgets\AccountWidget::class,
-//                Widgets\FilamentInfoWidget::class,
+//                Widgets\AccountWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -83,38 +83,33 @@ class AdminPanelProvider extends PanelProvider
                         CustomerResource::class,
                         DriverResource::class,
                         OrderResource::class,
-//                        ProductResource::class,
-//                        UserResource::class,
-//                        ArticleResource::class,
-//                        FileResource::class
                     ]),
             ])
             ->navigationGroups([
                 'Management' => NavigationGroup::make()
                     ->label(function () {
-                        return __("Management");
+                        return __('Management');
                     })
-                    ->icon("heroicon-o-adjustments-horizontal"),
+                    ->icon('heroicon-o-adjustments-horizontal'),
                 'Services Setting' => NavigationGroup::make()
                     ->label(function () {
-                        return __("Services Setting");
+                        return __('Services Setting');
                     })
-                    ->icon("heroicon-o-swatch"),
+                    ->icon('heroicon-o-swatch'),
                 'User Settings' => NavigationGroup::make()
                     ->label(function () {
-                        return __("User Settings");
+                        return __('User Settings');
                     })
-                    ->icon("heroicon-o-users"),
+                    ->icon('heroicon-o-users'),
                 'System Setting' => NavigationGroup::make()
                     ->label(function () {
-                        return __("System Setting");
+                        return __('System Setting');
                     })
-                    ->icon("heroicon-o-swatch"),
+                    ->icon('heroicon-o-swatch'),
             ])
             ->brandName(function () {
                 return __('Seraj');
             })
-            ->viteTheme('resources/css/filament/admin/theme.css')
-            /*->databaseNotifications()*/;
+            ->viteTheme('resources/css/filament/admin/theme.css');
     }
 }

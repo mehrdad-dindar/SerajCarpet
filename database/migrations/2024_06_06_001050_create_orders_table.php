@@ -18,7 +18,6 @@ return new class extends Migration
             $table->foreignId('driver_id')->nullable()->constrained();
             $table->foreignId('address_id')->nullable()->constrained()->onDelete("SET NULL");
             $table->string('discount')->nullable();
-            $table->json('options')->nullable();
             $table->string('sub_total')->nullable();
             $table->string('total')->nullable();
             $table->boolean('in_person_delivery')->nullable();

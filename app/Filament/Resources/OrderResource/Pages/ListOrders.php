@@ -58,11 +58,11 @@ class ListOrders extends ListRecords
                     'status',
                     fn ($q) => $q->where('name', OrderStatus::SENT_TO_FACTORY_FOR_WASHING)
                 )),
-            OrderStatus::READY_FOR_DELIVERY_TO_CUSTOMER => Tab::make()
+            OrderStatus::READY_FOR_DELIVERY => Tab::make()
                 ->label(__('Ready for delivery to customer'))
                 ->query(fn ($query) => $query->whereHas(
                     'status',
-                    fn ($q) => $q->where('name', OrderStatus::READY_FOR_DELIVERY_TO_CUSTOMER)
+                    fn ($q) => $q->where('name', OrderStatus::READY_FOR_DELIVERY)
                 )),
             OrderStatus::DELIVERED_AND_PAID => Tab::make()
                 ->label(__('Delivered and paid'))
