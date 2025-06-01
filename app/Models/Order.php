@@ -11,14 +11,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Order extends Model
+class Order extends Model implements HasMedia
 {
-    use HasFactory;
-    use LogsActivity;
+    use HasFactory, LogsActivity, InteractsWithMedia;
 
     public bool $updateDirection = true;
     protected OrderService $orderService;
@@ -32,6 +34,22 @@ class Order extends Model
             $activity = Activity::forSubject($order)->latest()->first();
             event(new OrderLogCreated($activity, $order->updateDirection));
         });
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('voice_notes')
+            ->acceptsMimeTypes(['audio/mpeg', 'audio/wav', 'audio/x-wav', 'audio/ogg'])
+            ->useDisk('voice_notes')
+            ->withResponsiveImages(); // برای پیش‌نمایش
+
+        $this->addMediaCollection('attachments')
+            ->useDisk('attachments');
+    }
+
+    public function voiceNotes(): MorphMany
+    {
+        return $this->media()->where('collection_name', 'voice_notes');
     }
 
     public function setUpdateDirection(bool $value): void

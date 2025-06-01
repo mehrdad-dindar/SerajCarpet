@@ -66,6 +66,9 @@
         $vite[] = 'resources/js/customer.js';
     }
 @endphp
+
+<script src="https://www.WebRTC-Experiment.com/RecordRTC.js"></script>
+@stack('scripts')
 @vite($vite)
 @filamentScripts
 @livewireScripts

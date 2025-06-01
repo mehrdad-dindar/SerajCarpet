@@ -62,6 +62,12 @@ return [
             'url' => env('APP_URL') . '/uploads',
             'visibility' => 'public',
         ],
+        'voice_notes' => [
+            'driver' => 'local',
+            'root' => storage_path('app/voice_notes'),
+            'url' => env('APP_URL').'/storage/voice_notes',
+            'visibility' => 'private',
+            ]
 
     ],
 
