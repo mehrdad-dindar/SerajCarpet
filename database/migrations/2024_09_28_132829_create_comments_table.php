@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('comments', function (Blueprint $table) {
             $table->id();
-            $table->text('body');
+            $table->text('body')->nullable();
             $table->morphs('commentable');
             $table->morphs('commenter');
             $table->foreignId('parent_id')

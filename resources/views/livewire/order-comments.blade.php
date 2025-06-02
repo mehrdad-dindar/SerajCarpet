@@ -16,7 +16,19 @@
             </div>
             <div class="relative mt-2 border-s border-warning-400 ps-1 ms-2">
                 <x-phosphor.icons::duotone.chat class="w-4 absolute top-0 -right-5 text-warning-400"/>
+                @if(is_null($comment->body))
+                    @php
+                        $voice_note = $comment->getMedia('voice_notes');
+                    @endphp
+                    @if($voice_note)
+                        <audio controls>
+                            <source src="{!! $voice_note[0]->getUrl() !!}" type="{!! $voice_note[0]->mime_type !!}">
+                            Your browser does not support the audio tag.
+                        </audio>
+                    @endif
+                @else
                 <p>{!! nl2br(e($comment->body)) !!}</p>
+                @endif
             </div>
         </div>
     @endforeach

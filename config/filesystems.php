@@ -64,9 +64,9 @@ return [
         ],
         'voice_notes' => [
             'driver' => 'local',
-            'root' => storage_path('app/voice_notes'),
-            'url' => env('APP_URL').'/storage/voice_notes',
-            'visibility' => 'private',
+            'root' => public_path('comments/voice_notes'),
+            'url' => env('APP_URL').'/comments/voice_notes',
+            'visibility' => 'public',
             ]
 
     ],

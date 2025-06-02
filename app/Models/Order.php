@@ -36,22 +36,6 @@ class Order extends Model implements HasMedia
         });
     }
 
-    public function registerMediaCollections(): void
-    {
-        $this->addMediaCollection('voice_notes')
-            ->acceptsMimeTypes(['audio/mpeg', 'audio/wav', 'audio/x-wav', 'audio/ogg'])
-            ->useDisk('voice_notes')
-            ->withResponsiveImages(); // برای پیش‌نمایش
-
-        $this->addMediaCollection('attachments')
-            ->useDisk('attachments');
-    }
-
-    public function voiceNotes(): MorphMany
-    {
-        return $this->media()->where('collection_name', 'voice_notes');
-    }
-
     public function setUpdateDirection(bool $value): void
     {
         $this->updateDirection = $value;
