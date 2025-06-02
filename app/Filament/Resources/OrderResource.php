@@ -367,6 +367,9 @@ class OrderResource extends Resource
                                 ->hiddenLabel()
                                 ->live()
                                 ->required()
+                                ->native(false)
+                                ->searchable()
+                                ->preload()
                                 ->label(__('Order Status')),
                             Forms\Components\Fieldset::make('reservation setting')
                                 ->label(__('Reservation setting for'))
