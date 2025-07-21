@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Models\DriverLocation;
 use Filament\Pages\Page;
+use Illuminate\Contracts\Support\Htmlable;
 
 class ShowDriverLocations extends Page
 {
@@ -21,4 +22,5 @@ class ShowDriverLocations extends Page
     {
         return "زنده";
     }
+    protected static ?string $navigationBadgeTooltip = 'آخرین موقعیت راننده ها در ۳۰ دقیقه گذشته';
 }

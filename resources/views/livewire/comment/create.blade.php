@@ -7,6 +7,9 @@
     />
     <div wire:ignore.self class="flex items-center my-2 gap-2 justify-between">
         <x-srj-button primary wire:click="submit" label="ثبت توضیح جدید" icon="paper-airplane"/>
-        <livewire:voice-recorder :order="$order" :key="'voice-recorder-'.$order->id"/>
+        <div class="flex gap-2 items-center justify-between">
+            <livewire:attachment :order="$order" :key="'attachment-'.$order->id"/>
+            <livewire:voice-recorder :order="$order" :key="'voice-recorder-'.$order->id"/>
+        </div>
     </div>
 </div>

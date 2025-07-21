@@ -18,17 +18,30 @@
                 <x-phosphor.icons::duotone.chat class="w-4 absolute top-0 -right-5 text-warning-400"/>
                 @if(is_null($comment->body))
                     @php
-                        $voice_note = $comment->getMedia('voice_notes');
+                        $voice_note = $comment->getMedia('voice_notes')->first();
+                        $attachment = $comment->getMedia('attachments')->first();
                     @endphp
                     @if($voice_note)
                         <audio controls>
-                            <source src="{!! $voice_note[0]->getUrl() !!}" type="{!! $voice_note[0]->mime_type !!}">
+                            <source src="{{ $voice_note->getUrl() }}" type="{{ $voice_note->mime_type }}">
                             Your browser does not support the audio tag.
                         </audio>
+                    @elseif($attachment)
+                        @if (str($attachment->mime_type)->startsWith('image/'))
+                            <a href="{{ $attachment->getUrl() }}" target="_blank">
+                                <img src="{{ $attachment->getUrl() }}" class="max-w-xs rounded" alt="Preview">
+                            </a>
+                        @elseif (str($attachment->mime_type)->startsWith('video/'))
+                            <video controls class="max-w-xs rounded">
+                                <source src="{{ $attachment->getUrl() }}" type="{{ $attachment->mime_type }}">
+                                مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند.
+                            </video>
+                        @endif
                     @endif
                 @else
-                <p>{!! nl2br(e($comment->body)) !!}</p>
+                    <p>{!! nl2br(e($comment->body)) !!}</p>
                 @endif
+
             </div>
         </div>
     @endforeach

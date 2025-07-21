@@ -15,7 +15,7 @@ class DriverSeeder extends Seeder
     {
         Driver::create([
             'name' => 'رضا راننده',
-            'phone' => '09121111111',
+            'phone' => '09123456789',
             'license' => 98456789,
             'car_tag' => "36الف45678"
         ]);

@@ -82,12 +82,6 @@ class VoiceRecorder extends Component
 
     public function render()
     {
-        //        dd('hi');
-        //        return <<<'blade'
-        //            <div>
-        //                <button wire:click="delete">Delete Post</button>
-        //            </div>
-        //        blade;
         return view('livewire.voice-recorder');
     }
 }

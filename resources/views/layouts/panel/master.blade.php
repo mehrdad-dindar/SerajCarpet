@@ -67,7 +67,7 @@
     }
 @endphp
 
-<script src="https://www.WebRTC-Experiment.com/RecordRTC.js"></script>
+<script src="{{asset("js/RecordRTC.js")}}"></script>
 @stack('scripts')
 @vite($vite)
 @filamentScripts
