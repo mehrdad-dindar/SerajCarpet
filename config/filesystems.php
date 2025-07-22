@@ -62,6 +62,18 @@ return [
             'url' => env('APP_URL') . '/uploads',
             'visibility' => 'public',
         ],
+        'voice_notes' => [
+            'driver' => 'local',
+            'root' => public_path('comments/voice_notes'),
+            'url' => env('APP_URL').'/comments/voice_notes',
+            'visibility' => 'public',
+            ],
+        'attachments' => [
+            'driver' => 'local',
+            'root' => public_path('comments/attachments'),
+            'url' => env('APP_URL').'/comments/attachments',
+            'visibility' => 'public',
+            ]
 
     ],
 

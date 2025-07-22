@@ -23,6 +23,7 @@ return new class extends Migration
             $table->boolean('in_person_delivery')->nullable();
             $table->foreignId('status_id')->constrained("order_statuses")->nullable();
             $table->dateTime('time_apply_status')->nullable();
+            $table->json('voice_notes_meta')->nullable();
             $table->dateTime('collected_at')->nullable();
             $table->dateTime('sent_to_factory_at')->nullable();
             $table->timestamps();

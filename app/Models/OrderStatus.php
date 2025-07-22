@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 
 class OrderStatus extends Model
 {
@@ -33,6 +34,17 @@ class OrderStatus extends Model
         } else {
             return 'N/A';
         }
+    }
+    public static function getCachedStatuses()
+    {
+        return Cache::rememberForever('order_statuses_all', function () {
+            return self::all()->keyBy('id');
+        });
+    }
+
+    public static function getLabelById($id)
+    {
+        return self::getCachedStatuses()->get($id)?->label;
     }
 
     public function typeLabel(): string

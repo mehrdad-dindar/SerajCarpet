@@ -25,6 +25,12 @@ class Card extends Component
     protected $rules = [
         'reason' => 'required|string|min:20|max:1200',
     ];
+    public $showForm = false;
+
+    public function toggleForm()
+    {
+        $this->showForm = !$this->showForm;
+    }
     public function mount()
     {
         $this->getMapUrl();
