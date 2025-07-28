@@ -23,6 +23,11 @@
                 <x-phosphor.icons::duotone.chat-circle-dots class="w-5 h-5 ml-1" />
                 {{$order->address->description}}</p>
         @endif
+        @if(!is_null($comment))
+            <p class="border p-2 rounded-lg mb-3 font-normal text-gray-700 dark:text-gray-400">
+                <x-phosphor.icons::duotone.chats-circle class="w-5 h-5 ml-1" />
+                {{$comment->body}}</p>
+        @endif
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
             {{--            <x-srj-button wire:click="updateInvoice({{$order}})" spinner="updateInvoice" label="ثبت فاکتور" class="bg-gradient-fuchsia sm:col-span-full">--}}
             {{--                <x-slot name="prepend">--}}
