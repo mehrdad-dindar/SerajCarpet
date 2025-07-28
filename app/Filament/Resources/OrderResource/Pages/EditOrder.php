@@ -44,8 +44,10 @@ class EditOrder extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make()
-            ->icon('heroicon-o-trash'),
+            Actions\Action::make('save')
+                ->translateLabel()
+                ->icon('heroicon-o-arrow-up-tray')
+                ->action('save'),
             Actions\Action::make('issue-invoice')
                 ->label(__('Issue Invoice'))
                 ->icon('heroicon-o-clipboard-document-list')
@@ -53,6 +55,8 @@ class EditOrder extends EditRecord
                 ->action(fn () => app(invoiceService::class)->issueInvoice($this->getRecord()))
                 ->requiresConfirmation()
                 ->modalHeading(__('Are you sure you want to issue an invoice for this order?')),
+            Actions\DeleteAction::make()
+                ->icon('heroicon-o-trash'),
         ];
     }
 
