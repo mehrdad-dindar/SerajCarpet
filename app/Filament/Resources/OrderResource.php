@@ -19,6 +19,7 @@ use App\Services\InvoiceService;
 use App\Settings\ShiftSettings;
 use Carbon\Carbon;
 use Filament\Forms;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\Select;
@@ -270,8 +271,6 @@ class OrderResource extends Resource
                                 ->live()
                                 ->required()
                                 ->native(false)
-                                ->searchable()
-                                ->preload()
                                 ->label(__('Order Status')),
                             Forms\Components\Fieldset::make('reservation setting')
                                 ->label(__('Reservation setting for'))
@@ -287,8 +286,8 @@ class OrderResource extends Resource
                                         ->label(__('Reservation Date'))
                                         ->translateLabel()
                                         ->reactive()
-                                        ->default(null)
-                                        ->displayFormat('Y-m-d')
+                                        ->default(Carbon::today()->toDateString())
+                                        ->displayFormat('l - d F Y')
                                         ->required()
                                         ->jalali(),
                                     Select::make('reservation_time')
@@ -368,8 +367,6 @@ class OrderResource extends Resource
                                 ->live()
                                 ->required()
                                 ->native(false)
-                                ->searchable()
-                                ->preload()
                                 ->label(__('Order Status')),
                             Forms\Components\Fieldset::make('reservation setting')
                                 ->label(__('Reservation setting for'))
@@ -385,8 +382,8 @@ class OrderResource extends Resource
                                         ->label(__('Reservation Date'))
                                         ->translateLabel()
                                         ->reactive()
-                                        ->default(null)
-                                        ->displayFormat('Y-m-d')
+                                        ->default(Carbon::today()->toDateString())
+                                        ->displayFormat('l - d F Y')
                                         ->required()
                                         ->jalali(),
                                     Select::make('reservation_time')
