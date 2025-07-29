@@ -7,9 +7,10 @@ use App\Filament\Resources\InvoiceResource\RelationManagers;
 use App\Models\Invoice;
 use App\Services\InvoiceService;
 use Filament\Forms;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Support\Colors\Color;
+use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -36,24 +37,76 @@ class InvoiceResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('order_id')
-                    ->label(__('Order ID'))
-                    ->relationship('order', 'id')
-                    ->required(),
+                Forms\Components\Section::make('information')
+                    ->schema([
+                        Forms\Components\Placeholder::make('order')
+                            ->columnSpan(1)
+                            ->content(fn (Invoice $record) => '#'.$record->order->id)
+                            ->key(fn (Invoice $record) => '#'.$record->order->id)
+                            ->hintAction(
+                                Action::make('Show order')
+                                    ->translateLabel()
+                                    ->icon('heroicon-s-eye')
+                                    ->url(
+                                        fn (Invoice $record) =>
+                                        route('filament.admin.resources.orders.edit', $record->order->id),
+                                        true
+                                    )
+                            )
+                            ->label(__('Order ID')),
+                        Forms\Components\Placeholder::make('customer_name')
+                            ->columnSpan(1)
+                            ->label(__('Customer Name'))
+                            ->content(fn (Invoice $record) => $record->customer->name),
+                        Forms\Components\Fieldset::make('customer_phone')
+                            ->columnSpan(2)
+                            ->schema([
+                                Forms\Components\Placeholder::make('customer_phone')
+                                    ->label(__('Customer Phone'))
+                                    ->hintAction(
+                                        Action::make('call')
+                                            ->translateLabel()
+                                            ->icon('heroicon-s-sparkles')
+                                            ->url(fn (Invoice $record) => 'tel:+98'. intval($record->customer->phone))
+                                    )
+                                    ->content(fn (Invoice $record) => $record->customer->phone),
+                                Forms\Components\Placeholder::make('customer_phone2')
+                                    ->label(__("Customer's second contact number"))
+                                    ->visible(fn (Invoice $record) => $record->customer?->phone2)
+                                    ->hintAction(
+                                        Action::make('call')
+                                            ->translateLabel()
+                                            ->icon('heroicon-s-sparkles')
+                                            ->url(fn (Invoice $record) => 'tel:+98'. intval($record->customer->phone2))
+                                    )
+                                    ->content(fn (Invoice $record) => $record->customer->phone2),
+                            ])
+                            ->label(__('Customer Phone')),
+                        Forms\Components\Fieldset::make('Address Info')
+                            ->schema([
+                                Forms\Components\Placeholder::make('address')
+                                    ->label(__('Full Address'))
+                                    ->content(fn (Invoice $record) => $record->order->address->getFullAddress())
+                            ])
+                            ->translateLabel(),
+                    ])
+                    ->columns(4),
                 Forms\Components\TextInput::make('amount')
                     ->translateLabel()
                     ->required()
-                    ->maxLength(191),
+                    ->mask(RawJs::make('$money($input)'))
+                    ->suffix('تومان'),
                 Forms\Components\Select::make('status')
                     ->translateLabel()
                     ->options([
-                        'paid' => 'paid',
-                        'pending' => 'pending',
-                        'canceled' => 'canceled'
+                        'paid' => __('invoice.status.paid'),
+                        'pending' => __('invoice.status.pending'),
+                        'canceled' => __('invoice.status.canceled')
                     ])
                     ->native(false)
                     ->required(),
                 Forms\Components\DateTimePicker::make('expire_at')
+                    ->jalali()
                     ->translateLabel()
                     ->required(),
             ]);
