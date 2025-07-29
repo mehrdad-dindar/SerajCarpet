@@ -15,6 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class AddressResource extends Resource
 {
@@ -53,7 +54,10 @@ class AddressResource extends Resource
                     ->sortable()
                     ->toggleable()
                     ->alignCenter()
-                    ->searchable()
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query
+                            ->where('neighbourhood', 'like', "%{$search}%");
+                    })
                     ->translateLabel(),
                 Tables\Columns\TextColumn::make('full_address')
                     ->label(__('Full Address'))

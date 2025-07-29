@@ -22,6 +22,8 @@ class Card extends Component
 
     public string $reason = '';
 
+    public $comment;
+
     protected $rules = [
         'reason' => 'required|string|min:20|max:1200',
     ];
@@ -34,6 +36,7 @@ class Card extends Component
     public function mount()
     {
         $this->getMapUrl();
+        $this->comment = $this->getLastAdminComment();
     }
     public function render()
     {
@@ -121,5 +124,13 @@ class Card extends Component
     {
         $this->order->status_id = OrderStatus::where('name', OrderStatus::DELIVERED_AND_PAID)->first()->id;
         $this->order->save();
+    }
+
+    private function getLastAdminComment()
+    {
+        if ($this->order->comments->count()) {
+            return $this->order->comments->last();
+        }
+        return null;
     }
 }

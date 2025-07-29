@@ -87,12 +87,17 @@ function updateDriverLocation()
                 timeout: 5000            // محدودیت زمانی ۵ ثانیه
             }
         );*/
+        console.log('updated location !')
     } else {
         // alert("مرورگر شما از موقعیت‌یاب پشتیبانی نمی‌کند.");
         console.error("مرورگر شما از موقعیت‌یاب پشتیبانی نمی‌کند.");
     }
 }
 
-setInterval(() => {
+function startLocationUpdates()
+{
     updateDriverLocation();
-    },60000);
+    return setInterval(updateDriverLocation, 60000);
+}
+
+const intervalId = startLocationUpdates();

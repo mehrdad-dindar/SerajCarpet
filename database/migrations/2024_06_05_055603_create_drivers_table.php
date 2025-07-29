@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('image')->nullable();
             $table->string('status')->default('active');
             $table->string('car_tag')->nullable();
+            $table->rememberToken();
             $table->softDeletes();
             $table->timestamps();
         });
