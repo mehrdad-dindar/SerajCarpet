@@ -48,7 +48,7 @@ class ShowDriverLocations extends Page implements HasTable
                     }, true)
                     ->getStateUsing(fn ($record) => $record->latitude.','.$record->longitude),
                 TextColumn::make('updated_at')
-                    ->jalaliDateTime('l - d F Y')
+                    ->jalaliDateTime('l - d F Y - H:i:s')
                     ->label('آخرین بروزرسانی'),
             ])
             ->filters([
