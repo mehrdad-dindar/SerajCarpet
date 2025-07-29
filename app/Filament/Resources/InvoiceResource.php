@@ -10,7 +10,7 @@ use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Support\Colors\Color;
+use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -86,7 +86,7 @@ class InvoiceResource extends Resource
                             ->schema([
                                 Forms\Components\Placeholder::make('address')
                                     ->label(__('Full Address'))
-                                    ->content(fn(Invoice $record) => $record->order->address->getFullAddress())
+                                    ->content(fn (Invoice $record) => $record->order->address->getFullAddress())
                             ])
                             ->translateLabel(),
                     ])
@@ -94,7 +94,8 @@ class InvoiceResource extends Resource
                 Forms\Components\TextInput::make('amount')
                     ->translateLabel()
                     ->required()
-                    ->maxLength(191),
+                    ->mask(RawJs::make('$money($input)'))
+                    ->suffix('تومان'),
                 Forms\Components\Select::make('status')
                     ->translateLabel()
                     ->options([
