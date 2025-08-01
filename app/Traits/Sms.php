@@ -2,7 +2,6 @@
 
 namespace App\Traits;
 
-
 use Error;
 use Exception;
 use HttpException;

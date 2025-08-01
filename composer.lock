@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d06b365f00e253d3ebef5f0b7aa0baf9",
+    "content-hash": "6c404df4d101113e15b2523318cad03d",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -5055,6 +5055,42 @@
                 "source": "https://github.com/Masterminds/html5-php/tree/2.9.0"
             },
             "time": "2024-03-31T07:05:07+00:00"
+        },
+        {
+            "name": "mehrdad-dindar/filament-survey-notifier",
+            "version": "dev-feature/survey",
+            "dist": {
+                "type": "path",
+                "url": "packages/MehrdadDindar/FilamentSurveyNotifier",
+                "reference": "08fc10250f4990aa6c6d3de64c90acb1d452d566"
+            },
+            "require": {
+                "illuminate/support": "^v11.45.1",
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "MehrdadDindar\\FilamentSurveyNotifier\\SurveyNotifierServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "MehrdadDindar\\FilamentSurveyNotifier\\": "src/"
+                }
+            },
+            "authors": [
+                {
+                    "name": "Mehrdad Dindar",
+                    "email": "mehrdad.replay@gmail.com"
+                }
+            ],
+            "description": "Laravel package to send survey SMS using Porsline + filamentphp",
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "mobiledetect/mobiledetectlib",
@@ -15297,7 +15333,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "mehrdad-dindar/filament-survey-notifier": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

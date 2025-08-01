@@ -7,6 +7,7 @@ use App\Livewire\Driver\Order\Steps\AddItemsStepComponent;
 use App\Livewire\Driver\Order\Steps\ConfirmStepComponent;
 use App\Livewire\Driver\Order\Steps\CustomerInfoStepComponent;
 use App\Services\ShiftSchedulerService;
+use App\Services\SmsSenderBridge;
 use App\Settings\SystemSettings;
 use Filament\Support\Facades\FilamentView;
 use Hekmatinasser\Verta\Verta;
@@ -14,6 +15,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
+use MehrdadDindar\FilamentSurveyNotifier\Contracts\SmsSenderInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
             $settings = app(SystemSettings::class);
             config()->set('payment.drivers.zarinpal.merchantId', $settings->zarinpal[1]);
         });
+        $this->app->bind(SmsSenderInterface::class, SmsSenderBridge::class);
     }
 
     /**
