@@ -28,6 +28,7 @@
         "laravel/telescope": "^5.5",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^v3.5.19",
+        "mehrdad-dindar/filament-porsline": "*",
         "mokhosh/filament-jalali": "v4.10.0",
         "shetabit/payment": "^6.2",
         "spatie/laravel-activitylog": "^4.10",
@@ -37,6 +38,12 @@
         "wireui/phosphoricons": "^2.3",
         "wireui/wireui": "^2.0"
     },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "packages/MehrdadDindar/FilamentPorsline"
+        }
+    ],
     "require-dev": {
         "fakerphp/faker": "^1.23",
         "friendsofphp/php-cs-fixer": "^3.64",
