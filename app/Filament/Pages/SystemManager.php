@@ -162,6 +162,7 @@ class SystemManager extends SettingsPage
                                                     ->onColor('success')
                                                     ->offColor('danger'),
                                                 Forms\Components\Select::make('surveys.deliver.survey_id')
+                                                    ->label(__('Select survey'))
                                                     ->options(Survey::all()->pluck('name', 'id'))
                                             ]),
                                     ])->columns(3),
