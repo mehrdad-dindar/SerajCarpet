@@ -8,5 +8,5 @@ enum SmsPattern: int
     const SET_LOCATION = 232111;
     const ORDER_RECEIVED = 249449;
     const DRIVER_WELCOME = 250083;
-    const SURVEY_INVITATION = 250000;
+    const SURVEY_INVITATION = 361156;
 }
