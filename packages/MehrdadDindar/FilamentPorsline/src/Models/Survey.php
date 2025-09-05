@@ -2,6 +2,7 @@
 
 namespace MehrdadDindar\FilamentPorsline\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -33,9 +34,9 @@ class Survey extends Model
         return "https://survey.porsline.ir/n/survey/{$this->porsline_id}/results/metrics/";
     }
 
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): void
     {
-        return $query->where('is_active', true);
+        $query->where('is_active', 1);
     }
 
     public function scopeNotStopped($query)

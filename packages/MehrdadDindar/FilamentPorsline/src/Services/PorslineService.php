@@ -5,6 +5,8 @@ namespace MehrdadDindar\FilamentPorsline\Services;
 use Filament\Notifications\Notification;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use MehrdadDindar\FilamentPorsline\Models\Survey;
 
@@ -127,16 +129,29 @@ class PorslineService
     /**
      * Get survey responses
      */
-    public function getSurveyResponses(int $surveyId, array $params = []): array
+    public function getSurveyResponses(int $surveyId, array $params = ['page' => 1, 'page_size' => 10]): array
     {
-        try {
-            $query = http_build_query($params);
-            $response = $this->client->get("/v2/surveys/{$surveyId}/responses/results-table/?{$query}");
-            return json_decode($response->getBody()->getContents(), true);
-        } catch (GuzzleException $e) {
-            Log::error('Porsline API Error: ' . $e->getMessage());
-            return [];
-        }
+        $cacheKey = "porsline_responses_{$surveyId}_".md5(json_encode($params));
+        $query = http_build_query($params);
+        return Cache::remember($cacheKey, now()->addMinutes(10), function () use ($surveyId, $query) {
+            try {
+                $response = $this->client->get("/api/v2/surveys/{$surveyId}/responses/results-table", [
+                    'query' => $query
+                ]);
+
+                $data = json_decode($response->getBody()->getContents(), true);
+
+                return [
+                    'headers' => $data['header'] ?? [],
+                    'body' => $data['body'] ?? [],
+                    'responders_count' => $data['responders_count'] ?? 0,
+                    'invisible_responders_count' => $data['invisible_responders_count'] ?? 0,
+                ];
+            } catch (GuzzleException|RequestException $e) {
+                Log::error('Porsline API Error: ' . $e->getMessage());
+                return [];
+            }
+        });
     }
 
     /**
@@ -145,7 +160,7 @@ class PorslineService
     public function exportSurveyResponses(int $surveyId, string $format = 'xlsx'): ?string
     {
         try {
-            $response = $this->client->get("/v2/surveys/{$surveyId}/responses/export/", [
+            $response = $this->client->get("/api/v2/surveys/{$surveyId}/responses/export/", [
                 'query' => ['export_format' => $format],
             ]);
             $data = json_decode($response->getBody()->getContents(), true);
@@ -225,6 +240,47 @@ class PorslineService
             } else {
                 Notification::make()
                     ->body('نظرسنجی‌ای برای بروزرسانی یافت نشد!')
+                    ->danger()
+                    ->send();
+            }
+        } catch (GuzzleException $e) {
+            Log::error('Porsline API Error: ' . $e->getMessage());
+
+            Notification::make()
+                ->body('خطا در دریافت نظرسنجی‌ها!')
+                ->danger()
+                ->send();
+
+            return null;
+        }
+    }
+
+    public function syncSurveyResponses()
+    {
+        try {
+            $surveys = Survey::active()->get();
+
+            if (!blank($surveys)) {
+                $newIds = $surveys->pluck('porsline_id')->toArray();
+
+                foreach ($newIds as $porsline_id) {
+                    dd($this->getSurveyResponses($porsline_id));
+                }
+                //                Survey::whereNotIn('porsline_id', $newIds)->delete();
+
+                Survey::upsert(
+                    $surveys,
+                    ['porsline_id'],
+                    ['name', 'folder_id', 'is_active', 'preview_code', 'submitted_responses', 'created_date']
+                );
+
+                Notification::make()
+                    ->body('نظرسنجی‌ها با موفقیت بروز شدند!')
+                    ->success()
+                    ->send();
+            } else {
+                Notification::make()
+                    ->body('نظرسنجی فعالی برای بروزرسانی یافت نشد!')
                     ->danger()
                     ->send();
             }
