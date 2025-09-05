@@ -158,8 +158,7 @@ class SurveyResource extends Resource
     {
         return [
             'index' => Pages\ListSurveys::route('/'),
-//            'create' => Pages\CreateSurvey::route('/create'),
-// ToDo:            'edit' => Pages\EditSurvey::route('/{record}/edit'),
+            'view'    => Pages\ViewSurveyResponses::route('/{record}/responses'),
         ];
     }
 }
