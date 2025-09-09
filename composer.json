@@ -14,7 +14,7 @@
         "bezhansalleh/filament-shield": "^3.2",
         "dotswan/filament-map-picker": "^1.8.0",
         "filament/filament": "^3.2",
-        "filament/notifications": "^3.2",
+        "filament/notifications": "^3.3",
         "filament/spatie-laravel-media-library-plugin": "^3.2",
         "filament/spatie-laravel-settings-plugin": "^3.2",
         "flowframe/laravel-trend": "^0.4.0",

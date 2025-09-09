@@ -12,3 +12,18 @@ window.Echo = new Echo({
     forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
     enabledTransports: ['ws', 'wss'],
 });
+
+Echo.channel('calls')
+    .listen('IncomingCall', (e) => {
+        // نمایش نوتیفیکیشن
+        alert(`تماس ورودی از مشتری: ${e.customer.name}`);
+        // یا استفاده از filament-notifications
+        window.Livewire.emit('openNotification', {
+            title: 'تماس جدید',
+            description: `از ${e.customer.name} - کلیک برای هدایت`,
+            action: {
+                label: 'مشاهده',
+                url: `/admin/customers/${e.customer.id}`
+            }
+        });
+    });
