@@ -11,22 +11,37 @@ class CallWebhookController extends Controller
 {
     public function incoming(Request $request)
     {
-        $callerId = $request->input('caller_id'); // شماره تماس‌گیرنده
+        $callerId = $this->normalizePhoneNumber($request->input('caller_id'));
+
+
+        if (!$callerId) {
+            return response()->json(['error' => 'caller_id required'], 400);
+        }
 
         $customer = Customer::where('phone', $callerId)->first();
 
-        if ($customer) {
-            CallLog::create([
-                'customer_id' => $customer->id,
-                'caller_id' => $callerId,
-                'call_type' => 'incoming',
-                'timestamp' => now(),
-            ]);
-
-            // پخش رویداد برای نوتیفیکیشن بلادرنگ
-//            broadcast(new \App\Events\IncomingCall($customer));
+        if (!$customer) {
+            return response()->json(['error' => 'Customer not found'], 404);
         }
 
-        return response()->json(['status' => 'processed']);
+        $callLog = CallLog::create([
+            'customer_id' => $customer->id,
+            'caller_id' => $callerId,
+            'call_type' => 'incoming',
+            'timestamp' => now(),
+        ]);
+
+        broadcast(new \App\Events\IncomingCall($customer));
+
+        return response()->json(['status' => 'processed', 'call_log_id' => $callLog->id]);
+    }
+
+    protected function normalizePhoneNumber($number)
+    {
+        $number = preg_replace('/[^0-9]/', '', $number);
+        if (strlen($number) === 10) {
+            $number = '0' . $number;
+        }
+        return $number;
     }
 }
