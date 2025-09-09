@@ -11,6 +11,7 @@ class SystemSettings extends Settings
     public string $sms_panel_password;
     public array $zarinpal;
     public array $factory_location;
+    public array $surveys;
     public static function group(): string
     {
         return 'system';

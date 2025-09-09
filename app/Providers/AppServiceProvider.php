@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->booted(function () {
             $settings = app(SystemSettings::class);
-            config()->set('payment.drivers.zarinpal.merchantId', $settings->zarinpal[1]);
+            config()->set('payment.drivers.zarinpal.merchantId', $settings->zarinpal[1] ?? null);
         });
         $this->app->bind(SmsSenderInterface::class, SmsSenderBridge::class);
     }

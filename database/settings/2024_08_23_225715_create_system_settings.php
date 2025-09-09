@@ -229,6 +229,6 @@ return new class extends SettingsMigration
                 ],
             ],
         ]);
-        $this->migrator->add('shift.current',"");
+        $this->migrator->add('system.surveys', []);
     }
 };
