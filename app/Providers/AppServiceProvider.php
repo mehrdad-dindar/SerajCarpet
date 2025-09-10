@@ -6,12 +6,11 @@ use App\Livewire\Driver\Order\CreateWizard;
 use App\Livewire\Driver\Order\Steps\AddItemsStepComponent;
 use App\Livewire\Driver\Order\Steps\ConfirmStepComponent;
 use App\Livewire\Driver\Order\Steps\CustomerInfoStepComponent;
-use App\Services\ShiftSchedulerService;
 use App\Services\SmsSenderBridge;
 use App\Settings\SystemSettings;
 use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
 use Hekmatinasser\Verta\Verta;
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
@@ -45,7 +44,7 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('confirm-order', ConfirmStepComponent::class);
 
         FilamentView::registerRenderHook(
-            'panels::global-search.before',
+            PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
             fn (): string => Verta::now()->format('l, d M Y'),
         );
     }

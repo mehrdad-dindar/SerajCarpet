@@ -30,6 +30,7 @@
         "livewire/livewire": "^v3.5.19",
         "mehrdad-dindar/filament-porsline": "*",
         "mokhosh/filament-jalali": "v4.10.0",
+        "pusher/pusher-php-server": "^7.2",
         "shetabit/payment": "^6.2",
         "spatie/laravel-activitylog": "^4.10",
         "spatie/laravel-livewire-wizard": "^2.3",

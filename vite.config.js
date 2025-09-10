@@ -11,6 +11,7 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/driver.js',
                 'resources/js/customer.js',
+                'resources/js/pusher.js',
             ],
             refresh: [
                 ...refreshPaths,

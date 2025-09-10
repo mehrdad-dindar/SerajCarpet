@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\IncomingCall;
 use App\Http\Controllers\Controller;
 use App\Models\CallLog;
 use App\Models\Customer;
@@ -31,7 +32,7 @@ class CallWebhookController extends Controller
             'timestamp' => now(),
         ]);
 
-        broadcast(new \App\Events\IncomingCall($customer));
+        broadcast(new IncomingCall($customer));
 
         return response()->json(['status' => 'processed', 'call_log_id' => $callLog->id]);
     }
