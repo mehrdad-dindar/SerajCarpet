@@ -13,6 +13,9 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class CallLogsRelationManager extends RelationManager
 {
     protected static string $relationship = 'callLogs';
+    protected static ?string $label = 'تماس ها';
+    protected static ?string $title = 'تماس ها';
+    protected static ?string $icon = 'heroicon-o-phone';
 
     public function form(Form $form): Form
     {
