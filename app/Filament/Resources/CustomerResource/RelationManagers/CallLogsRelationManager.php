@@ -30,6 +30,10 @@ class CallLogsRelationManager extends RelationManager
             ->recordTitleAttribute('id')
             ->columns([
                 Tables\Columns\TextColumn::make('id'),
+                Tables\Columns\TextColumn::make('customer.name'),
+                Tables\Columns\TextColumn::make('caller_id'),
+                Tables\Columns\TextColumn::make('timestamp')
+                    ->jalaliDateTime('l - d F Y - H:i:s'),
             ])
             ->filters([
                 //
