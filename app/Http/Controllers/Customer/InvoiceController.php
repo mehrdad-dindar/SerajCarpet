@@ -30,8 +30,8 @@ class InvoiceController extends Controller
     {
         try {
             $ShetabitInvoice = new ShetabitInvoice();
-            $ShetabitInvoice->amount(intval($invoice->amount));
-            $paymentId = md5(uniqid());
+            $ShetabitInvoice->amount((int)$invoice->amount);
+            $paymentId = md5(uniqid('', true));
             $transaction = $this->customer->transactions()->create([
                 'invoice_id' => $invoice->id,
                 'paid' => $ShetabitInvoice->getAmount(),

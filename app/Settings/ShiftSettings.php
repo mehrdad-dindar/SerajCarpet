@@ -8,7 +8,7 @@ use Spatie\LaravelSettings\Settings;
 class ShiftSettings extends Settings
 {
     public array $shifts = [];
-    public string $current = "";
+//    public string $current = "";
 
     public static function group(): string
     {
@@ -29,7 +29,7 @@ class ShiftSettings extends Settings
         return "";
     }
 
-    public function getCurrentShiftTitle()
+    public function getCurrentShiftTitle(): string
     {
         $currentTime = date('H:i:s');
         $shifts = self::getShiftHours(self::getDay(Carbon::today()));

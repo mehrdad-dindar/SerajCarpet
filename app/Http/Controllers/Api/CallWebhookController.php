@@ -4,45 +4,35 @@ namespace App\Http\Controllers\Api;
 
 use App\Events\IncomingCall;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\IncomingCallRequest;
 use App\Models\CallLog;
 use App\Models\Customer;
+use App\Services\CallService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CallWebhookController extends Controller
 {
-    public function incoming(Request $request)
+    protected CallService $callService;
+
+    public function __construct(CallService $callService)
     {
-        $callerId = $this->normalizePhoneNumber($request->input('caller_id'));
-
-
-        if (!$callerId) {
-            return response()->json(['error' => 'caller_id required'], 400);
-        }
-
-        $customer = Customer::where('phone', $callerId)->first();
-
-        if (!$customer) {
-            return response()->json(['error' => 'Customer not found'], 404);
-        }
-
-        $callLog = CallLog::create([
-            'customer_id' => $customer->id,
-            'caller_id' => $callerId,
-            'call_type' => 'incoming',
-            'timestamp' => now(),
-        ]);
-
-        broadcast(new IncomingCall($customer));
-
-        return response()->json(['status' => 'processed', 'call_log_id' => $callLog->id]);
+        $this->callService = $callService;
     }
-
-    protected function normalizePhoneNumber($number)
+    public function incoming(IncomingCallRequest $request): JsonResponse
     {
-        $number = preg_replace('/[^0-9]/', '', $number);
-        if (strlen($number) === 10) {
-            $number = '0' . $number;
+        try {
+            $callLog = $this->callService->handleIncomingCall($request->validated());
+
+            return response()->json([
+                'status' => 'processed',
+                'call_log_id' => $callLog->id,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 500);
         }
-        return $number;
     }
 }

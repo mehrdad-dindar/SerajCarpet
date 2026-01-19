@@ -1,10 +1,8 @@
 import Echo from 'laravel-echo';
-
-
-
 import Pusher from 'pusher-js';
+
 window.Pusher = Pusher;
-Pusher.logToConsole = true; // برای دیباگ
+Pusher.logToConsole = true; // For Debugging
 
 window.Echo = new Echo({
 
