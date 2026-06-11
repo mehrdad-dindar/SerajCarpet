@@ -110,7 +110,24 @@ class AddressForm
                     Forms\Components\Hidden::make('municipality_zone'),
                     Forms\Components\Hidden::make('neighbourhood'),
                 ])->columns(9),
-            Map::make('location')
+            NeshanMap::make('location')
+                ->visible(fn (Get $get) => $get('location_type') == self::MANUAL)
+                ->label('موقعیت روی نقشه')
+                ->defaultLocation(latitude: 35.69974184, longitude: 51.33805990)
+                ->afterStateUpdated(function (Set $set, $state): void {
+                    if (isset($state['lat']) && isset($state['lng'])) {
+                        $set('latitude', $state['lat']);
+                        $set('longitude', $state['lng']);
+                    }
+                })
+                ->afterStateHydrated(function ($state, $record, Set $set): void {
+                    if ($record) {
+                        $set('location', ['lat' => $record->latitude, 'lng' => $record->longitude]);
+                    }
+                })
+                ->live(debounce: 500)
+                ->columnSpanFull(),
+            /*Map::make('location')
                 ->visible(fn (Get $get) => $get('location_type') == self::MANUAL)
                 ->hint('با کشیدن و اسکرول موقعیت مورد نظر را انتخاب کنید')
                 ->label(__('Location'))
@@ -137,7 +154,7 @@ class AddressForm
                 ->detectRetina()
                 ->showMyLocationButton()
                 ->zoom(11)
-                ->tilesUrl('https://tile.openstreetmap.org/{z}/{x}/{y}.png'),
+                ->tilesUrl('https://tile.openstreetmap.org/{z}/{x}/{y}.png'),*/
         ];
     }
 
@@ -156,15 +173,40 @@ class AddressForm
         }
 
         $neshan = self::reverseGeocoding($latitude, $longitude)->getData(true);
-
         if (is_array($neshan) && $neshan !== [] && ($neshan['status'] ?? null) === 'OK') {
             $neshan['latitude'] = $latitude;
             $neshan['longitude'] = $longitude;
 
             return self::renderAddress($neshan);
         }
+        if ($neshan["status"] === "ERROR") {
 
-        return [];
+            $errorCode = $neshan["code"] ?? 500;
+
+            // لیست ترجمه خطاهای سرویس نشان
+            $errorMessages = [
+                400 => 'خطا در پارامترهای ورودی',
+                470 => 'مختصات جغرافیایی ارسالی معتبر نیست',
+                480 => 'کلید دسترسی (Api Key) نامعتبر است یا ارسال نشده',
+                481 => 'تعداد فراخوانی وب‌سرویس از میزان مجاز عبور کرده است',
+                482 => 'تعداد درخواست وب‌سرویس در دقیقه از حد مجاز عبور کرده است',
+                483 => 'کلید دسترسی استفاده شده با سرویس درخواستی همخوانی ندارد',
+                484 => 'با توجه به محدودیت‌های تعریف‌شده (IP/دامنه) برای این کلید، مجاز به استفاده نیستید',
+                485 => 'این سرویس در لیست سرویس‌های مجاز برای کلید دسترسی شما نیست',
+                500 => 'وقوع خطای ناشناخته در سرور نشان',
+            ];
+
+            // پیدا کردن پیام مناسب بر اساس کد، یا استفاده از پیام پیش‌فرض
+            $translatedMessage = $errorMessages[$errorCode] ?? 'خطای نامشخص در ارتباط با سرویس نقشه';
+
+            Notification::make()
+                ->title('خطا در دریافت آدرس')
+                ->body($translatedMessage . " #" . $errorCode)
+                ->danger()
+                ->send();
+            }
+
+        return ['formatted_address' => 'حطا در دریافت آدرس'];
     }
 
     protected static function getAddressTemp(): ?array
