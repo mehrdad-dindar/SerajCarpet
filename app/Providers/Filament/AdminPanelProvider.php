@@ -114,6 +114,8 @@ class AdminPanelProvider extends PanelProvider
             ->brandName(function () {
                 return __('Seraj');
             })
+//            ->databaseNotifications()
+//            ->databaseNotificationsPolling('2s')
             ->viteTheme('resources/css/filament/admin/theme.css');
     }
 }
