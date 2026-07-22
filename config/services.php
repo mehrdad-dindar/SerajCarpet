@@ -34,5 +34,8 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-
+    'voip' => [
+        'api_key' => env('VOIP_API_KEY'),
+        'allowed_ip' => env('VOIP_ALLOWED_IP'),
+    ],
 ];
