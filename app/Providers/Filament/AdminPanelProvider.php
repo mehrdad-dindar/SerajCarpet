@@ -18,12 +18,14 @@ use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -91,26 +93,26 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 'Management' => NavigationGroup::make()
-                    ->label(function () {
-                        return __('Management');
-                    })
-                    ->icon('heroicon-o-adjustments-horizontal'),
+                    ->label(fn () => __('Management')),
+
                 'Services Setting' => NavigationGroup::make()
-                    ->label(function () {
-                        return __('Services Setting');
-                    })
-                    ->icon('heroicon-o-swatch'),
+                    ->label(fn () => __('Services Setting')),
+
                 'User Settings' => NavigationGroup::make()
-                    ->label(function () {
-                        return __('User Settings');
-                    })
-                    ->icon('heroicon-o-users'),
+                    ->label(fn () => __('User Settings')),
+
                 'System Setting' => NavigationGroup::make()
-                    ->label(function () {
-                        return __('System Setting');
-                    })
-                    ->icon('heroicon-o-swatch'),
+                    ->label(fn () => __('System Setting')),
             ])
+            ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn (): string => Blade::render('@vite(["resources/js/echo.js"])')
+            )
+            // لود کپسول شناور تماس در تمام صفحات پنل
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn (): string => Blade::render('<livewire:voip.screen-pop-modal />')
+            )
             ->brandName(function () {
                 return __('Seraj');
             })

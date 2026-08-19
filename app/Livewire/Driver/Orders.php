@@ -4,6 +4,7 @@ namespace App\Livewire\Driver;
 
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Application;
 use Livewire\Attributes\Layout;
@@ -50,5 +51,12 @@ class Orders extends Component
     public function render(): Application|Factory|View|\Illuminate\View\View
     {
         return view('livewire.driver.orders');
+    }
+
+    protected function createdAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => verta($value)->format('d F Y - H:i'),
+        );
     }
 }
