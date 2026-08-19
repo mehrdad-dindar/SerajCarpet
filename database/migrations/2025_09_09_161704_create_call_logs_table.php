@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('call_logs', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('customer_id')->constrained()->onDelete('cascade');
-            $table->string('caller_id');
-            $table->string('call_type');
-            $table->integer('duration')->nullable();
-            $table->timestamp('timestamp');
-            $table->text('notes')->nullable();
-            $table->timestamps();
-        });
+//        Schema::create('call_logs', function (Blueprint $table) {
+//            $table->id();
+//            $table->foreignId('customer_id')->constrained()->onDelete('cascade');
+//            $table->string('caller_id');
+//            $table->string('call_type');
+//            $table->integer('duration')->nullable();
+//            $table->timestamp('timestamp');
+//            $table->text('notes')->nullable();
+//            $table->timestamps();
+//        });
     }
 
     /**
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('call_logs');
+//        Schema::dropIfExists('call_logs');
     }
 };

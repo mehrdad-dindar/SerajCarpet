@@ -15,20 +15,18 @@ return [
     */
 
     'broadcasting' => [
-
-         'echo' => [
-             'broadcaster' => env('BROADCAST_DRIVER'),
-             'key' => env('PUSHER_APP_KEY'),
-             'cluster' => env('PUSHER_APP_CLUSTER'),
-//             'wsHost' => env('VITE_PUSHER_HOST'),
-//             'wsPort' => env('VITE_PUSHER_PORT') ?? 80,
-//             'wssPort' => env('VITE_PUSHER_PORT') ?? 443 ,
-//             'authEndpoint' => ' broadcasting/auth',
-             'disableStats' => true,
-             'encrypted' => env('PUSHER_SCHEME', 'https') === 'https',
-             'forceTLS' => env('PUSHER_SCHEME', 'https') === 'https',
-         ],
-
+        'echo' => [
+            'broadcaster' => 'pusher',
+            'key' => env('PUSHER_APP_KEY'),
+            'cluster' => env('PUSHER_APP_CLUSTER'),
+            'wsHost' => env('PUSHER_HOST') ? env('PUSHER_HOST') : 'ws-'.env('PUSHER_APP_CLUSTER').'.pusher.com',
+            'wsPort' => env('PUSHER_PORT') ?? 80,
+            'wssPort' => env('PUSHER_PORT') ?? 443,
+            'authEndpoint' => '/broadcasting/auth',
+            'disableStats' => true,
+            'encrypted' => true,
+            'forceTLS' => true,
+        ],
     ],
 
     /*

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Widgets\CallReportWidget;
+//use App\Filament\Widgets\CallReportWidget;
 use App\Models\CallLog;
 use Filament\Forms;
 use Filament\Pages\Page;
@@ -73,7 +73,7 @@ class CallReport extends Page implements Tables\Contracts\HasTable
     public function getHeaderWidgets(): array
     {
         return [
-            CallReportWidget::class,
+//            CallReportWidget::class,
         ];
     }
 }

@@ -22,10 +22,10 @@ class CallReportWidget extends ChartWidget
 
     protected function getData(): array
     {
-        $query = CallLog::selectRaw('DATE(timestamp) as date, COUNT(*) as count')
+        $query = CallLog::selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->groupBy('date')
             ->orderBy('date')
-            ->where('timestamp', '>=', Carbon::now()->subDays($this->dateRange));
+            ->where('created_at', '>=', Carbon::now()->subDays($this->dateRange));
 
         if ($this->filter !== 'all') {
             $query->where('call_type', $this->filter);

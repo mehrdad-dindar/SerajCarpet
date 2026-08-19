@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 //    return $request->user();
 //})->middleware('auth:sanctum');
 
-Route::post('/call-incoming', [CallWebhookController::class, 'incoming'])->middleware('auth:sanctum');
+//Route::post('/call-incoming', [CallWebhookController::class, 'incoming'])->middleware('auth:sanctum');
 
 Route::middleware([VerifyVoipRequest::class])->prefix('voip')->group(function () {
     // Endpoint: https://yourdomain.com/api/voip/incoming-call
