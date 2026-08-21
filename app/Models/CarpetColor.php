@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CarpetColor extends Model
 {
-    protected $guarded;
+    public $timestamps = false;
+    protected $guarded = [];
 
     public function orderItem(): HasMany
     {

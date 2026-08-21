@@ -15,7 +15,7 @@ use Laravel\Sanctum\HasApiTokens;
 class Driver extends Authenticatable
 {
     use SoftDeletes,HasFactory, Notifiable, HasApiTokens;
-    protected $guarded;
+    protected $guarded = [];
 
     // order relationship
     public function orders(): HasMany

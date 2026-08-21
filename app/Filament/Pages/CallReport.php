@@ -2,78 +2,105 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Widgets\CallReportWidget;
 use App\Models\CallLog;
 use Filament\Forms;
 use Filament\Pages\Page;
 use Filament\Tables;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class CallReport extends Page implements Tables\Contracts\HasTable
 {
     use InteractsWithTable;
 
-    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
-
-    protected static ?string $navigationLabel = 'گزارش تماس‌ها';
-    protected static ?string $title = 'گزارش تماس‌ها';
+    protected static ?string $navigationIcon = 'heroicon-o-phone-arrow-up-right';
+    protected static ?string $navigationGroup = 'Management';
+    protected static ?string $navigationLabel = 'گزارش تماس‌ها و مکالمات';
+    protected static ?string $title = 'گزارش و ضبط تماس‌های ایزابل';
+    protected static ?int $navigationSort = 5;
 
     protected static string $view = 'filament.pages.call-report';
 
     public function table(Table $table): Table
     {
         return $table
-            ->query(CallLog::query())
+            ->query(CallLog::query()->with('customer')->latest())
             ->columns([
                 Tables\Columns\TextColumn::make('caller_id')
                     ->label('شماره تماس')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('call_type')
-                    ->label('نوع تماس')
-                    ->formatStateUsing(fn ($state) => $state === 'incoming' ? 'ورودی' : 'خروجی'),
-                Tables\Columns\TextColumn::make('timestamp')
-                    ->label('زمان')
-                    ->dateTime('Y-m-d H:i:s'),
+                    ->searchable()
+                    ->copyable()
+                    ->fontFamily('mono'),
+
                 Tables\Columns\TextColumn::make('customer.name')
-                    ->label('مشتری')
-                    ->default('ناشناس'),
-            ])
-            ->filters([
-                Tables\Filters\SelectFilter::make('call_type')
-                    ->options([
-                        'incoming' => 'ورودی',
-                        'outgoing' => 'خروجی',
-                    ])
-                    ->label('نوع تماس'),
-                Tables\Filters\Filter::make('date_range')
-                    ->form([
-                        Forms\Components\DatePicker::make('from_date')->label('از تاریخ'),
-                        Forms\Components\DatePicker::make('to_date')->label('تا تاریخ'),
-                    ])
-                    ->query(function ($query, array $data) {
-                        return $query
-                            ->when($data['from_date'], fn ($q) => $q->whereDate('timestamp', '>=', $data['from_date']))
-                            ->when($data['to_date'], fn ($q) => $q->whereDate('timestamp', '<=', $data['to_date']));
+                    ->label('نام مشتری')
+                    ->default('ناشناس / جدید')
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('extension')
+                    ->label('داخلی')
+                    ->badge()
+                    ->color('gray'),
+
+                Tables\Columns\TextColumn::make('type')
+                    ->label('نوع تماس')
+                    ->badge()
+                    ->formatStateUsing(fn ($state) => match ($state) {
+                        'inbound'  => 'ورودی موفق',
+                        'outbound' => 'خروجی',
+                        'missed'   => 'بی‌پاسخ / ناموفق',
+                        default    => $state,
+                    })
+                    ->color(fn ($state) => match ($state) {
+                        'inbound'  => 'success',
+                        'outbound' => 'info',
+                        'missed'   => 'danger',
+                        default    => 'gray',
+                    }),
+
+                Tables\Columns\TextColumn::make('duration')
+                    ->label('مدت (ثانیه)')
+                    ->formatStateUsing(fn ($state) => $state ? gmdate("H:i:s", (int)$state) : '-')
+                    ->alignCenter(),
+
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('زمان تماس')
+                    ->jalaliDateTime('Y/m/d - H:i:s')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('recording_file')
+                    ->label('فایل ضبط مکالمه')
+                    ->formatStateUsing(function ($state, CallLog $record) {
+                        if (blank($state)) {
+                            return new HtmlString('<span class="text-xs text-gray-400">فاقد ضبط</span>');
+                        }
+                        $url = route('voip.recordings.stream', $record);
+                        return new HtmlString(<<<HTML
+                            <audio controls preload="none" class="h-8 w-48">
+                                <source src="{$url}" type="audio/wav">
+                                مرورگر شما پشتیبانی نمی‌کند.
+                            </audio>
+                        HTML);
                     }),
             ])
-            ->actions([
-                Tables\Actions\Action::make('view_customer')
-                    ->label('مشاهده مشتری')
-                    ->url(fn (CallLog $record): string => $record->customer ? route('filament.admin.resources.customers.edit', $record->customer) : '#')
-                    ->disabled(fn (CallLog $record): bool => ! $record->customer),
+            ->filters([
+                Tables\Filters\SelectFilter::make('type')
+                    ->options([
+                        'inbound'  => 'ورودی',
+                        'outbound' => 'خروجی',
+                        'missed'   => 'از دست رفته (Missed)',
+                    ])
+                    ->label('فیلتر نوع تماس'),
             ])
-            ->bulkActions([
-                Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ExportAction::make()->label('خروجی به CSV'),
-                ]),
+            ->actions([
+                Tables\Actions\Action::make('create_order')
+                    ->label('ثبت سفارش')
+                    ->icon('heroicon-o-plus')
+                    ->color('success')
+                    ->url(fn (CallLog $record) => route('filament.admin.resources.orders.create', [
+                        'customer_id' => $record->customer_id,
+                    ]))
             ]);
-    }
-
-    public function getHeaderWidgets(): array
-    {
-        return [
-            CallReportWidget::class,
-        ];
     }
 }

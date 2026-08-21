@@ -97,3 +97,8 @@ Route::middleware(['auth:driver'])->prefix('dashboard')->group(function () {
     Route::get('/properties/dimensions/{property}', [PropertyController::class,'getDimensions'])
         ->name('property.dimensions');
 });
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/voip/recordings/{callLog}', [\App\Http\Controllers\VoipRecordingController::class, 'stream'])
+        ->name('voip.recordings.stream');
+});

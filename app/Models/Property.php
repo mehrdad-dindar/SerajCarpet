@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Property extends Model
 {
-    protected $guarded;
+    protected $guarded = [];
     public $timestamps = false;
 
     protected $casts = [

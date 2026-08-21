@@ -15,20 +15,17 @@ return [
     */
 
     'broadcasting' => [
-
-         'echo' => [
-             'broadcaster' => env('BROADCAST_DRIVER'),
-             'key' => env('PUSHER_APP_KEY'),
-             'cluster' => env('PUSHER_APP_CLUSTER'),
-//             'wsHost' => env('VITE_PUSHER_HOST'),
-//             'wsPort' => env('VITE_PUSHER_PORT') ?? 80,
-//             'wssPort' => env('VITE_PUSHER_PORT') ?? 443 ,
-//             'authEndpoint' => ' broadcasting/auth',
-             'disableStats' => true,
-             'encrypted' => env('PUSHER_SCHEME', 'https') === 'https',
-             'forceTLS' => env('PUSHER_SCHEME', 'https') === 'https',
-         ],
-
+        'echo' => [
+            'broadcaster' => 'reverb',
+            'key' => env('VITE_REVERB_APP_KEY', env('REVERB_APP_KEY', 'seraj_voip_key')),
+            'wsHost' => env('VITE_REVERB_HOST', env('REVERB_HOST', '127.0.0.1')),
+            'wsPort' => (int) env('VITE_REVERB_PORT', env('REVERB_PORT', 8080)),
+            'wssPort' => (int) env('VITE_REVERB_PORT', env('REVERB_PORT', 8080)),
+            'forceTLS' => false,
+            'encrypted' => false,
+            'authEndpoint' => '/broadcasting/auth',
+            'enabledTransports' => ['ws', 'wss'],
+        ],
     ],
 
     /*
