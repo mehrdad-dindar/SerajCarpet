@@ -18,6 +18,7 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -26,7 +27,8 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 use Spatie\Activitylog\Facades\LogBatch;
@@ -47,9 +49,14 @@ class LoadingOrders extends Page implements HasForms
 
     public function mount(): void
     {
+        // پاکسازی کش وضعیت‌ها جهت همگام‌سازی فوری
+        Cache::forget('order_statuses_all');
+
         $this->form->fill([
-            'operation_type' => 'distribution', // 'distribution' (پخش) or 'collection' (جمع‌آوری)
+            'operation_type' => 'distribution',
             'shift' => app(ShiftSettings::class)->getCurrentShift(),
+            'status_filter' => 'auto',
+            'ignore_assigned_drivers' => true,
             'orders' => [],
         ]);
     }
@@ -59,9 +66,11 @@ class LoadingOrders extends Page implements HasForms
         return $form
             ->schema([
                 Wizard::make([
+                    // گام ۱: انتخاب راننده و شیفت
                     Wizard\Step::make('DriverAndShift')
-                        ->label('انتخاب راننده و شیفت')
+                        ->label('۱. انتخاب راننده و شیفت')
                         ->icon('heroicon-o-user')
+                        ->description('مشخص کردن راننده تحویل‌گیرنده و شیفت کاری')
                         ->schema([
                             Grid::make(3)->schema([
                                 Radio::make('operation_type')
@@ -72,6 +81,7 @@ class LoadingOrders extends Page implements HasForms
                                     ])
                                     ->default('distribution')
                                     ->live()
+                                    ->afterStateUpdated(fn (Set $set) => $set('orders', []))
                                     ->columnSpan(3),
                                 Select::make('driver_id')
                                     ->label('انتخاب راننده')
@@ -80,7 +90,6 @@ class LoadingOrders extends Page implements HasForms
                                     ->preload()
                                     ->required()
                                     ->live()
-                                    ->afterStateUpdated(fn (Set $set) => $set('orders', []))
                                     ->columnSpan(1),
                                 Select::make('shift')
                                     ->label('شیفت کاری')
@@ -88,26 +97,54 @@ class LoadingOrders extends Page implements HasForms
                                     ->default(fn () => app(ShiftSettings::class)->getCurrentShift())
                                     ->required()
                                     ->live()
-                                    ->afterStateUpdated(fn (Set $set) => $set('orders', []))
                                     ->columnSpan(1),
                                 Placeholder::make('shift_info')
                                     ->label('وضعیت شیفت جاری')
-                                    ->content(fn () => app(ShiftSettings::class)->getCurrentShiftTitle() ?: 'خارج از شیفت رسمی')
+                                    ->content(fn () => app(ShiftSettings::class)->getCurrentShiftTitle() ?: 'شیفت عادی')
                                     ->columnSpan(1),
                             ]),
                         ]),
 
+                    // گام ۲: انتخاب سفارشات
                     Wizard\Step::make('SelectOrders')
-                        ->label('انتخاب سفارشات جهت بارگیری')
+                        ->label('۲. انتخاب سفارشات')
                         ->icon('heroicon-o-clipboard-document-check')
+                        ->description('مشاهده و انتخاب سفارش‌های آماده بارگیری')
                         ->schema([
-                            Section::make('سفارش‌های واجد شرایط بارگیری')
-                                ->description('سفارش‌هایی که آدرس و مشخصات آن‌ها تایید شده و آماده تخصیص هستند')
+                            Section::make('فیلتر و مدیریت سفارش‌ها')
+                                ->schema([
+                                    Grid::make(3)->schema([
+                                        Select::make('status_filter')
+                                            ->label('فیلتر وضعیت سفارشات')
+                                            ->options(function (Get $get) {
+                                                $options = [
+                                                    'auto' => 'پیش‌فرض بر اساس نوع عملیات (' . ($get('operation_type') === 'distribution' ? 'آماده تحویل' : 'رزرو اولیه') . ')',
+                                                    'all'  => 'نمایش همه وضعیت‌ها (بدون فیلتر وضعیت)',
+                                                ];
+                                                foreach (OrderStatus::all() as $st) {
+                                                    $options[$st->id] = "فقط وضعیت: {$st->label}";
+                                                }
+                                                return $options;
+                                            })
+                                            ->default('auto')
+                                            ->live()
+                                            ->afterStateUpdated(fn (Set $set) => $set('orders', []))
+                                            ->columnSpan(2),
+                                        Toggle::make('ignore_assigned_drivers')
+                                            ->label('شامل سفارش‌هایی که قبلاً راننده داشته‌اند')
+                                            ->default(true)
+                                            ->live()
+                                            ->columnSpan(1),
+                                    ]),
+                                ]),
+
+                            Section::make('لیست سفارش‌های موجود')
                                 ->schema([
                                     Actions::make([
                                         FormAction::make('selectAll')
-                                            ->label('انتخاب همه سفارش‌ها')
+                                            ->label('انتخاب همه سفارش‌های موجود')
                                             ->icon('heroicon-m-check-badge')
+                                            ->color('primary')
                                             ->action(function (Get $get, Set $set) {
                                                 $availableIds = array_keys($this->getAvailableOrdersList($get));
                                                 $set('orders', $availableIds);
@@ -115,41 +152,68 @@ class LoadingOrders extends Page implements HasForms
                                         FormAction::make('deselectAll')
                                             ->label('لغو انتخاب همه')
                                             ->icon('heroicon-m-x-circle')
-                                            ->color('danger')
+                                            ->color('gray')
                                             ->action(fn (Set $set) => $set('orders', [])),
                                     ]),
+
                                     CheckboxList::make('orders')
                                         ->hiddenLabel()
                                         ->options(fn (Get $get) => $this->getAvailableOrdersList($get))
                                         ->descriptions(fn (Get $get) => $this->getOrdersDescriptions($get))
                                         ->columns(2)
                                         ->live()
-                                        ->required(),
+                                        ->required()
+                                        ->helperText(function (Get $get) {
+                                            $count = count($this->getAvailableOrdersList($get));
+                                            if ($count === 0) {
+                                                return new HtmlString('<span class="text-danger-600 font-bold">⚠️ هیچ سفارشی با شرایط انتخابی یافت نشد. می‌توانید از فیلتر بالا گزینه «نمایش همه وضعیت‌ها» را انتخاب کنید.</span>');
+                                            }
+                                            return "تعداد {$count} سفارش واجد شرایط یافت شد.";
+                                        })
+                                        ->validationMessages([
+                                            'required' => 'لطفاً حداقل یک سفارش را برای بارگیری تیک بزنید.',
+                                        ]),
                                 ]),
                         ]),
 
+                    // گام ۳: تایید نهایی و صدور مانیفست
                     Wizard\Step::make('Confirmation')
-                        ->label('تایید نهایی و صدور مانیفست بارگیری')
+                        ->label('۳. بررسی و صدور مانیفست')
                         ->icon('heroicon-o-check-badge')
+                        ->description('بازبینی نهایی و تحویل قطعی به راننده')
                         ->schema([
-                            Grid::make(3)->schema([
-                                Placeholder::make('summary_count')
-                                    ->label('تعداد کل سفارشات انتخابی')
-                                    ->content(fn (Get $get) => count($get('orders') ?? []) . ' سفارش'),
-                                Placeholder::make('summary_driver')
-                                    ->label('راننده تحویل‌گیرنده')
-                                    ->content(fn (Get $get) => Driver::find($get('driver_id'))?->name ?? '---'),
-                                Placeholder::make('summary_shift')
-                                    ->label('شیفت کاری انتخابی')
-                                    ->content(fn (Get $get) => $get('shift') ?: 'نامشخص'),
-                            ]),
+                            Section::make('خلاصه مانیفست بارگیری')
+                                ->schema([
+                                    Grid::make(3)->schema([
+                                        Placeholder::make('summary_count')
+                                            ->label('تعداد کل سفارش‌های بارگیری‌شده')
+                                            ->content(fn (Get $get) => count($get('orders') ?? []) . ' سفارش'),
+                                        Placeholder::make('summary_driver')
+                                            ->label('راننده مسئول')
+                                            ->content(fn (Get $get) => Driver::find($get('driver_id'))?->name ?? '---'),
+                                        Placeholder::make('summary_shift')
+                                            ->label('شیفت کاری')
+                                            ->content(fn (Get $get) => $get('shift') ?: 'نامشخص'),
+                                    ]),
+                                ]),
                         ]),
                 ])
-                    ->submitAction(new HtmlString(
-                        '<button type="submit" class="fi-btn fi-btn-size-md fi-btn-color-primary relative inline-grid grid-flow-col items-center justify-center font-semibold outline-none transition duration-75 focus-visible:ring-2 rounded-lg gap-1.5 px-4 py-2 text-sm text-white shadow-sm bg-amber-600 hover:bg-amber-500">
-                        <span class="fi-btn-label">ثبت قطعی بارگیری و تحویل به راننده</span>
-                    </button>'
-                    )),
+                    ->nextAction(
+                        fn (FormAction $action) => $action
+                            ->label('گام بعدی')
+                            ->icon('heroicon-m-arrow-left')
+                    )
+                    ->previousAction(
+                        fn (FormAction $action) => $action
+                            ->label('گام قبلی')
+                            ->icon('heroicon-m-arrow-right')
+                            ->color('gray')
+                    )
+                    ->submitAction(new HtmlString(Blade::render(<<<'BLADE'
+                    <x-filament::button type="submit" size="md" color="warning" icon="heroicon-m-truck">
+                        ثبت قطعی بارگیری و صدور مانیفست راننده
+                    </x-filament::button>
+                BLADE))),
             ])
             ->statePath('data');
     }
@@ -158,20 +222,32 @@ class LoadingOrders extends Page implements HasForms
     {
         $operationType = $get('operation_type') ?? 'distribution';
         $driverId = $get('driver_id');
+        $statusFilter = $get('status_filter') ?? 'auto';
+        $ignoreAssigned = (bool) ($get('ignore_assigned_drivers') ?? true);
 
-        $query = Order::query()->with(['customer', 'address', 'items.property']);
+        $query = Order::query()->with(['customer', 'address', 'items.property', 'status']);
 
-        if ($operationType === 'distribution') {
-            // فرش‌های شسته شده و آماده تحویل در انبار کارخانه
-            $targetStatusId = OrderStatus::getIdByName(OrderStatusEnum::READY_FOR_DELIVERY->value);
-            $query->where('status_id', $targetStatusId);
+        // اعمال فیلتر وضعیت
+        if ($statusFilter === 'all') {
+            // هیچ فیلتر وضعیتی اعمال نشود
+        } elseif (is_numeric($statusFilter)) {
+            $query->where('status_id', (int) $statusFilter);
         } else {
-            // سفارش‌های جدید رزرو شده جهت جمع‌آوری
-            $targetStatusId = OrderStatus::getIdByName(OrderStatusEnum::RESERVED->value);
-            $query->where('status_id', $targetStatusId);
+            // حالت اتوماتیک
+            if ($operationType === 'distribution') {
+                $targetNames = ['ready_for_delivery', 'ready_for_deliver', 'ready_for_delivery_to_customer'];
+            } else {
+                $targetNames = ['reserved', 'in_collective_list', 'in_waiting_list', 'revisiting_driver'];
+            }
+            $targetStatusIds = OrderStatus::whereIn('name', $targetNames)->pluck('id')->toArray();
+
+            if (!empty($targetStatusIds)) {
+                $query->whereIn('status_id', $targetStatusIds);
+            }
         }
 
-        if ($driverId) {
+        // فیلتر راننده
+        if (!$ignoreAssigned && $driverId) {
             $query->where(function ($q) use ($driverId) {
                 $q->whereNull('driver_id')->orWhere('driver_id', $driverId);
             });
@@ -179,8 +255,9 @@ class LoadingOrders extends Page implements HasForms
 
         return $query->latest()->take(50)->get()->mapWithKeys(function (Order $order) {
             $customerName = $order->customer?->name ?? 'بدون نام';
+            $statusLabel = $order->status?->label ? " [{$order->status->label}]" : '';
             $zone = $order->address?->municipality_zone ? " (منطقه {$order->address->municipality_zone})" : '';
-            return [$order->id => "سفارش #{$order->id} - {$customerName}{$zone}"];
+            return [$order->id => "سفارش #{$order->id} - {$customerName}{$statusLabel}{$zone}"];
         })->toArray();
     }
 
@@ -196,7 +273,7 @@ class LoadingOrders extends Page implements HasForms
 
         foreach ($orders as $order) {
             $itemsSummary = $order->items->map(function ($item) {
-                return ($item->property?->fullTitle ?? 'فرش') . " ({$item->quantity} تخته/عدد)";
+                return ($item->property?->fullTitle ?? 'فرش') . " ({$item->quantity} عدد)";
             })->join(' | ');
 
             $address = $order->address?->getFullAddress() ?? 'فاقد آدرس ثبت‌شده';
@@ -215,7 +292,7 @@ class LoadingOrders extends Page implements HasForms
         $shift = $state['shift'] ?? app(ShiftSettings::class)->getCurrentShift();
 
         if (empty($orderIds) || !$driverId) {
-            Notification::make()->title('خطا')->body('لطفا حداقل یک سفارش و یک راننده را مشخص کنید.')->danger()->send();
+            Notification::make()->title('خطا')->body('لطفاً حداقل یک سفارش و یک راننده را مشخص کنید.')->danger()->send();
             return;
         }
 
@@ -223,31 +300,47 @@ class LoadingOrders extends Page implements HasForms
             ? OrderStatusEnum::IN_DISTRIBUTION_LIST->value
             : OrderStatusEnum::IN_COLLECTIVE_LIST->value;
 
-        $targetStatusId = OrderStatus::getIdByName($targetStatusName);
+        $targetStatusId = OrderStatus::where('name', $targetStatusName)->value('id')
+            ?? OrderStatus::first()->id;
 
-        DB::transaction(function () use ($orderIds, $driverId, $targetStatusId, $shift, $targetStatusName) {
+        $driver = Driver::find($driverId);
+
+        DB::transaction(function () use ($orderIds, $driverId, $driver, $targetStatusId, $shift, $targetStatusName) {
             $orders = Order::whereIn('id', $orderIds)->get();
 
             LogBatch::startBatch();
 
-            Order::whereIn('id', $orderIds)->update([
-                'driver_id' => $driverId,
-                'status_id' => $targetStatusId,
-                'time_apply_status' => Carbon::now(),
-            ]);
-
             foreach ($orders as $order) {
-                activity()
+                $oldStatusId = $order->status_id;
+                $oldDriverId = $order->driver_id;
+
+                // ذخیره بدون تریگر لاگ تکراری
+                $order->status_id = $targetStatusId;
+                $order->driver_id = $driverId;
+                $order->time_apply_status = Carbon::now();
+                $order->saveQuietly();
+
+                // ثبت دقیقاً یک لاگ معنادار
+                activity('order')
                     ->causedBy(auth()->user())
                     ->performedOn($order)
-                    ->withProperties(['driver_id' => $driverId, 'status' => $targetStatusName, 'shift' => $shift])
-                    ->log("سفارش به راننده تحویل و به وضعیت [{$targetStatusName}] منتقل شد.");
+                    ->withProperties([
+                        'old' => [
+                            'status_id' => $oldStatusId,
+                            'driver_id' => $oldDriverId,
+                        ],
+                        'attributes' => [
+                            'status_id' => $targetStatusId,
+                            'driver_id' => $driverId,
+                            'shift'     => $shift,
+                        ],
+                    ])
+                    ->log("تحویل به راننده ({$driver?->name})");
             }
 
             LogBatch::endBatch();
 
             // بروزرسانی روت بهینه نشان برای راننده
-            $driver = Driver::find($driverId);
             if ($driver) {
                 app(OptimizedRoute::class)->calculateRoute([$driverId]);
             }
@@ -257,15 +350,17 @@ class LoadingOrders extends Page implements HasForms
 
         Notification::make()
             ->title('عملیات بارگیری با موفقیت انجام شد')
-            ->body(count($orderIds) . ' سفارش به راننده تحویل و در مانیفست راننده قرار گرفت.')
+            ->body(count($orderIds) . ' سفارش به مانیفست راننده اضافه شد.')
             ->success()
             ->send();
 
         $this->form->fill([
             'operation_type' => $operationType,
-            'driver_id' => null,
-            'orders' => [],
-            'shift' => $shift,
+            'driver_id'      => null,
+            'orders'         => [],
+            'shift'          => $shift,
+            'status_filter'  => 'auto',
+            'ignore_assigned_drivers' => true,
         ]);
     }
 }

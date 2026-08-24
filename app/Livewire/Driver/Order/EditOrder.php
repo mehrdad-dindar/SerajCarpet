@@ -3,22 +3,26 @@
 namespace App\Livewire\Driver\Order;
 
 use App\Events\OrderReceivedByDriver;
+use App\Models\CarpetColor;
 use App\Models\Comment;
 use App\Models\Option;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\OrderStatus;
 use App\Models\Property;
-use App\Traits\Neshan;
-use Dotswan\MapPicker\Fields\Map;
+use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -26,29 +30,27 @@ use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Support\RawJs;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
-use function Laravel\Prompts\alert;
 
+#[Title('کارشناسی و تحویل فرش')]
 class EditOrder extends Component implements HasForms
 {
     use InteractsWithForms;
-    use Neshan;
 
     public Order $order;
-
     public ?array $data = [];
 
-    public function mount(Order $order)
+    public function mount(Order $order): void
     {
-        $status_ids = [2, 3, 4];
-        if (! in_array($this->order->status_id, $status_ids)) {
-            abort(404);
-        }
-        $this->order = $order;
-        $this->form->fill($order->toArray());
+        $this->order = $order->load(['customer', 'address', 'items.media', 'otherItems']);
+
+        $formData = $this->order->toArray();
+        $formData['selected_options'] = $this->order->options ?? Option::where('is_default', true)->pluck('id')->toArray();
+
+        $this->form->fill($formData);
     }
 
     public function form(Form $form): Form
@@ -57,424 +59,204 @@ class EditOrder extends Component implements HasForms
             ->model($this->order)
             ->schema([
                 Wizard::make([
-                    Wizard\Step::make('Customer')
+                    // مرحله ۱: تأیید مشتری و آدرس
+                    Wizard\Step::make('مشتری و آدرس')
                         ->icon('heroicon-o-user')
-                        ->translateLabel()
-                        ->description(__('Check customer information'))
                         ->schema([
-                            Placeholder::make('customer.name')
-                                ->label(__('Customer Name'))
-                                ->content(fn (Order $order): string => $order->customer->name),
-                            Placeholder::make('customer.phone')
-                                ->label(__('Customer Phone'))
-                                ->content(fn (Order $order): string => $order->customer->phone),
-                            Placeholder::make('customer.phone2')
-                                ->label(__('Customer\'s second contact number'))
-                                ->content(fn (Order $order): string => $order->customer->phone),
-                            Placeholder::make('customer_id')
-                                ->label(__('Customer ID'))
-                                ->content(fn (Order $order): string => '#'.$order->customer->id),
-                        ])->columns(),
-                    Wizard\Step::make('Address')
-                        ->icon('heroicon-o-map-pin')
-                        ->translateLabel()
-                        ->description(__('Check or edit customer address'))
-                        ->schema([
-                            Fieldset::make('customer_address')
-                                ->schema([
-                                    Group::make([
-                                        Placeholder::make('Full Address')
-                                            ->content(fn (Order $order): string => $order->address->getFullAddress())
-                                            ->label(__('Full Address')),
-                                        Placeholder::make('Comment')
-                                            ->content(function (Order $order) {
-                                                $comment = $order->address->customerComments()
-                                                    ->orderBy('created_at', 'desc')->first();
-                                                if ($comment) {
-                                                    return $comment->body;
-                                                }
-                                                return null;
-                                            })
-                                            ->visible(fn(Order $order) => $order->address->customerComments()
-                                                ->orderBy('created_at', 'desc')->first())
-                                            ->label(__('Customer comment for address')),
-                                    ]),
-                                    Map::make('current_location')
-                                        ->label(__('Location'))
-                                        ->defaultLocation(latitude: 40.4168, longitude: -3.7038)
-                                        ->afterStateHydrated(function ($state, Order $order, Set $set): void {
-                                            $set('current_location', [
-                                                'lat' => $order->address->latitude,
-                                                'lng' => $order->address->longitude,
-                                            ]);
-                                        })
-                                        ->extraStyles([
-                                            'min-height: 100px',
-                                            'max-height: 100px',
-                                            'border-radius: 12px',
-                                        ])
-                                        ->showMarker()
-                                        ->showFullscreenControl(false)
-                                        ->markerColor('#FBBC04')
-                                        ->showZoomControl()
-                                        ->tilesUrl('http://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}')
-                                        ->zoom(15)
-                                        ->draggable(false),
-                                ])
-                                ->columns()
-                                ->label(__("Customer's Address"))
-                                ->translateLabel(),
-                            Toggle::make('edit_address')
-                                ->live()
-                                ->label(__('Need to edit?')),
-                            Fieldset::make('Address')
-                                ->relationship('address')
-                                ->schema([
-                                TextInput::make('state')
-                                    ->required()
-                                    ->helperText(fn (Get $get) => self::getHint('state', $get))
-                                    ->label(__('State')),
-                                TextInput::make('city')
-                                    ->required()
-                                    ->helperText(fn (Get $get) => self::getHint('city', $get))
-                                    ->label(__('City')),
-                                Textarea::make('address')
-                                    ->autosize()
-                                    ->required()
-                                    ->columnSpanFull()
-                                    ->helperText(fn (Get $get) => self::getHint('address', $get))
-                                    ->label(__('Full Address')),
-                                TextInput::make('no')
-                                    ->required()
-                                    ->label(__('No.')),
-                                TextInput::make('floor')
-                                    ->required()
-                                    ->label(__('Floor')),
-                                TextInput::make('unit')
-                                    ->label(__('Unit')),
-                                Hidden::make('latitude')
-                                    ->required(),
-                                Hidden::make('longitude')
-                                    ->required(),
-                                Hidden::make('municipality_zone'),
-                                Hidden::make('neighbourhood'),
-                                Map::make('location')
-                                    ->hint('با کشیدن و اسکرول موقعیت مورد نظر را انتخاب کنید')
-                                    ->label(__('Location'))
-                                    ->columnSpanFull()
-                                    ->default([
-                                        'lat' => 35.699741844984004,
-                                        'lng' => 51.33805990219117,
-                                    ])
-                                    ->afterStateUpdated(function (Get $get, Set $set, $old, ?array $state): void {
-                                        $set('latitude', $state['lat']);
-                                        $set('longitude', $state['lng']);
-                                        if ($get('is_suggested')) {
-                                            $data = self::getHint(field: null, get: $get, all: true);
-                                            if ($data && $data->status == 'OK') {
-                                                $set('state', $data->state);
-                                                $set('city', $data->city);
-                                                $set('address', $data->formatted_address);
-                                                $set('municipality_zone', $data->municipality_zone);
-                                                $set('neighbourhood', $data->neighbourhood);
-                                            } else {
-                                                alert('Error');
-                                            }
-                                        }
-                                    })
-                                    ->afterStateHydrated(function (Get $get, Order $order, Set $set): void {
-                                        $set('location', [
-                                            'lat' => $get('latitude'),
-                                            'lng' => $get('longitude'),
-                                        ]);
-                                    })
-                                    ->extraStyles([
-                                        'min-height: 50vh',
-                                        'border-radius: 16px',
-                                    ])
-                                    ->showFullscreenControl()
-                                    ->liveLocation(true, true, 5000)
-                                    ->showMyLocationButton(true)
-                                    ->showMarker()
-                                    ->markerColor('#FBBC04')
-                                    ->showZoomControl()
-                                    ->draggable()
-                                    ->detectRetina()
-                                    ->zoom(11)
-                                    ->tilesUrl('http://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}'),
-                                Toggle::make('is_suggested')
-                                    ->translateLabel()
-                                    ->onIcon('heroicon-s-sparkles')
-                                    ->offIcon('heroicon-o-star')
-                                    ->helperText('با استفاده از این گزینه آدرس از نقشه خوانده می‌شود')
-                                    ->reactive()
-                                    ->default(false)
-                                    ->afterStateUpdated(function (Get $get, Set $set) {
-                                        $latitude = $get('latitude');
-                                        $longitude = $get('longitude');
-                                        if ($latitude && $longitude) {
-                                            $neshan = self::reverseGeocoding($latitude, $longitude)->getData();
-                                            $set('address', $neshan->formatted_address);
-                                            $set('state', $neshan->state);
-                                            $set('city', $neshan->city);
-                                            $set('municipality_zone', $neshan->municipality_zone);
-                                            $set('neighbourhood', $neshan->neighbourhood);
-                                        }
-                                    }),
-                            ])
-                                ->columns()
-                                ->reactive()
-                                ->visible(fn (Get $get) => $get('edit_address')),
+                            Grid::make(3)->schema([
+                                Placeholder::make('customer_name')
+                                    ->label('نام مشتری')
+                                    ->content(fn () => $this->order->customer?->name ?? 'بدون نام'),
+                                Placeholder::make('customer_phone')
+                                    ->label('شماره همراه')
+                                    ->content(fn () => $this->order->customer?->phone),
+                                Placeholder::make('full_address')
+                                    ->label('آدرس کامل')
+                                    ->content(fn () => $this->order->address?->getFullAddress() ?? 'فاقد آدرس')
+                                    ->columnSpan(3),
+                            ]),
                         ]),
-                    Wizard\Step::make('Order Items')
-                        ->icon('heroicon-o-list-bullet')
-                        ->translateLabel()
-                        ->description(__('Check or edit order items'))
+
+                    // مرحله ۲: کارشناسی اقلام، متراژ دقیق، رنگ و عکس عیوب
+                    Wizard\Step::make('کارشناسی و متراژ فرش‌ها')
+                        ->icon('heroicon-o-sparkles')
                         ->schema([
                             Repeater::make('items')
-                                ->label(__('Items'))
-                                ->translateLabel()
+                                ->label('لیست فرش‌ها و اقلام تحویلی')
                                 ->relationship('items')
                                 ->defaultItems(1)
-                                ->columns(12)
+                                ->addActionLabel('+ افزودن فرش جدید')
+                                ->reorderable(false)
                                 ->schema([
-                                    Select::make('property_id')
-                                        ->label(__('Select Service'))
-                                        ->translateLabel()
-                                        ->required()
-                                        ->reactive()
-                                        ->helperText(
-                                            fn (Get $get) => Property::find($get('property_id'))->helperText ?? ''
-                                        )
-                                        ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                            $dimensions = (int) $get('dimensions') ?? 1;
-                                            $quantity = $get('quantity');
-                                            $price = Property::find($state)->price;
+                                    Grid::make(12)->schema([
+                                        Select::make('property_id')
+                                            ->label('نوع فرش و خدمت')
+                                            ->relationship('property', 'name')
+                                            ->getOptionLabelFromRecordUsing(fn (Property $p) => $p->fullTitle . ' (' . number_format($p->price) . ' ت)')
+                                            ->searchable()
+                                            ->preload()
+                                            ->live()
+                                            ->required()
+                                            ->afterStateUpdated(function (Set $set, Get $get, $state) {
+                                                $prop = Property::find($state);
+                                                if ($prop) {
+                                                    $set('unit_price', $prop->price);
+                                                    self::recalculateItemTotal($set, $get);
+                                                }
+                                            })
+                                            ->columnSpan(4),
 
-                                            $set('sub_total', $dimensions * $quantity * $price);
-                                            $set('unit_price', $price);
-                                        })
-                                        ->relationship('property', 'fullTitle')
-                                        ->getOptionLabelFromRecordUsing(function (Property $property) {
-                                            return $property->fullTitle;
-                                        })
-                                        ->columnSpan(3),
-                                    Select::make('dimensions')
-                                        ->options(function ($state, Get $get) {
-                                            if ($propertyId = $get('property_id')) {
-                                                $dimensions = Property::find($propertyId)->dimensions ?? [];
+                                        Select::make('carpet_color_id')
+                                            ->label('رنگ زمینه')
+                                            ->options(CarpetColor::pluck('name', 'id'))
+                                            ->searchable()
+                                            ->preload()
+                                            ->required()
+                                            ->columnSpan(2),
 
-                                                return array_combine($dimensions, $dimensions);
-                                            }
+                                        Select::make('dimensions')
+                                            ->label('متراژ استاندارد')
+                                            ->options([
+                                                4  => '۴ متری (۱.۵ × ۲.۲۵)',
+                                                6  => '۶ متری (۲ × ۳)',
+                                                9  => '۹ متری (۲.۵ × ۳.۵)',
+                                                12 => '۱۲ متری (۳ × ۴)',
+                                                24 => '۲۴ متری',
+                                            ])
+                                            ->live()
+                                            ->afterStateUpdated(fn (Set $set, Get $get) => self::recalculateItemTotal($set, $get))
+                                            ->columnSpan(2),
 
-                                            return [];
-                                        })
-                                        ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                            $dimensions = (int) $state ?? 1;
-                                            $quantity = $get('quantity');
-                                            $price = Property::find($get('property_id'))->price;
+                                        TextInput::make('quantity')
+                                            ->label('تعداد')
+                                            ->numeric()
+                                            ->default(1)
+                                            ->minValue(1)
+                                            ->live()
+                                            ->afterStateUpdated(fn (Set $set, Get $get) => self::recalculateItemTotal($set, $get))
+                                            ->columnSpan(1)
+                                            ->required(),
 
-                                            $set('sub_total', $dimensions * $quantity * $price);
-                                            $set('unit_price', $price);
-                                        })
-                                        ->translateLabel()
-                                        ->live()
-                                        ->hidden(function ($get, $set) {
-                                            $propertyId = $get('property_id');
-                                            $property = $propertyId ? Property::find($propertyId) : null;
+                                        Hidden::make('unit_price')->default(0),
 
-                                            if (! $propertyId || ! $property || ! $property->dimensions) {
-                                                $set('dimensions', 1);
+                                        TextInput::make('sub_total')
+                                            ->label('مبلغ قلم (تومان)')
+                                            ->readOnly()
+                                            ->dehydrated()
+                                            ->columnSpan(3),
+                                    ]),
 
-                                                return true;
-                                            }
+                                    // بخش ثبت عیوب اولیه و عکس‌برداری در محل
+                                    Section::make('وضعیت سلامت فرش و ثبت عیوب اولیه (قبل از بارگیری)')
+                                        ->icon('heroicon-o-camera')
+                                        ->collapsed()
+                                        ->schema([
+                                            CheckboxList::make('options.defects')
+                                                ->label('عیوب ظاهری مشاهده شده توسط راننده:')
+                                                ->options([
+                                                    'tear'       => 'پارگی یا سوراخ‌شدگی',
+                                                    'burn'       => 'سوختگی (اتوی داغ/ذغال)',
+                                                    'decay'      => 'پوسیدگی ریشه یا چله',
+                                                    'ink_stain'  => 'لکه جوهر یا رنگ‌دویدگی',
+                                                    'oil_stain'  => 'لکه چربی یا چسب شدید',
+                                                    'wear'       => 'ساییدگی خواب فرش',
+                                                ])
+                                                ->columns(3),
 
-                                            return false;
-                                        })
-                                        ->columnSpan(2),
-                                    TextInput::make('quantity')
-                                        ->label(__('Quantity'))
-                                        ->translateLabel()
-                                        ->numeric()
-                                        ->default(1)
-                                        ->minValue(1)
-                                        ->reactive()
-                                        ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                            if ($get('property_id') !== null) {
-                                                $dimensions = (int) $get('dimensions') ?? 1;
-                                                $price = Property::find($get('property_id'))->price;
-
-                                                $set('sub_total', $dimensions * $state * $price);
-                                                $set('unit_price', $price);
-                                            }
-                                        })
-                                        ->columnSpan(2)
-                                        ->required(),
-                                    Hidden::make('unit_price'),
-                                    TextInput::make('sub_total')
-                                        ->label(__('Sub Total Price'))
-                                        ->readOnly()
-                                        ->dehydrated()
-                                        ->translateLabel()
-                                        ->integer()
-                                        ->required()
-                                        ->columnSpan(4)
-                                        ->mask(RawJs::make('$money($input)'))
-                                        ->suffix('تومان')
-                                        ->stripCharacters('.')
-                                        ->mutateStateForValidationUsing(fn ($state) => str_replace(',', '', $state))
-                                        ->mutateDehydratedStateUsing(fn ($state) => str_replace(',', '', $state)),
-                                ])
-                                ->columnSpanFull(),
-                            Repeater::make('otherItems')
-                                ->label(__('Other Items'))
-                                ->translateLabel()
-                                ->relationship()
-                                ->defaultItems(0)
-                                ->hiddenLabel()
-                                ->columns(12)
-                                ->schema([
-                                    Hidden::make('is_custom')->default(1),
-                                    TextInput::make('title')
-                                        ->columnSpan(4),
-                                    TextInput::make('quantity')
-                                        ->label(__('Quantity'))
-                                        ->translateLabel()
-                                        ->numeric()
-                                        ->default(1)
-                                        ->minValue(1)
-                                        ->reactive()
-                                        ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                            if ($price = str_replace(',', '', $get('unit_price'))) {
-                                                $set('sub_total', (int) $state * (int) $price);
-                                            }
-                                        })
-                                        ->columnSpan(2)
-                                        ->required(),
-                                    TextInput::make('unit_price')
-                                        ->label(__('Unit Price'))
-                                        ->columnSpan(3)
-                                        ->mask(RawJs::make('$money($input)'))
-                                        ->suffix('تومان')
-                                        ->stripCharacters('.')
-                                        ->reactive()
-                                        ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                                            if ($price = str_replace(',', '', $state)) {
-                                                $set('sub_total', number_format((int) $get('quantity') * (int) $price));
-                                                $set('unit_price', number_format($price));
-                                            }
-                                        })
-                                        ->mutateStateForValidationUsing(fn ($state) => str_replace(',', '', $state))
-                                        ->mutateDehydratedStateUsing(fn ($state) => str_replace(',', '', $state)),
-                                    TextInput::make('sub_total')
-                                        ->label(__('Sub Total Price'))
-                                        ->readOnly()
-                                        ->dehydrated()
-                                        ->translateLabel()
-                                        ->integer()
-                                        ->required()
-                                        ->columnSpan(3)
-                                        ->mask(RawJs::make('$money($input)'))
-                                        ->suffix('تومان')
-                                        ->stripCharacters('.')
-                                        ->mutateStateForValidationUsing(fn ($state) => str_replace(',', '', $state))
-                                        ->mutateDehydratedStateUsing(fn ($state) => str_replace(',', '', $state)),
-
+                                            SpatieMediaLibraryFileUpload::make('carpet_images')
+                                                ->label('تصویر از عیوب یا کل فرش (جهت ضمیمه در پرونده)')
+                                                ->collection('carpet_images')
+                                                ->disk('media')
+                                                ->multiple()
+                                                ->maxFiles(3)
+                                                ->image()
+                                                ->imageResizeMode('cover')
+                                                ->imageCropAspectRatio('16:9')
+                                                ->imageResizeTargetWidth('1280')
+                                                ->imageResizeTargetHeight('720')
+                                                ->columnSpanFull(),
+                                        ]),
                                 ])
                                 ->columnSpanFull(),
                         ]),
-                    Wizard\Step::make('Special services')
-                        ->icon('heroicon-o-sparkles')
-                        ->translateLabel()
-                        ->description(__('Application of ancillary services'))
+
+                    // مرحله ۳: ثبت نهایی و تحویل
+                    Wizard\Step::make('تأیید و تحویل')
+                        ->icon('heroicon-o-check-badge')
                         ->schema([
-                            Select::make('options')
-                                ->hiddenLabel()
+                            Select::make('selected_options')
+                                ->label('خدمات جانبی درخواستی')
                                 ->multiple()
                                 ->options(Option::pluck('name', 'id'))
-                                ->default(Option::where('is_default', true)->pluck('id')->toArray())
-                                ->native()
-                                ->required(),
-                            Textarea::make('comment')
-                                ->label(__('Order Description'))
-                            ->autosize()
+                                ->preload()
+                                ->columnSpanFull(),
+
+                            Textarea::make('driver_comment')
+                                ->label('توضیحات یا نکات راننده')
+                                ->rows(3)
+                                ->columnSpanFull(),
                         ]),
                 ])
-                    ->submitAction(new HtmlString(Blade::render(
-                        <<<'BLADE'
-    <x-srj-button :label="__('Submit Order')" icon="rocket-launch" type="submit" class="bg-gradient-fuchsia"/>
-BLADE
-                    ))),
+                    ->submitAction(new HtmlString(
+                        '<button type="submit" class="w-full py-3.5 px-8 text-base font-black text-white bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 rounded-2xl shadow-xl shadow-green-500/30 transition transform active:scale-95 flex items-center justify-center gap-2">✓ دریافت فرش‌ها و ثبت در سیستم</button>'
+                    )),
             ])
             ->statePath('data');
     }
 
-    public static function getHint(?string $field, Get $get, bool $all = false)
+    public static function recalculateItemTotal(Set $set, Get $get): void
     {
-        $latitude = $get('latitude');
-        $longitude = $get('longitude');
+        $dims = (float) ($get('dimensions') ?: 1);
+        $qty = (int) ($get('quantity') ?: 1);
+        $unitPrice = (int) ($get('unit_price') ?: 0);
 
-        if (! $latitude || ! $longitude) {
-            return '';
-        }
-
-        $neshan = self::reverseGeocoding($latitude, $longitude)->getData();
-        if ($all) {
-            return $neshan;
-        }
-
-        return self::getFieldValue($field, $neshan);
+        $subTotal = $dims * $qty * $unitPrice;
+        $set('sub_total', number_format($subTotal));
     }
 
-    private static function getFieldValue(string $field, $neshan): string
+    public function save()
     {
-        return match ($field) {
-            'address' => $neshan->formatted_address ?? '',
-            'state' => $neshan->state ?? '',
-            'city' => $neshan->city ?? '',
-            'municipality_zone' => $neshan->municipality_zone ?? '',
-            'neighbourhood' => $neshan->neighbourhood ?? '',
-            default => '',
-        };
+        $data = $this->form->getState();
+
+        // ۱. محاسبه جمع کل سفارش
+        $total = 0;
+        foreach ($data['items'] ?? [] as $item) {
+            $dims = (float) ($item['dimensions'] ?? 1);
+            $qty = (int) ($item['quantity'] ?? 1);
+            $unitPrice = (int) ($item['unit_price'] ?? 0);
+            $total += $dims * $qty * $unitPrice;
+        }
+
+        // ۲. تغییر وضعیت به «تحویل گرفته شده توسط راننده»
+        $receivedStatusId = OrderStatus::where('name', OrderStatus::CARPETS_RECEIVED)->value('id');
+
+        $this->order->update([
+            'status_id'    => $receivedStatusId,
+            'total'        => $total,
+            'sub_total'    => $total,
+            'collected_at' => Carbon::now(),
+            'options'      => $data['selected_options'] ?? [],
+        ]);
+
+        // ۳. ثبت توضیحات راننده
+        if (!empty($data['driver_comment'])) {
+            $this->order->comments()->create([
+                'body'           => $data['driver_comment'],
+                'commenter_type' => get_class(auth('driver')->user()),
+                'commenter_id'   => auth('driver')->id(),
+            ]);
+        }
+
+        // ۴. ارسال رویداد جهت پیامک اطلاع‌رسانی به مشتری
+        event(new OrderReceivedByDriver($this->order));
+
+        session()->flash('message', "سفارش #{$this->order->id} با موفقیت تحویل گرفته شد.");
+        return redirect()->route('driver.orders');
     }
 
     #[Layout('driver.layouts.app')]
     public function render()
     {
         return view('livewire.driver.order.edit-order');
-    }
-
-    public function save()
-    {
-        $this->order->update($this->updateDataBeforeSaving());
-        session()->flash('message', 'Order updated successfully!');
-        event(new OrderReceivedByDriver($this->order));
-        return redirect()->route('driver.orders');
-    }
-
-    private function updateDataBeforeSaving()
-    {
-        $data = $this->form->getState();
-
-        if ($data['comment']) {
-            $this->submitOrderComment($data['comment']);
-        }
-        $data['status_id'] = OrderStatus::whereName(OrderStatus::CARPETS_RECEIVED)->first()->id;
-
-        unset(
-            $data['current_location'],
-            $data['edit_address'],
-            $data['comment']
-        );
-
-        return $data;
-    }
-
-    private function submitOrderComment($commentBody)
-    {
-        $comment = new Comment();
-        $comment->body = $commentBody;
-        $comment->commenter()->associate(auth('driver')->user());
-        $this->order->comments()->save($comment);
     }
 }

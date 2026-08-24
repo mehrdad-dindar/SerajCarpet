@@ -40,8 +40,27 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->colors([
                 'primary' => Color::Amber,
+                'slate'   => Color::Slate,
+                'gray'    => Color::Gray,
+                'red'     => Color::Red,
+                'orange'  => Color::Orange,
+                'amber'   => Color::Amber,
+                'yellow'  => Color::Yellow,
+                'emerald' => Color::Emerald,
+                'teal'    => Color::Teal,
+                'cyan'    => Color::Cyan,
+                'sky'     => Color::Sky,
+                'blue'    => Color::Blue,
+                'indigo'  => Color::Indigo,
+                'violet'  => Color::Violet,
+                'purple'  => Color::Purple,
+                'pink'    => Color::Pink,
+                'rose'    => Color::Rose,
+                'danger'  => Color::Rose,
+                'success' => Color::Emerald,
+                'warning' => Color::Amber,
+                'info'    => Color::Sky,
             ])
-//            ->spa()
             ->font('iranSans')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverResources(
@@ -57,7 +76,6 @@ class AdminPanelProvider extends PanelProvider
                 InvoiceChart::class,
                 LatestCommentsWidget::class,
                 OverlookWidget::class,
-//                Widgets\AccountWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

@@ -7,159 +7,128 @@ use App\Traits\Neshan;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class OptimizedRoute extends Model
 {
     use HasFactory, Neshan;
 
-    const MORNING_SHIFT = 1;
-
-    const AFTERNOON_SHIFT = 2;
-
-    protected $guarded;
+    protected $guarded = [];
 
     protected $casts = [
         'orders' => 'array',
     ];
 
-    public static function getOrdersCount($shift)
+    public function driver(): BelongsTo
     {
-        $driver = auth('driver')->user();
-        $optimizedRoute = $driver->optimizedRoutes()
-            ->whereShift($shift)
-            ->first();
-        if ($optimizedRoute) {
-            return $optimizedRoute->orders()->count();
-        }
-        return 0;
+        return $this->belongsTo(Driver::class);
     }
 
-    public function orders()
+    /**
+     * واکشی سفارشات با حفظ ترتیب دقیق بهینه‌سازی‌شده
+     */
+    public function getSortedOrdersAttribute(): Collection
     {
-        return Order::whereIn('id', $this->orders)
-            ->orderByRaw('FIELD(id, ' . implode(',', $this->orders) . ')')
-            ->whereDate('time_apply_status', Carbon::today())
-            ->whereHas(
-                'status',
-                fn ($q) => $q->whereIn('name', [
-                    OrderStatus::RESERVED,
-                    OrderStatus::IN_COLLECTIVE_LIST,
-                    OrderStatus::IN_DISTRIBUTION_LIST,
-                    OrderStatus::REVISITING_DRIVER,
-                ])
-            )
+        if (empty($this->orders)) {
+            return collect();
+        }
+
+        return Order::query()
+            ->with(['customer', 'address', 'status', 'items.property'])
+            ->whereIn('id', $this->orders)
+            ->orderByRaw('FIELD(id, ' . implode(',', array_map('intval', $this->orders)) . ')')
             ->get();
     }
 
+    /**
+     * محاسبه و بروزرسانی مسیر بهینه برای رانندگان
+     */
     public function calculateRoute(array $driverIds): void
     {
         foreach ($driverIds as $driverId) {
             $driver = Driver::find($driverId);
-            if (! $driver) {
+            if (!$driver) {
                 continue;
             }
-            foreach (ShiftSettings::getTodayShifts() as $shift) {
-                $this->processDriverOrdersForShift($driver, $shift);
+
+            // واکشی تمام شیفت‌های فعال روز
+            $shifts = ShiftSettings::getTodayShifts();
+            if (empty($shifts)) {
+                $shifts = ['08:00 - 20:00' => '08:00 - 20:00'];
+            }
+
+            foreach ($shifts as $shiftKey => $shiftRange) {
+                $this->processDriverOrdersForShift($driver, is_string($shiftKey) ? $shiftKey : $shiftRange);
             }
         }
     }
 
     private function processDriverOrdersForShift(Driver $driver, string $shift): void
     {
-        $orders = $this->getOrders($driver, $shift);
-        $this->updateOptimizedRoutes($driver, $orders, $shift);
-    }
-
-    private function getOrders(Driver $driver, $shift)
-    {
-        $shiftTimeFrame = explode(' - ', $shift);
-        return $driver->orders()
-            ->whereDate('time_apply_status', Carbon::today())
-            ->whereTime('time_apply_status', '>=', $shiftTimeFrame[0])
-            ->whereTime('time_apply_status', '<', $shiftTimeFrame[1])
+        $orders = $driver->orders()
+            ->with('address')
+            ->whereHas('status', fn ($q) => $q->whereIn('name', [
+                OrderStatus::RESERVED,
+                OrderStatus::IN_COLLECTIVE_LIST,
+                OrderStatus::IN_DISTRIBUTION_LIST,
+                OrderStatus::REVISITING_DRIVER,
+            ]))
             ->get();
-    }
 
-    private function updateOptimizedRoutes(Driver $driver, $orders, $shift): void
-    {
-        if ($orders->count()) {
-            $orderLocations = $this->processableOrders($orders);
-            $waypoints = $this->salesman($orderLocations);
-            if (isset($waypoints->getData()->points)) {
-                $points = $waypoints->getData()->points;
-                $sortedOrders = $this->sortOrdersByIndex($orderLocations, $points);
-                $orderIds = $sortedOrders->pluck('id')->toArray();
+        if ($orders->isEmpty()) {
+            $driver->optimizedRoutes()->where('shift', $shift)->delete();
+            return;
+        }
+
+        $processableOrders = $orders->filter(fn ($o) => !empty($o->address?->latitude) && !empty($o->address?->longitude))->values();
+
+        // در صورتی که سفارشات کمتر از ۲ تا باشند یا مختصات نداشته باشند، ترتیب عادی ذخیره می‌شود
+        if ($processableOrders->count() < 2) {
+            $driver->optimizedRoutes()->updateOrCreate(
+                ['driver_id' => $driver->id, 'shift' => $shift],
+                ['orders' => $orders->pluck('id')->toArray()]
+            );
+            return;
+        }
+
+        // ارسال به وب‌سرویس TSP نشان
+        try {
+            $points = $processableOrders->map(fn ($o) => [
+                'id'        => $o->id,
+                'latitude'  => $o->address->latitude,
+                'longitude' => $o->address->longitude,
+            ]);
+
+            $response = $this->salesman($points)->getData(true);
+
+            if (isset($response['points']) && is_array($response['points'])) {
+                // استخراج ایندکس‌های مرتب‌شده (بدون نقطه مبدا کارخانه)
+                $sortedOrderIds = collect($response['points'])
+                    ->slice(1) // حذف نقطه شروع
+                    ->map(fn ($pt) => $points[$pt['index'] - 1]['id'] ?? null)
+                    ->filter()
+                    ->toArray();
+
+                // اضافه کردن سفارش‌های بدون لوکیشن به انتهای لیست
+                $unlocatedIds = $orders->pluck('id')->diff($sortedOrderIds)->toArray();
+                $finalOrderIds = array_merge($sortedOrderIds, $unlocatedIds);
+
                 $driver->optimizedRoutes()->updateOrCreate(
-                    [
-                        'driver_id' => $driver->id,
-                        'shift' => $shift,
-                    ],
-                    [
-                        'orders' => $orderIds,
-                    ]
+                    ['driver_id' => $driver->id, 'shift' => $shift],
+                    ['orders' => $finalOrderIds]
                 );
+                return;
             }
-        } else {
-            $driver->optimizedRoutes()
-                ->whereShift($shift)
-                ->delete();
-        }
-    }
-
-    private function processableOrders(Collection $orders)
-    {
-        return $orders->filter(fn ($order) => $this->isProcessable($order))
-            ->values()
-            ->map(fn ($order) => $this->transformOrder($order));
-    }
-
-    private function isProcessable($order): bool
-    {
-        if (! isset($order->address->latitude)) {
-            return false;
+        } catch (\Exception $e) {
+            Log::warning('Neshan TSP Route Optimization failed: ' . $e->getMessage());
         }
 
-        return true;
-    }
-
-    private function transformOrder($order): array
-    {
-        return [
-            'id' => $order->id,
-            'latitude' => $order->address->latitude,
-            'longitude' => $order->address->longitude,
-        ];
-    }
-
-    public function sortOrdersByIndex($orders, $apiResponse)
-    {
-        array_shift($apiResponse);
-
-        return collect($apiResponse)
-            ->map(fn ($point) => $this->mapOrderToPoint($orders, $point))
-            ->filter();
-    }
-
-    private function mapOrderToPoint($orders, $point)
-    {
-        $orderIndex = $point->index;
-
-        if (! isset($orders[$orderIndex - 1])) {
-            return null;
-        }
-
-        $order = Order::find($orders[$orderIndex - 1]['id']);
-
-        $this->updateOrderAddressIfNeeded($order->address, $point->location);
-
-        return $order;
-    }
-
-    private function updateOrderAddressIfNeeded(Address $address, $location): void
-    {
-        if ($address->latitude !== $location[0]) {
-            $address->updateAddressGeo($location);
-        }
+        // Fallback در صورت عدم پاسخ نشان: ذخیره ترتیب معمولی
+        $driver->optimizedRoutes()->updateOrCreate(
+            ['driver_id' => $driver->id, 'shift' => $shift],
+            ['orders' => $orders->pluck('id')->toArray()]
+        );
     }
 }

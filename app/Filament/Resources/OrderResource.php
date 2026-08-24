@@ -74,6 +74,23 @@ class OrderResource extends Resource
                     ->alignCenter()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
+                    ->label('وضعیت سفارش')
+                    ->badge()
+                    ->color(function (Order $record): string {
+                        $enum = \App\Enums\OrderStatus::tryFrom($record->status?->name ?? '');
+                        return $enum ? $enum->getColor() : 'gray';
+                    })
+                    ->icon(function (Order $record): ?string {
+                        $enum = \App\Enums\OrderStatus::tryFrom($record->status?->name ?? '');
+                        return $enum ? $enum->getIcon() : 'heroicon-m-question-mark-circle';
+                    })
+                    ->iconPosition(\Filament\Support\Enums\IconPosition::Before)
+                    ->formatStateUsing(function (Order $record): string {
+                        return $record->status?->label ?? 'نامشخص';
+                    })
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('status')
                     ->label('Status')
                     ->translateLabel()
                     ->sortable()

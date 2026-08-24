@@ -116,22 +116,6 @@ class Order extends Model implements HasMedia
         return OrderStatusEnum::tryFrom($this->status?->name ?? '')?->getColor() ?? 'gray';
     }
 
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logOnly([
-                'status_id',
-                'time_apply_status',
-                'address_id',
-                'driver_id',
-                'collected_at',
-                'sent_to_factory_at',
-                'total',
-            ])
-            ->useLogName('order')
-            ->logOnlyDirty();
-    }
-
     protected function createdAt(): Attribute
     {
         return Attribute::make(
@@ -149,5 +133,30 @@ class Order extends Model implements HasMedia
     public function getAllItemsAttribute()
     {
         return $this->items->merge($this->otherItems);
+    }
+
+    public function getDescriptionForEvent(string $eventName): string
+    {
+        return match ($eventName) {
+            'created' => 'ثبت اولیه سفارش در سیستم',
+            'updated' => 'ویرایش و تغییر مشخصات سفارش',
+            'deleted' => 'حذف سفارش',
+            default   => $eventName,
+        };
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly([
+                'status_id',
+                'driver_id',
+                'time_apply_status',
+                'collected_at',
+                'total',
+            ])
+            ->useLogName('order')
+            ->dontSubmitEmptyLogs()
+            ->logOnlyDirty();
     }
 }
