@@ -19,6 +19,7 @@ use App\Services\InvoiceService;
 use App\Settings\ShiftSettings;
 use Carbon\Carbon;
 use Filament\Forms;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\Select;
@@ -72,6 +73,23 @@ class OrderResource extends Resource
                     ->description(fn (Model $record): ?string => $record->customer->phone)
                     ->alignCenter()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('وضعیت سفارش')
+                    ->badge()
+                    ->color(function (Order $record): string {
+                        $enum = \App\Enums\OrderStatus::tryFrom($record->status?->name ?? '');
+                        return $enum ? $enum->getColor() : 'gray';
+                    })
+                    ->icon(function (Order $record): ?string {
+                        $enum = \App\Enums\OrderStatus::tryFrom($record->status?->name ?? '');
+                        return $enum ? $enum->getIcon() : 'heroicon-m-question-mark-circle';
+                    })
+                    ->iconPosition(\Filament\Support\Enums\IconPosition::Before)
+                    ->formatStateUsing(function (Order $record): string {
+                        return $record->status?->label ?? 'نامشخص';
+                    })
+                    ->sortable()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
                     ->translateLabel()
@@ -237,6 +255,68 @@ class OrderResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('changeStatus')
+                        ->label('Change status')
+                        ->icon('heroicon-o-arrow-path-rounded-square')
+                        ->translateLabel()
+                        ->action(function ($record, array $data): void {
+                            $reservationDate = $data['reservation_date'] ?? null;
+                            $reservationTime = $data['reservation_time'] ?? null;
+
+                            if ($reservationDate && $reservationTime) {
+                                $time_apply_status = Carbon::parse("$reservationDate $reservationTime");
+                            } else {
+                                $time_apply_status = null;
+                            }
+
+                            $order = $record->update([
+                                'status_id' => $data['status_id'],
+                                'time_apply_status' => $time_apply_status ?? DB::raw('time_apply_status'),
+                            ]);
+                            if ($order) {
+                                Notification::make()
+                                    ->title('وضعیت سفارش‌ تغییر کرد')
+                                    ->body('وضعیت سفارش #'.$record->id.' به ('. OrderStatus::getLabelById($data['status_id']) . ') تغییر داده شد!')
+                                    ->success()
+                                    ->send();
+                            }
+                        })
+                        ->form([
+                            Forms\Components\Select::make('status_id')
+                                ->relationship('status', 'label')
+                                ->hiddenLabel()
+                                ->live()
+                                ->required()
+                                ->native(false)
+                                ->label(__('Order Status')),
+                            Forms\Components\Fieldset::make('reservation setting')
+                                ->label(__('Reservation setting for'))
+                                ->visible(
+                                    fn (Get $get): bool => OrderStatus::where(
+                                        'id',
+                                        intval($get('status_id'))
+                                    )->value('has_time') == true
+                                )
+                                ->schema([
+                                    Forms\Components\DatePicker::make('reservation_date')
+                                        ->prefixIcon('heroicon-o-calendar-days')
+                                        ->label(__('Reservation Date'))
+                                        ->translateLabel()
+                                        ->reactive()
+                                        ->default(Carbon::today()->toDateString())
+                                        ->displayFormat('l - d F Y')
+                                        ->required()
+                                        ->jalali(),
+                                    Select::make('reservation_time')
+                                        ->visible(
+                                            fn (Get $get): bool => ! is_null($get('reservation_date'))
+                                        )
+                                        ->label(__('Shift'))
+                                        ->options(fn (Get $get): array => ShiftSettings::getDayShifts($get('reservation_date')))
+                                        ->reactive()
+                                        ->required(),
+                                ]),
+                        ]),
                     Tables\Actions\Action::make('assignDriver')
                         ->label('Assign Driver')
                         ->icon('heroicon-o-truck')
@@ -290,6 +370,11 @@ class OrderResource extends Resource
                             ]);
                             if ($orders) {
                                 event(new BulkOrderUpdated($records, $data['status_id']));
+                                Notification::make()
+                                    ->title('وضعیت سفارش‌های انتخابی تغییر کرد')
+                                    ->body('وضعیت '.count($ids).' سفارش انتخاب شده به ('. OrderStatus::getLabelById($data['status_id']) . ') تغییر داده شد!')
+                                    ->success()
+                                    ->send();
                             }
                         })
                         ->form([
@@ -298,6 +383,7 @@ class OrderResource extends Resource
                                 ->hiddenLabel()
                                 ->live()
                                 ->required()
+                                ->native(false)
                                 ->label(__('Order Status')),
                             Forms\Components\Fieldset::make('reservation setting')
                                 ->label(__('Reservation setting for'))
@@ -313,8 +399,8 @@ class OrderResource extends Resource
                                         ->label(__('Reservation Date'))
                                         ->translateLabel()
                                         ->reactive()
-                                        ->default(null)
-                                        ->displayFormat('Y-m-d')
+                                        ->default(Carbon::today()->toDateString())
+                                        ->displayFormat('l - d F Y')
                                         ->required()
                                         ->jalali(),
                                     Select::make('reservation_time')

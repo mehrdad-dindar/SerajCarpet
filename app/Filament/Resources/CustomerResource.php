@@ -77,6 +77,7 @@ class CustomerResource extends Resource
                 RelationManagers\TransactionsRelationManager::class
             ])->icon('heroicon-o-banknotes'),
             RelationManagers\AddressRelationManager::class,
+            RelationManagers\CallLogsRelationManager::class
         ];
     }
 

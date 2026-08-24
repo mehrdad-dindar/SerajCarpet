@@ -1,0 +1,28 @@
+{
+    "name": "mehrdad-dindar/filament-survey-notifier",
+    "description": "Laravel package to send survey SMS using Porsline + filamentphp",
+    "type": "library",
+    "version": "0.0.1",
+    "require": {
+        "illuminate/support": "^v11.45.1",
+        "php": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "MehrdadDindar\\FilamentSurveyNotifier\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "MehrdadDindar\\FilamentSurveyNotifier\\SurveyNotifierServiceProvider"
+            ]
+        }
+    },
+    "authors": [
+        {
+            "name": "Mehrdad Dindar",
+            "email": "mehrdad.replay@gmail.com"
+        }
+    ]
+}

@@ -6,6 +6,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DriverLocationController;
 use App\Http\Controllers\PropertyController;
 use App\Livewire\Auth\Login;
+use App\Livewire\Customer\Addresses;
 use App\Livewire\Customer\Invoice as CustomerInvoices;
 use App\Livewire\Customer\Invoice\Show as CustomerInvoiceShow;
 use App\Livewire\Customer\Panel as CustomerPanel;
@@ -64,27 +65,26 @@ Route::middleware(['guest'])->group(function () {
     //    Route::post('doVerify', [AuthController::class, 'doVerify'])->name('doVerify');
 });
 Route::get('/login', Login::class)->name('login');
+
 Route::middleware(['auth:customer'])->prefix('panel')->group(function () {
     Route::get('/', CustomerPanel::class)->name('customer.panel.index');
     Route::get('/profile', CustomerProfile::class)->name('customer.panel.profile');
-    Route::get('/test/{address}', function (Address $address) {
-        $lat = $address->latitude;
-        $lng = $address->longitude;
-        return redirect("");
-    })->name("admin.users.edit");
+    Route::get('/addresses', Addresses::class)->name('customer.panel.addresses');
+
     Route::prefix('orders')->group(function () {
         Route::get('/', CustomerOrders::class)->name('customer.panel.orders');
+        Route::get('/new', \App\Livewire\Customer\Order\CreateOrderWizard::class)->name('customer.panel.orders.new'); // روت جدید
         Route::get('{order}', CustomerOrderShow::class)->name('customer.panel.order.show');
     });
+
     Route::prefix('invoices')->group(function () {
         Route::get('/', CustomerInvoices::class)->name('customer.panel.invoices');
         Route::get('{invoice}', CustomerInvoiceShow::class)->name('customer.panel.invoice.show');
-        Route::get('{invoice}/purchase', [InvoiceController::class, 'purchase'])
-            ->name('customer.panel.invoice.purchase');
-        Route::get('{invoice}/purchase/result', [InvoiceController::class, 'result'])
-            ->name('customer.panel.invoice.purchase.result');
+        Route::get('{invoice}/purchase', [InvoiceController::class, 'purchase'])->name('customer.panel.invoice.purchase');
+        Route::get('{invoice}/purchase/result', [InvoiceController::class, 'result'])->name('customer.panel.invoice.purchase.result');
     });
 });
+
 Route::middleware(['auth:driver'])->prefix('dashboard')->group(function () {
     Route::post('/update-location', [DriverLocationController::class, 'updateLocation']);
     Route::get('/', DriverPanel::class)->name('driver.panel.index');
@@ -96,4 +96,9 @@ Route::middleware(['auth:driver'])->prefix('dashboard')->group(function () {
     Route::get('/properties', PropertyController::class)->name('property.index');
     Route::get('/properties/dimensions/{property}', [PropertyController::class,'getDimensions'])
         ->name('property.dimensions');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/voip/recordings/{callLog}', [\App\Http\Controllers\VoipRecordingController::class, 'stream'])
+        ->name('voip.recordings.stream');
 });

@@ -29,5 +29,9 @@ class DatabaseSeeder extends Seeder
             CarpetColorSeeder::class,
             PaymentMethodSeeder::class
         ]);
+
+        $user = User::factory()->create(['name' => 'Issabel']);
+        $token = $user->createToken('issabel-token')->plainTextToken;
+        \Log::info('Issabel Token: ' . $token);
     }
 }

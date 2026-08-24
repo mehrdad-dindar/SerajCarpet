@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrained('orders');
+            $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
             $table->string('amount');
             $table->enum('status', ['pending', 'paid', 'canceled'])->default('pending');
             $table->dateTime('expire_at');

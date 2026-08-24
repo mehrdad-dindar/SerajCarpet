@@ -66,6 +66,9 @@
         $vite[] = 'resources/js/customer.js';
     }
 @endphp
+
+<script src="{{asset("js/RecordRTC.js")}}"></script>
+@stack('scripts')
 @vite($vite)
 @filamentScripts
 @livewireScripts

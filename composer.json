@@ -1,7 +1,7 @@
 {
     "name": "mehrdad-dindar/seraj",
     "type": "project",
-    "version": "1.0.42",
+    "version": "1.1.0",
     "description": "The skeleton application for the Laravel framework.",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
@@ -14,7 +14,7 @@
         "bezhansalleh/filament-shield": "^3.2",
         "dotswan/filament-map-picker": "^1.8.0",
         "filament/filament": "^3.2",
-        "filament/notifications": "^3.2",
+        "filament/notifications": "^3.3",
         "filament/spatie-laravel-media-library-plugin": "^3.2",
         "filament/spatie-laravel-settings-plugin": "^3.2",
         "flowframe/laravel-trend": "^0.4.0",
@@ -28,7 +28,10 @@
         "laravel/telescope": "^5.5",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^v3.5.19",
-        "mokhosh/filament-jalali": "v4.9.0",
+        "marcelog/pami": "^2.0",
+        "mehrdad-dindar/filament-porsline": "*",
+        "mokhosh/filament-jalali": "v4.10.0",
+        "pusher/pusher-php-server": "^7.2",
         "shetabit/payment": "^6.2",
         "spatie/laravel-activitylog": "^4.10",
         "spatie/laravel-livewire-wizard": "^2.3",
@@ -37,6 +40,12 @@
         "wireui/phosphoricons": "^2.3",
         "wireui/wireui": "^2.0"
     },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "packages/MehrdadDindar/FilamentPorsline"
+        }
+    ],
     "require-dev": {
         "fakerphp/faker": "^1.23",
         "friendsofphp/php-cs-fixer": "^3.64",

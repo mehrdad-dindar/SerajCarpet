@@ -13,7 +13,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class OrderItem extends Model implements HasMedia
 {
     use InteractsWithMedia;
-    protected $guarded;
+    protected $guarded = [];
     protected $casts = [
         'options' => 'array',
     ];

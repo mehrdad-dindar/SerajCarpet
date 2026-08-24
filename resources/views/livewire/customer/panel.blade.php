@@ -1,154 +1,113 @@
-<div class="h-screen">
-    <!-- row 1 -->
-    <div class="flex flex-wrap -mx-3">
-        <!-- card1 -->
-        <div class="w-full max-w-full px-3 mb-6 sm:w-1/2 sm:flex-none xl:mb-0 xl:w-1/4">
-            <div class="relative flex flex-col min-w-0 break-words bg-white shadow-soft-xl rounded-2xl bg-clip-border">
-                <div class="flex-auto p-4">
-                    <div class="flex flex-row -mx-3">
-                        <div class="flex-none w-2/3 max-w-full px-3">
-                            <div>
-                                <p class="mb-0 font-sans font-semibold leading-normal text-size-sm">{{ __("Wallet") }}</p>
-                                <h5 class="mb-0 font-bold">
-                                     ت {{ $wallet }}
-                                    <span
-                                        class="leading-normal text-size-sm font-weight-bolder text-lime-500">+0%</span>
-                                </h5>
-                            </div>
-                        </div>
-                        <div class="px-3 text-left basis-1/3">
-                            <div class="inline-block w-12 h-12 text-center rounded-lg bg-gradient-fuchsia">
-                                <i class="ni ni-money-coins text-size-lg relative top-3.5 text-white"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="space-y-6 pb-12" dir="rtl">
 
-        <!-- card2 -->
-        <div class="w-full max-w-full px-3 mb-6 sm:w-1/2 sm:flex-none xl:mb-0 xl:w-1/4">
-            <div class="relative flex flex-col min-w-0 break-words bg-white shadow-soft-xl rounded-2xl bg-clip-border">
-                <div class="flex-auto p-4">
-                    <div class="flex flex-row -mx-3">
-                        <div class="flex-none w-2/3 max-w-full px-3">
-                            <div>
-                                <p class="mb-0 font-sans font-semibold leading-normal text-size-sm">{{ __("Referred Customers") }}
-                                </p>
-                                <h5 class="mb-0 font-bold">
-                                    0
-                                    <span
-                                        class="leading-normal text-size-sm font-weight-bolder text-lime-500">+0%</span>
-                                </h5>
-                            </div>
-                        </div>
-                        <div class="px-3 text-left basis-1/3">
-                            <div class="inline-block w-12 h-12 text-center rounded-lg bg-gradient-fuchsia">
-                                <x-phosphor.icons::duotone.user-circle-plus class="w-6 relative top-3.5 text-white" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    {{-- هدر خوش‌آمدگویی و اکشن رزرو سریع --}}
+    <div class="bg-gradient-to-l from-amber-600 via-amber-500 to-yellow-500 rounded-3xl p-6 md:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="space-y-2 text-center md:text-right">
+            <h1 class="text-2xl md:text-3xl font-extrabold">
+                سلام، {{ $customer->name ?? 'مشتری گرامی' }} 👋
+            </h1>
+            <p class="text-amber-100 text-sm md:text-base">
+                به سامانه هوشمند خدمات تخصصی قالیشویی سراج خوش آمدید.
+            </p>
         </div>
-
-        <!-- card3 -->
-        <div class="w-full max-w-full px-3 mb-6 sm:w-1/2 sm:flex-none xl:mb-0 xl:w-1/4">
-            <div class="relative flex flex-col min-w-0 break-words bg-white shadow-soft-xl rounded-2xl bg-clip-border">
-                <div class="flex-auto p-4">
-                    <div class="flex flex-row -mx-3">
-                        <div class="flex-none w-2/3 max-w-full px-3">
-                            <div>
-                                <p class="mb-0 font-sans font-semibold leading-normal text-size-sm">{{__("Orders")}}</p>
-                                <h5 class="mb-0 font-bold">
-                                    {{ $ordersCount }}
-{{--                                    <span class="leading-normal text-lime-500 text-size-sm font-weight-bolder">+2%</span>--}}
-                                </h5>
-                            </div>
-                        </div>
-                        <div class="px-3 text-left basis-1/3">
-                            <div class="inline-block w-12 h-12 text-center rounded-lg bg-gradient-fuchsia">
-                                <x-phosphor.icons::duotone.shopping-bag class="w-6 relative top-3.5 text-white"/>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="flex items-center gap-3">
+            <a href="{{ route('customer.panel.orders') }}" class="px-5 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-2xl font-bold text-sm transition">
+                سوابق سفارش‌ها
+            </a>
+            <a href="{{ url('/panel/orders/new') }}" class="px-6 py-3 bg-white text-amber-700 hover:bg-amber-50 rounded-2xl font-extrabold text-sm shadow-lg hover:shadow-xl transition transform active:scale-95 flex items-center gap-2">
+                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                ثبت سفارش آنلاین جدید
+            </a>
         </div>
-
-        {{--<!-- card4 -->
-        <div class="w-full max-w-full px-3 sm:w-1/2 sm:flex-none xl:w-1/4">
-            <div class="relative flex flex-col min-w-0 break-words bg-white shadow-soft-xl rounded-2xl bg-clip-border">
-                <div class="flex-auto p-4">
-                    <div class="flex flex-row -mx-3">
-                        <div class="flex-none w-2/3 max-w-full px-3">
-                            <div>
-                                <p class="mb-0 font-sans font-semibold leading-normal text-size-sm">Sales</p>
-                                <h5 class="mb-0 font-bold">
-                                    $103,430
-                                    <span
-                                        class="leading-normal text-size-sm font-weight-bolder text-lime-500">+5%</span>
-                                </h5>
-                            </div>
-                        </div>
-                        <div class="px-3 text-right basis-1/3">
-                            <div class="inline-block w-12 h-12 text-center rounded-lg bg-gradient-fuchsia">
-                                <i class="ni ni-cart text-size-lg relative top-3.5 text-white"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>--}}
     </div>
 
-    <!-- cards row 2 -->
-    <div class="flex flex-wrap mt-6 -mx-3">
-        <div class="w-full px-3 mb-6 lg:mb-0 lg:w-7/12 lg:flex-none">
-            <div class="relative flex flex-col min-w-0 break-words bg-white shadow-soft-xl rounded-2xl bg-clip-border">
-                <div class="flex-auto p-4">
-                    <div class="flex flex-wrap -mx-3">
-                        <div class="max-w-full px-3 lg:w-1/2 lg:flex-none">
-                            <div class="flex flex-col h-full">
-                                <p class="pt-2 mb-1 font-semibold">پیام مدیریت</p>
-                                <h5 class="font-bold">به قالیشویی سراج خوش آمدید!</h5>
-                                <p class="mb-12">سپاسگزاریم که ما را برای پاکیزگی قالی‌های ارزشمندتان انتخاب کرده‌اید. برای هرگونه سوال یا درخواست، با پشتیبانی ما در تماس باشید.</p>
-                                <a class="inline-flex items-end mt-auto mb-0 font-semibold leading-normal text-size-sm group text-slate-500"
-                                   href="javascript:;">
-                                    ادامه پیام
-                                    <i
-                                        class="fas fa-arrow-left ease-bounce text-size-sm group-hover:-translate-x-1.25 ms-1 leading-normal transition-all duration-200"></i>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="max-w-full px-3 mt-12 ms-auto text-center lg:mt-0 lg:w-5/12 lg:flex-none">
-                            <div class="h-full bg-gradient-fuchsia rounded-xl overflow-hidden">
-                                <img src="{{asset("panel/img/21687.jpg")}}"
-                                     class="w-full max-h-52 object-cover object-top" alt="waves" />
-                            </div>
+    {{-- کارت وضعیت سفارش جاری (Live Tracking Stepper) --}}
+    @if($activeOrder)
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
+            <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-gray-100 dark:border-gray-700 gap-4">
+                <div class="flex items-center gap-3">
+                    <span class="p-3 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-2xl">
+                        <svg class="w-6 h-6 animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    </span>
+                    <div>
+                        <div class="text-xs text-gray-400">وضعیت سفارش جاری</div>
+                        <div class="text-lg font-bold text-gray-900 dark:text-white">
+                            سفارش شماره #{{ $activeOrder->id }}
+                            <span class="mr-2 text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                                {{ $activeOrder->status?->label }}
+                            </span>
                         </div>
                     </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a href="{{ route('customer.panel.order.show', $activeOrder) }}" class="text-sm font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1">
+                        جزئیات کامل سفارش
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    </a>
                 </div>
             </div>
-        </div>
-        <div class="w-full max-w-full px-3 lg:w-5/12 lg:flex-none">
-            <div
-                class="border-black/12.5 shadow-soft-xl relative flex h-full min-w-0 flex-col break-words rounded-2xl border-0 border-solid bg-white bg-clip-border p-4">
-                <div class="relative h-full overflow-hidden bg-cover rounded-xl"
-                     style="background-image: url('{{asset("panel/img/ivancik.jpg")}}')">
-                    <span
-                        class="absolute top-0 left-0 w-full h-full bg-center bg-cover bg-gradient-dark-gray opacity-80"></span>
-                    <div class="relative z-10 flex flex-col flex-auto h-full p-4">
-                        <h5 class="pt-2 mb-6 font-bold text-white">باشگاه مشتریان رو دریاب</h5>
-                        <p class="text-white">با عضویت در باشگاه مشتریان، به ازای هر سفارش امتیاز کسب کنید و با افزایش امتیازات خود، از خدمات ویژه و تخفیف‌های اختصاصی بهره‌مند شوید.</p>
-                        <a class="mt-auto mb-0 font-semibold leading-normal text-white group text-size-sm"
-                           href="javascript:;">
-                            {{ __("Customer Club") }}
-                            <i
-                                class="fas fa-arrow-left ease-bounce text-size-sm group-hover:-translate-x-1.25 ms-1 leading-normal transition-all duration-200"></i>
-                        </a>
-                    </div>
+
+            {{-- Progress Bar --}}
+            <div class="mt-6">
+                <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-2 font-medium">
+                    <span>دریافت و جمع‌آوری</span>
+                    <span>شستشو و اعلاشویی در کارخانه</span>
+                    <span>تحویل و تسویه</span>
                 </div>
+                <div class="w-full h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full transition-all duration-1000 ease-out" style="width: {{ $progressPercentage }}%"></div>
+                </div>
+            </div>
+
+            {{-- مشخصات راننده یا نوبت --}}
+            @if($activeOrder->time_apply_status)
+                <div class="mt-6 p-4 rounded-2xl bg-amber-50/60 dark:bg-gray-700/40 border border-amber-100/80 dark:border-gray-600/50 flex items-center justify-between text-xs md:text-sm text-gray-700 dark:text-gray-300">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span>زمان‌بندی مراجعه راننده: <strong>{{ verta($activeOrder->time_apply_status)->format('l d F Y - H:i') }}</strong></span>
+                    </div>
+                    @if($activeOrder->driver)
+                        <div class="font-bold text-gray-900 dark:text-white">
+                            راننده مسئول: {{ $activeOrder->driver->name }}
+                        </div>
+                    @endif
+                </div>
+            @endif
+        </div>
+    @endif
+
+    {{-- کارت‌های آمار و میان‌برها --}}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {{-- کل سفارش‌ها --}}
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-center justify-between">
+            <div>
+                <div class="text-xs text-gray-400 font-medium">کل سفارش‌های ثبت‌شده</div>
+                <div class="text-2xl font-black text-gray-900 dark:text-white mt-1">{{ $totalOrdersCount }} <span class="text-xs font-normal text-gray-400">سفارش</span></div>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            </div>
+        </div>
+
+        {{-- صورتحساب‌های معلق --}}
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-center justify-between">
+            <div>
+                <div class="text-xs text-gray-400 font-medium">فاکتورهای منتظر پرداخت</div>
+                <div class="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1">{{ $pendingInvoicesCount }} <span class="text-xs font-normal text-gray-400">فاکتور</span></div>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-900/30 text-amber-600 flex items-center justify-center">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            </div>
+        </div>
+
+        {{-- آدرس‌های ثبت‌شده --}}
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-center justify-between">
+            <div>
+                <div class="text-xs text-gray-400 font-medium">دفترچه آدرس‌ها</div>
+                <div class="text-2xl font-black text-gray-900 dark:text-white mt-1">{{ $customer->addresses()->count() }} <span class="text-xs font-normal text-gray-400">موقعیت</span></div>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             </div>
         </div>
     </div>

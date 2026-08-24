@@ -18,12 +18,14 @@ use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -38,10 +40,33 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->colors([
                 'primary' => Color::Amber,
+                'slate'   => Color::Slate,
+                'gray'    => Color::Gray,
+                'red'     => Color::Red,
+                'orange'  => Color::Orange,
+                'amber'   => Color::Amber,
+                'yellow'  => Color::Yellow,
+                'emerald' => Color::Emerald,
+                'teal'    => Color::Teal,
+                'cyan'    => Color::Cyan,
+                'sky'     => Color::Sky,
+                'blue'    => Color::Blue,
+                'indigo'  => Color::Indigo,
+                'violet'  => Color::Violet,
+                'purple'  => Color::Purple,
+                'pink'    => Color::Pink,
+                'rose'    => Color::Rose,
+                'danger'  => Color::Rose,
+                'success' => Color::Emerald,
+                'warning' => Color::Amber,
+                'info'    => Color::Sky,
             ])
-//            ->spa()
             ->font('iranSans')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
+            ->discoverResources(
+                in: base_path('packages/MehrdadDindar/FilamentPorsline/src/Filament/Resources'),
+                for: 'MehrdadDindar\\FilamentPorsline\\Filament\\Resources'
+            )
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Dashboard::class,
@@ -51,7 +76,6 @@ class AdminPanelProvider extends PanelProvider
                 InvoiceChart::class,
                 LatestCommentsWidget::class,
                 OverlookWidget::class,
-//                Widgets\AccountWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -87,29 +111,32 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 'Management' => NavigationGroup::make()
-                    ->label(function () {
-                        return __('Management');
-                    })
-                    ->icon('heroicon-o-adjustments-horizontal'),
+                    ->label(fn () => __('Management')),
+
                 'Services Setting' => NavigationGroup::make()
-                    ->label(function () {
-                        return __('Services Setting');
-                    })
-                    ->icon('heroicon-o-swatch'),
+                    ->label(fn () => __('Services Setting')),
+
                 'User Settings' => NavigationGroup::make()
-                    ->label(function () {
-                        return __('User Settings');
-                    })
-                    ->icon('heroicon-o-users'),
+                    ->label(fn () => __('User Settings')),
+
                 'System Setting' => NavigationGroup::make()
-                    ->label(function () {
-                        return __('System Setting');
-                    })
-                    ->icon('heroicon-o-swatch'),
+                    ->label(fn () => __('System Setting')),
             ])
+            ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn (): string => Blade::render('@vite(["resources/js/echo.js"])')
+            )
+            // لود کپسول شناور تماس در تمام صفحات پنل
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn (): string => Blade::render('<livewire:voip.screen-pop-modal />')
+            )
             ->brandName(function () {
                 return __('Seraj');
             })
-            ->viteTheme('resources/css/filament/admin/theme.css');
+//            ->databaseNotifications()
+//            ->databaseNotificationsPolling('2s')
+            ->viteTheme('resources/css/filament/admin/theme.css')
+            ->databaseNotifications();
     }
 }

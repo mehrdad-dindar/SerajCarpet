@@ -123,6 +123,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    'neshan_api_key' => env('NESHAN_API_KEY','123'),
+    'neshan_api_key' => env('NESHAN_API_KEY', '123'),
 
 ];

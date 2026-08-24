@@ -2,35 +2,38 @@
 
 namespace App\Models;
 
-use App\Events\BulkOrderUpdated;
+use App\Enums\OrderStatus as OrderStatusEnum;
 use App\Events\OrderLogCreated;
-use App\Services\OrderService;
+use App\Services\CarpetPricingService;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Order extends Model
+class Order extends Model implements HasMedia
 {
-    use HasFactory;
-    use LogsActivity;
+    use HasFactory, LogsActivity, InteractsWithMedia;
 
     public bool $updateDirection = true;
-    protected OrderService $orderService;
-    protected $guarded;
+    protected $guarded = [];
 
     protected static function boot(): void
     {
         parent::boot();
 
-        static::updated(function ($order) {
+        static::updated(function (self $order) {
             $activity = Activity::forSubject($order)->latest()->first();
-            event(new OrderLogCreated($activity, $order->updateDirection));
+            if ($activity) {
+                event(new OrderLogCreated($activity, $order->updateDirection));
+            }
         });
     }
 
@@ -44,7 +47,7 @@ class Order extends Model
         return $this->belongsTo(Customer::class);
     }
 
-    public function address()
+    public function address(): BelongsTo
     {
         return $this->belongsTo(Address::class);
     }
@@ -66,7 +69,7 @@ class Order extends Model
 
     public function status(): BelongsTo
     {
-        return $this->belongsTo(OrderStatus::class, "status_id");
+        return $this->belongsTo(OrderStatus::class, 'status_id');
     }
 
     public function driver(): BelongsTo
@@ -74,91 +77,57 @@ class Order extends Model
         return $this->belongsTo(Driver::class);
     }
 
+    public function invoice(): HasOne
+    {
+        return $this->hasOne(Invoice::class);
+    }
+
     public function getStatusLabel(): ?string
     {
         return $this->status->label;
     }
+    public function comments(): MorphMany
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
+
+    /**
+     * Calculate order total using the dedicated CarpetPricingService.
+     */
+    public function recalculateTotals(): self
+    {
+        return app(CarpetPricingService::class)->syncAndSaveOrderTotals($this);
+    }
+
+    public function updateOrderStatus(string $statusName, $applyTime = null): void
+    {
+        $statusId = OrderStatus::getIdByName($statusName);
+        if ($statusId) {
+            $this->status_id = $statusId;
+            if ($applyTime) {
+                $this->time_apply_status = $applyTime;
+            }
+            $this->save();
+        }
+    }
 
     public function getStatusColor(): string
     {
-        return match ($this->status->name) {
-            OrderStatus::RESERVED => 'bg-blue-500',
-            OrderStatus::IN_COLLECTIVE_LIST => 'bg-yellow-500',
-            OrderStatus::IN_DISTRIBUTION_LIST => 'bg-yellow-500',
-            OrderStatus::REVISITING_DRIVER => 'bg-yellow-500',
-            OrderStatus::CARPETS_RECEIVED => 'bg-teal-500',
-            OrderStatus::PRE_WASH_REPAIR_SERVICE => 'bg-orange-500',
-            OrderStatus::SENT_TO_FACTORY_FOR_WASHING => 'bg-green-500',
-            OrderStatus::POST_WASH_REPAIR_SERVICE => 'bg-red-500',
-            OrderStatus::READY_FOR_DELIVERY => 'bg-purple-500',
-            OrderStatus::DELIVERED_AND_PAID => 'bg-green-700',
-            default => 'bg-red-500'
-        };
-    }
-
-//    public function getOptionModelsAttribute()
-//    {
-//        $optionIds = $this->options ?? [];
-//        return Option::whereIn('id', $optionIds)->get();
-//    }
-
-    public function getDescriptionForEvent(string $eventName): string
-    {
-        return match ($eventName) {
-            "created" => __('order.created'),
-            "updated" => __('order.updated', ['status' => $this->status->label]),
-            "deleted" => __('order.deleted'),
-        };
-//        return __('order.' . $eventName);
-    }
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logOnly([
-                'status_id',
-                'time_apply_status',
-                'address_id',
-                'driver_id',
-                'collected_at',
-                'sent_to_factory_at',
-            ])
-            ->useLogName('order')
-            ->logOnlyDirty();
-    }
-
-    public function updateOrderStatus(string $carpets_received, $apply_time = false): void
-    {
-        $this->status_id = (OrderStatus::firstWhere('name', $carpets_received))->id;
-        if ($apply_time) {
-            $this->time_apply_status = $apply_time;
-        }
-        $this->save();
+        return OrderStatusEnum::tryFrom($this->status?->name ?? '')?->getColor() ?? 'gray';
     }
 
     protected function createdAt(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => verta($value)->format('d F Y - H:i'),
+            get: fn (mixed $value) => $value ? verta($value)->format('d F Y - H:i') : null,
         );
     }
+
     protected function collectedAt(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value) => $value ? verta($value)->format('d F Y - H:i') : null,
+            get: fn (mixed $value) => $value ? verta($value)->format('d F Y - H:i') : null,
         );
-    }
-
-    protected function updatedAt(): Attribute
-    {
-        return Attribute::make(
-            get: fn (string $value) => verta($value)->format('d F Y - H:i'),
-        );
-    }
-
-    public function comments()
-    {
-        return $this->morphMany(Comment::class, 'commentable');
     }
 
     public function getAllItemsAttribute()
@@ -166,8 +135,28 @@ class Order extends Model
         return $this->items->merge($this->otherItems);
     }
 
-    public function invoice(): HasOne
+    public function getDescriptionForEvent(string $eventName): string
     {
-        return $this->hasOne(Invoice::class);
+        return match ($eventName) {
+            'created' => 'ثبت اولیه سفارش در سیستم',
+            'updated' => 'ویرایش و تغییر مشخصات سفارش',
+            'deleted' => 'حذف سفارش',
+            default   => $eventName,
+        };
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly([
+                'status_id',
+                'driver_id',
+                'time_apply_status',
+                'collected_at',
+                'total',
+            ])
+            ->useLogName('order')
+            ->dontSubmitEmptyLogs()
+            ->logOnlyDirty();
     }
 }
